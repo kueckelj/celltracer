@@ -85,7 +85,8 @@ doPamClustering <- function(object,
     object <- addClusterVariable(object = object, 
                                  cluster_df = cluster_df,
                                  cluster_name = cluster_name,
-                                 phase = phase)
+                                 phase = phase, 
+                                 overwrite = TRUE)
     
   }
 
