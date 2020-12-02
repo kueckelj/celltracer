@@ -71,26 +71,28 @@ hlpr_caption_add_on <- function(object, phase){
     
     if(phase == "entire"){
       
-      ggplot2::labs(caption = "Before & after treatment") %>% 
-        base::return()
+      add_on <- 
+        ggplot2::labs(caption = "Before & after treatment")
       
     } else if(phase == "first_tmt") {
       
-      ggplot2::labs(caption = "After treatment") %>% 
-        base::return()
+      add_on <- 
+        ggplot2::labs(caption = "After treatment") 
       
     } else if(phase == "before_tmt"){
       
-      ggplot2::labs(caption = "Before treatment") %>% 
-        base::return()
+      add_on <- 
+        ggplot2::labs(caption = "Before treatment") 
       
     }
     
   } else {
     
-    base::return(list())
+    add_on <- list()
     
   }
+  
+  base::return(add_on)
   
 }
 

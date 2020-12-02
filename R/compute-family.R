@@ -11,6 +11,8 @@
 
 computeUmapData <- function(object){
   
+  stat_df <- getStats(object)
+  
   umap_obj <- 
     tibble::column_to_rownames(stat_df, var = "cell_id") %>% 
     dplyr::select_if(.predicate = base::is.numeric) %>% 
