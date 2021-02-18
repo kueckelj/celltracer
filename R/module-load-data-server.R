@@ -246,11 +246,10 @@ moduleLoadDataServer <- function(id, ed_input){
         
       }
       
-      
       shinyFiles::shinyDirChoose(input = input, 
                                  id = "ld_well_plate_dir", 
                                  session = session, 
-                                 roots = dir_roots()
+                                 roots = base::ifelse(test = system_info["sysname"] == "Windows", dir_roots(), dir_roots)
                                  )
       
       # assembled directory 
