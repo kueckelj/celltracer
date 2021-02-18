@@ -19,6 +19,8 @@ checkpoint(
     "The filter criteria discard all cells. At least one cell must remain.", errors_left
     =
     "Trying to load some files resulted in errors. To proceed without them enable 'Ignore Errors'. If you want the files to be included fix the error and load the files again.",
+    no_qc_data =
+    "Data has to undergo quality check first before the cell tracer object can be returned.",
     no_features_selected = "Please selecte at least one feature."),
   warning_notifications = list(),
   duration = 4,

@@ -88,11 +88,11 @@ hlpr_caption_add_on <- function(object, phase){
     
   } else {
     
-    add_on <- list()
+    add_on <- NULL
     
   }
   
-  base::return(add_on)
+  base::return(list(add_on))
   
 }
 

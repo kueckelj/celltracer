@@ -15,6 +15,8 @@ plotAllTracks(
   color_to = NULL,
   linetype = "solid",
   linesize = 0.75,
+  clrp = "milo",
+  ...,
   verbose = TRUE
 )
 }

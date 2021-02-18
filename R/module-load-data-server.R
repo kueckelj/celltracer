@@ -234,13 +234,24 @@ moduleLoadDataServer <- function(id, ed_input){
       
       # shinyFiles::shinyDirButton() - server
       
-      dir_roots <- shinyFiles::getVolumes()
+      system_info <- base::Sys.info()
+      
+      if(system_info["sysname"] == "Windows"){
+        
+        dir_roots <- shinyFiles::getVolumes()
+        
+      } else {
+        
+        dir_roots <- c("wd" = "~")
+        
+      }
+      
       
       shinyFiles::shinyDirChoose(input = input, 
                                  id = "ld_well_plate_dir", 
                                  session = session, 
                                  roots = dir_roots()
-      )
+                                 )
       
       # assembled directory 
       dir_string <- shiny::reactive({ 

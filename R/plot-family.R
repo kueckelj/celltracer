@@ -35,7 +35,9 @@ plotAllTracks <- function(object,
                           n_cells = 100,
                           color_to = NULL, 
                           linetype = "solid", 
-                          linesize = 0.75, 
+                          linesize = 0.75,
+                          clrp = "milo", 
+                          ...,
                           verbose = TRUE){
   
   track_df <-
@@ -102,12 +104,16 @@ plotAllTracks <- function(object,
     ggplot2::theme_bw() + 
     ggplot2::theme(
       panel.grid.major = ggplot2::element_blank(),
-      panel.grid.minor = ggplot2::element_blank()
+      panel.grid.minor = ggplot2::element_blank(), 
+      strip.background = ggplot2::element_blank(), 
+      axis.text = ggplot2::element_blank(), 
+      axis.ticks = ggplot2::element_blank()
     ) + 
-    ggplot2::facet_wrap(facets = ~ facet, scales = "fixed") + 
+    ggplot2::facet_wrap(facets = ~ facet, scales = "fixed", ...) + 
     ggplot2::labs(x = NULL, y = NULL,
                   subtitle = glue::glue("Time: {time_subset} {getIntervalUnit(object)}")) + 
-    hlpr_caption_add_on(object = object, phase = phase)
+    hlpr_caption_add_on(object = object, phase = phase) + 
+    confuns::scale_color_add_on(variable = "discrete", clrp = clrp)
   
 }
 
@@ -425,6 +431,9 @@ plotDistribution <- function(object,
   labels_y <- NULL
   n_variables <- dplyr::n_distinct(data[["variables"]])
   
+  print(max_value) 
+  assign("dfxyz", data, .GlobalEnv)
+  print("remember to remove 'assign'")
   # pairwise statistics
   
   if(n_variables == 1 & plot_type %in% testable_plottypes){
@@ -433,9 +442,10 @@ plotDistribution <- function(object,
       
       comparison_list <- 
         ggpubr_comparison_list(ref.group = ref_group, groups = base::levels(data[[across]]))
+      print(comparison_list)
       
       labels_y <- ggpubr_y_labels(input.list = comparison_list, max.value = max_value)
-      
+
       pairwise_add_on <- list(
         ggpubr::stat_compare_means(
           method = test_pairwise, 
@@ -467,7 +477,7 @@ plotDistribution <- function(object,
         
       } else if(base::is.numeric(labels_y)){
         
-        label_y <- base::max(labels_y)*1.1
+        label_y <- base::max(labels_y, na.rm = TRUE)*1.1
         
       }
       

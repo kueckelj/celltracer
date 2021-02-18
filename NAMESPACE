@@ -3,6 +3,8 @@
 export(addClusterVariable)
 export(addDimRedData)
 export(addGroupingVariable)
+export(allColorpanels)
+export(allColorspectra)
 export(animateAllTracks)
 export(animateWellImage)
 export(check_track_df)
