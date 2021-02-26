@@ -3,7 +3,7 @@
 #' @description Sets up a data.frame in which each observation refers
 #' to a well.
 #'
-#' @param type Character value. One of \emph{'2x3 (6)', '3x4 (12)', '4x6 (24)', '6x8 (48)', '6x12 (96)'}
+#' @param type Character value. One of \emph{'2x3 (6)', '3x4 (12)', '4x6 (24)', '6x8 (48)', '8x12 (96)'}
 #'
 #' @export
 #'

@@ -301,12 +301,26 @@ moduleExperimentDesignServer <- function(id){
     ymin <- input$well_plate_brush$ymin
     ymax <- input$well_plate_brush$ymax
     
-    selected_wells <- 
+    is_selected <-
+      !base::any(
+        base::is.null(xmin), 
+        base::is.null(xmax), 
+        base::is.null(ymin), 
+        base::is.null(ymax)
+       )
+    
+    if(base::isTRUE(is_selected)){
+      
+      selected_wells <- 
       dplyr::filter(.data = well_plate_df(),
                     dplyr::between(x = col_num, xmin, xmax), 
                     dplyr::between(x = row_num, ymin, ymax))
+      
+    } 
     
-    return(selected_wells)
+    base::return(selected_wells)
+    
+
     
   })
   

@@ -431,9 +431,6 @@ plotDistribution <- function(object,
   labels_y <- NULL
   n_variables <- dplyr::n_distinct(data[["variables"]])
   
-  print(max_value) 
-  assign("dfxyz", data, .GlobalEnv)
-  print("remember to remove 'assign'")
   # pairwise statistics
   
   if(n_variables == 1 & plot_type %in% testable_plottypes){
@@ -779,7 +776,7 @@ plotVelocityHeatmap <- function(object,
     speed_df <-
       dplyr::group_modify(
         .data = speed_df,
-        .f =  ~ confuns::arrange_rows(df = .x, across = "maxima", verbose = FALSE)
+        .f =  ~ confuns::arrange_rows(df = .x, according.to = "maxima", verbose = FALSE)
         )
   
   }

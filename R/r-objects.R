@@ -47,6 +47,9 @@ colors_unnamed <- c("#D4E8CF", "#EBAAAA", "#EBBCD6", "#A0E8CB", "#DEDEAB", "#B6A
                     "#EBD1B0", "#BBC1F0", "#F2C2C2", "#AD9A9A", "#F2A9F5", "#E5CCF0", "#FFFC96",
                     "#CCFFFC", "#A0E8FA", "#C7B6FC", "#C5FCCC", "#EDFCB0", "#C8FAF0")
 
+
+debug_ct <- FALSE
+
 descr_variables <- c("cell_id", "cell_line", "condition")
 
 filetypes <- c("csv$", "xls$", "xlsx$")

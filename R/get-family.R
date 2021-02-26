@@ -373,7 +373,6 @@ getClusterNames <- function(object,
 #'
 #' @return An informative list. 
 #' @export
-#'
 
 getAcrossOptions <- function(object, phase = "first_tmt"){
   
@@ -382,6 +381,29 @@ getAcrossOptions <- function(object, phase = "first_tmt"){
                    variable_classes = c("input", "cluster"))
   
 }
+
+#' @rdname getAcrossOptions
+#' @export
+getGroupingOptions <- function(object){
+  
+  groups <- 
+    getStats(object) %>% 
+    base::colnames()
+  
+  #!!! add cluster options
+  
+  valid_groups <-
+    groups[!groups %in% c(invalid_groups, numeric_stat_vars)]
+  
+  base::return(valid_groups)
+  
+  
+  
+}
+
+
+
+
 
 #' @title Obtain all numeric stat-variables
 #'
@@ -524,21 +546,6 @@ getFrameTimeSeq <- function(object, phase = "all"){
   
 }
 
-
-getGroupingOptions <- function(object){
-  
-  groups <- 
-    getMeta(object) %>% 
-    base::colnames()
-  
-  #!!! add cluster options
-  
-  valid_groups <-
-    groups[!groups %in% invalid_groups]
-  
-  base::return(valid_groups)
-  
-}
 
 getGroups <- function(object, option){
   

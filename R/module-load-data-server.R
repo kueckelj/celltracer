@@ -235,8 +235,9 @@ moduleLoadDataServer <- function(id, ed_input){
       # shinyFiles::shinyDirButton() - server
       
       system_info <- base::Sys.info()
+      sysname <- system_info["sysname"]
       
-      if(system_info["sysname"] == "Windows"){
+      if(sysname == "Windows"){
         
         dir_roots <- shinyFiles::getVolumes()
         
@@ -246,11 +247,26 @@ moduleLoadDataServer <- function(id, ed_input){
         
       }
       
-      shinyFiles::shinyDirChoose(input = input, 
-                                 id = "ld_well_plate_dir", 
-                                 session = session, 
-                                 roots = base::ifelse(test = system_info["sysname"] == "Windows", dir_roots(), dir_roots)
-                                 )
+      if(sysname == "Windows"){
+        
+        shinyFiles::shinyDirChoose(input = input, 
+                                   id = "ld_well_plate_dir", 
+                                   session = session, 
+                                   roots = dir_roots()
+        )
+        
+      } else {
+        
+        shinyFiles::shinyDirChoose(input = input, 
+                                   id = "ld_well_plate_dir", 
+                                   session = session, 
+                                   roots = dir_roots, 
+                                   restrictions = base::system.file(package = "base")
+                                   )
+        
+      }
+      
+
       
       # assembled directory 
       dir_string <- shiny::reactive({ 
@@ -260,7 +276,15 @@ moduleLoadDataServer <- function(id, ed_input){
                       message = "No folder chosen.")
         )
         
-        hlpr_assemble_directory(input_list = input$ld_well_plate_dir)
+        if(sysname == "Windows"){
+          
+          hlpr_assemble_directory(input_list = input$ld_well_plate_dir)
+          
+        } else {
+          
+          shinyFiles::parseDirPath(roots = c(wd = "~"), input$ld_well_plate_dir)
+          
+        }
         
       })
       
