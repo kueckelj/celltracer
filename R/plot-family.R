@@ -743,6 +743,8 @@ plotSingleTracks <- function(object,
 #' @param arrange_rows Character value. Either \emph{'maxima'} or \emph{'none'}.
 #' @inherit check_smooth params
 #' @inherit verbose params
+#' 
+#' @export
  
 plotVelocityHeatmap <- function(object, 
                                 across = "cl_condition", 
@@ -895,6 +897,8 @@ plotVelocityHeatmap <- function(object,
 #' @inherit verbose params
 #' 
 #' @inherit ggplot_return params
+#' 
+#' @export
 
 plotVelocityLineplot <- function(object, 
                                  across = "cl_condition", 

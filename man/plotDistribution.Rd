@@ -96,6 +96,6 @@ the computational progress will be printed.
 A ggplot.
 }
 \description{
-This function allows for a variety of different plots concerning
-descriptive statistics.
+These functions are deprecated in favor of \code{plotDensityplot(),
+plotHistogram(), plotRidgplot(), plotBoxplot() and plotViolinplot()}.
 }

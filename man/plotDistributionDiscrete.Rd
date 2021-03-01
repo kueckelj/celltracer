@@ -45,5 +45,5 @@ via \code{allColorpanels()}.}
 A ggplot.
 }
 \description{
-Visualize the distribution of discrete features.
+This function is deprecated in favor of \code{plotBarchart()}.
 }
