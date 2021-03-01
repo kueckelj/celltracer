@@ -76,6 +76,9 @@ are displayed.}
 \item{...}{Additional arguments given to the respective \code{ggplot2::geom_<plot_type>()}
 function. E.g. \code{plotViolinplot()} relies on \code{ggplot2::geom_violin()}.}
 }
+\value{
+
+}
 \description{
 Visualizes the count or the proportion of barcode spots falling
 into certain groups via barcharts. It does so either for the whole sample or

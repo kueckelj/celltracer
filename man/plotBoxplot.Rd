@@ -202,6 +202,9 @@ the computational progress will be printed.
 \item{...}{Additional arguments given to the respective \code{ggplot2::geom_<plot_type>()}
 function. E.g. \code{plotViolinplot()} relies on \code{ggplot2::geom_violin()}.}
 }
+\value{
+
+}
 \description{
 These functions display the distribution of numeric
 variables for the whole sample or in a comparative manner if argument

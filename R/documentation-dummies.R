@@ -149,6 +149,15 @@ colors <- function(clrp, clrsp){}
 #' 
 dim_red_method <- function(dim_red_method){}
 
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+ggplot_family <- function(){}
+
+
 #' image
 #' @param image Numeric value. The well-image of interest. 
 #' 
@@ -259,6 +268,14 @@ with_meta <- function(with_meta){}
 with_stats <- function(with_stats){}
 
 
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+variables_num <- function(){}
+
 #' variables_num
 #' @param variables Character vector. Denotes the numeric variables of interest.
 #' Run \code{getNumericVariableNames()} with you celltracer-object to obtain 
@@ -293,4 +310,12 @@ check_smooth <- function(smooth, smooth_se, smooth_span){}
 check_pam_input <- function(k){}
 
 
+
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+check_pt <- function(){}
 
