@@ -46,7 +46,7 @@ the computational progress will be printed.
 (Warning messages will always be printed.)}
 }
 \value{
-An updated cell tracer object.
+An updated celltracer-object.
 }
 \description{
 Performs pam-clustering with the respective variables, during

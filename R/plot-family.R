@@ -40,13 +40,16 @@ plotAllTracks <- function(object,
                           ...,
                           verbose = TRUE){
   
-  track_df <-
-    hlpr_subset_across(data = getTracks(object = object,
-                                        phase = phase,
-                                        phase_cluster = phase_cluster,
-                                        verbose = verbose),
-                       across = across,
-                       across_subset = across_subset)
+  track_df <- 
+    getTracks(object = object,
+              phase = phase,
+              phase_cluster = phase_cluster,
+              verbose = verbose) %>% 
+    confuns::check_across_subset(
+      df = ., 
+      across = across, 
+      across.subset = across_subset
+    )
   
   cell_id_df <- 
     dplyr::select(track_df, dplyr::all_of(x = c("cell_id", across))) %>% 
@@ -194,8 +197,8 @@ plotDimRed <- function(object,
 
 #' @title Plot descriptive statistics
 #' 
-#' @description This function allows for a variety of different plots concerning 
-#' descriptive statistics. 
+#' @description These functions are deprecated in favor of \code{plotDensityplot(),
+#' plotHistogram(), plotRidgplot(), plotBoxplot() and plotViolinplot()}.
 #'
 #' @inherit check_object params
 #' @param variables 
@@ -579,8 +582,8 @@ plotDistribution <- function(object,
 
 #' @title Distribution of discrete features
 #'
-#' @description Visualize the distribution of discrete features.
-#'
+#' @description This function is deprecated in favor of \code{plotBarchart()}.
+#' 
 #' @inherit check_object params
 #' @param features Character vector. Denotes the discrete variables whoose distribution 
 #' is to be visualized.  
@@ -756,12 +759,15 @@ plotVelocityHeatmap <- function(object,
   
   # the speed data shifted and sliced
   speed_df <- 
-    hlpr_subset_across(data = getTracks(object,
-                                        phase = phase,
-                                        phase_cluster = phase_cluster, 
-                                        verbose = verbose),
-                       across = across, 
-                       across_subset = across_subset) %>% 
+    getTracks(object,
+              phase = phase,
+              phase_cluster = phase_cluster, 
+              verbose = verbose) %>% 
+    confuns::check_across_subset(
+      df = ., 
+      across = across, 
+      across.subset = across_subset
+    ) %>% 
     tidyr::pivot_wider(
       data = ., 
       id_cols = dplyr::all_of(x = c("cell_id", "frame_itvl", across)), 

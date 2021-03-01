@@ -10,7 +10,7 @@ computeUmapData(object)
 \item{object}{A valid cell tracer object.}
 }
 \value{
-An updated cell tracer object.
+An updated celltracer-object.
 }
 \description{
 A wrapper around the umap algorithm and \code{addDimRedData()}.

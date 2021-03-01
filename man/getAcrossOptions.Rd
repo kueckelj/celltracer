@@ -2,9 +2,12 @@
 % Please edit documentation in R/get-family.R
 \name{getAcrossOptions}
 \alias{getAcrossOptions}
+\alias{getGroupingOptions}
 \title{Obtain across input options}
 \usage{
 getAcrossOptions(object, phase = "first_tmt")
+
+getGroupingOptions(object, phase = "first_tmt")
 }
 \arguments{
 \item{object}{A valid cell tracer object.}

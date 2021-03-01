@@ -194,6 +194,41 @@ getStats <- function(object,
 }
 
 
+#' @rdname getStats
+#' @export
+getStatsDf <- function(object,
+                       with_meta = TRUE,
+                       with_cluster = TRUE,
+                       phase = "first_tmt"){
+  
+  stat_df <-
+    getData(object = object,
+            data_slot = "stats", 
+            phase = phase)
+  
+  if(base::isTRUE(with_meta)){
+    
+    stat_df <- 
+      join_with_meta(object = object, df = stat_df)
+    
+  } 
+  
+  if(base::isTRUE(with_cluster)){
+    
+    stat_df <- 
+      dplyr::left_join(
+        x = stat_df, 
+        y = getClusterData(object, phase = phase), 
+        by = "cell_id"
+      )
+    
+  }
+  
+  base::return(stat_df)
+  
+}
+
+
 
 #' @title Obtain track data.frame. 
 #'
@@ -362,7 +397,68 @@ getClusterNames <- function(object,
 # Exported ---
 
 
-#' @title Obtain across input options
+#' @title Obtain group names a grouping variable contains
+#'
+#' @inherit check_object params
+#' @param option Character value. Denotes the discrete variable - the grouping of cells - 
+#' of interest. Use \code{getGroupingOptions()} to obtain all valid input options. 
+#'
+#' @return Character vector of group names. 
+#' 
+#' @export
+
+getGroupNames <- function(object, option, phase = "all"){
+  
+  group_vec <- 
+    getStats(object = object, phase = phase) %>% 
+    dplyr::pull(var = {{option}}) 
+  
+  if(base::is.factor(group_vec)){
+    
+    base::levels(x = group_vec)
+    
+  } else if(base::is.character(group_vec)){
+    
+    base::unique(group_vec)
+    
+  } else {
+    
+    msg <- glue::glue("The result of grouping option '{option}' must be a character vector or a factor.")
+    
+    confuns::give_feedback(msg = msg, fdb.fn = "stop")
+    
+  }
+  
+}
+
+#' @rdname getGroupNames
+#' @export
+getGroups <- function(object, option){
+  
+  warning("getGroups() is deprecated. Use getGroupNames()")
+  
+  group_vec <- 
+    getMeta(object) %>% 
+    dplyr::pull(var = {{option}}) 
+  
+  if(base::is.factor(group_vec)){
+    
+    base::levels(x = group_vec)
+    
+  } else if(base::is.character(group_vec)){
+    
+    base::unique(group_vec)
+    
+  } else {
+    
+    base::stop(glue::glue("The result of grouping option '{option}' must be a character vector or a factor."))
+    
+  }
+  
+}
+
+
+#' @title Obtain variable names that group the cells 
 #' 
 #' @description This function returns the names of the variables that 
 #' group cell ids and can therefore be used as input for the \code{across}
@@ -374,7 +470,7 @@ getClusterNames <- function(object,
 #' @return An informative list. 
 #' @export
 
-getAcrossOptions <- function(object, phase = "first_tmt"){
+getGroupingOptions <- function(object, phase = "first_tmt"){
   
   getVariableNames(object = object, 
                    phase = phase, 
@@ -382,24 +478,18 @@ getAcrossOptions <- function(object, phase = "first_tmt"){
   
 }
 
-#' @rdname getAcrossOptions
+#' @rdname getGroupingOptions
 #' @export
-getGroupingOptions <- function(object){
+getAcrossOptions <- function(object, phase = "first_tmt"){
   
-  groups <- 
-    getStats(object) %>% 
-    base::colnames()
+  warning("getAcrossOptions() is deprecated. Use getGroupingOption()")
   
-  #!!! add cluster options
-  
-  valid_groups <-
-    groups[!groups %in% c(invalid_groups, numeric_stat_vars)]
-  
-  base::return(valid_groups)
-  
-  
+  getVariableNames(object = object, 
+                   phase = phase, 
+                   variable_classes = c("input", "cluster"))
   
 }
+
 
 
 
@@ -613,8 +703,16 @@ getVariableNames <- function(object,
   
   if("input" %in% variable_classes){
     
-    select_list$Meta <- 
-      getGroupingOptions(object)
+    groups <- 
+      getStats(object, phase = phase) %>% 
+      base::colnames()
+    
+    #!!! add cluster options
+    
+    valid_groups <-
+      groups[!groups %in% c(invalid_groups, numeric_stat_vars)]
+    
+    select_list$Meta <- valid_groups
     
   }
   

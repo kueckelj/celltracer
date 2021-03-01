@@ -1,6 +1,6 @@
 
 #' dummy
-#' @return An updated cell tracer object. 
+#' @return An updated celltracer-object. 
 updated_object <- function(){}
 
 #' dummy
@@ -46,6 +46,76 @@ dim_red_df <- function(dim_red_df){}
 
 
 # Miscellaneous -----------------------------------------------------------
+
+
+#' @title argument_dummy
+#' 
+#' @param clrp Character value. Specifies the color palette to be used to represent
+#' groups of discrete variables. Run \code{validColorPalettes()} to obtain valid
+#' input options.
+#'
+#' @param clrp_adjust Named character vector or NULL. If character, it adjusts the
+#' color palette that is used to represent the groups. Names of the input vector must refer
+#' to the group and the respective named element denotes the color with which to
+#' represent the group.
+#'
+#' @param clrsp Character value. Specifies the color spectrum to be used to represent
+#' continuous values of numeric variables. Run \code{validColorSpectra()} to obtain
+#' valid input options.
+#'
+#' @param discrete_feature Character value. Specifies the name of the grouping variable
+#' of interest. Use \code{getGroupingOptions()} to obtain all valid input options.
+#'
+#' @param display_facets Logical value. If set to TRUE the plot is split via
+#' \code{ggplot2::facet_wrap()} such that each variable gets it's own subplot.
+#' @param display_points Logical value. If set to TRUE points are used additionally
+#' to display the results.
+#' @param display_title Logical value. If set to TRUE an informative title is displayed.
+#'
+#' @param pt_alpha Numeric value. Specifies the degree of transparency of all points.
+#' @param pt_clr Character value. Specifies the color of all points.
+#' @param pt_clrp The color palette to be used if the specified variable displayed by
+#' color is categorical/discrete. Run \code{validColorPalettes()} to see valid input.
+#' @param pt_clrsp The color spectrum to be used if the specified variable displayed by
+#' color is continuous. Run \code{validColorSpectra()} to see valid input.
+#' @param pt_size Numeric value. Specifies the size of all points.
+#' 
+#' @param scales,ncol,nrow Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+#' are displayed.
+#'
+#' @param simplify Logical. If set to TRUE the output list is simplified to a vector if possible. If set
+#' to FALSE a list is returned.
+#'
+#' @param verbose Logical. If set to TRUE informative messages regarding
+#' the computational progress will be printed.
+#'
+#' (Warning messages will always be printed.)
+#'
+
+argument_dummy <- function(pt_alpha, pt_clr, pt_clrp, pt_clrsp, pt_size){}
+
+
+#' @title across
+#' @param across Character value or NULL. Specifies the grouping variable of interest.
+#'
+#' Use \code{getGroupingOptions()} to obtain all variable names that group the
+#' cells of your experiment in a certain manner.
+#'
+#' @param across_subset Character vector or NULL. Specifies the particular groups
+#' of interest the grouping variable specified in argument \code{across} contains.
+#'
+#' If set to NULL all of them are chosen. You can prefix groups you are NOT interested in
+#' with a \emph{'-'}. (Saves writing if there are more groups you are interested in
+#' than groups you are not interested in.)
+#'
+#' Use \code{getGroupNames()} to obtain all valid input options.
+#'
+#' @param relevel Logical value. If set to TRUE the input order of \code{across_subset}
+#' determines the order in which the groups of interest are displayed. Groups that
+#' are not included are dropped which affects the colors with which they are displayed.
+#'
+
+across_dummy <- function(across, across_subset, relevel){}
 
 
 #' add_on_list
@@ -155,9 +225,6 @@ pretty_names <- function(pretty_names){}
 #' 
 pt_args <- function(pt_color, pt_size, pt_alpha){}
 
-
-  
-
   
 #' well
 #' @param well Character value. The well of interest (e.g. \emph{'A1'}, \emph{'B12'})
@@ -191,7 +258,11 @@ with_meta <- function(with_meta){}
 #' 
 with_stats <- function(with_stats){}
 
-#' 
+
+#' variables_num
+#' @param variables Character vector. Denotes the numeric variables of interest.
+#' Run \code{getNumericVariableNames()} with you celltracer-object to obtain 
+#' all valid input options.
 
 #' verbose
 #' @param verbose Logical. If set to TRUE informative messages regarding
@@ -213,8 +284,6 @@ verbose <- function(verbose){
 #' @param smooth_span NUmeric value. Denotes the smoothing span used. 
 
 check_smooth <- function(smooth, smooth_se, smooth_span){}
-
-
 
 
 #' @title Check pam input 
