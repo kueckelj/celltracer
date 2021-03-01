@@ -154,7 +154,6 @@ dim_red_method <- function(dim_red_method){}
 #' @return
 #' @export
 #'
-#' @examples
 ggplot_family <- function(){}
 
 
@@ -273,7 +272,6 @@ with_stats <- function(with_stats){}
 #' @return
 #' @export
 #'
-#' @examples
 variables_num <- function(){}
 
 #' variables_num
@@ -316,6 +314,5 @@ check_pam_input <- function(k){}
 #' @return
 #' @export
 #'
-#' @examples
 check_pt <- function(){}
 
