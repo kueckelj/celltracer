@@ -2,7 +2,7 @@
 % Please edit documentation in R/documentation-dummies.R
 \name{verbose}
 \alias{verbose}
-\title{verbose}
+\title{variables_num}
 \usage{
 verbose(verbose)
 }
@@ -11,7 +11,12 @@ verbose(verbose)
 the computational progress will be printed.
 
 (Warning messages will always be printed.)}
+
+\item{variables}{Character vector. Denotes the numeric variables of interest.
+Run \code{getNumericVariableNames()} with you celltracer-object to obtain
+all valid input options.
+verbose}
 }
 \description{
-verbose
+variables_num
 }

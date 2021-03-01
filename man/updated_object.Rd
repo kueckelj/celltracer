@@ -7,7 +7,7 @@
 updated_object()
 }
 \value{
-An updated cell tracer object.
+An updated celltracer-object.
 }
 \description{
 dummy

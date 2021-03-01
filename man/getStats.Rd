@@ -2,9 +2,12 @@
 % Please edit documentation in R/get-family.R
 \name{getStats}
 \alias{getStats}
+\alias{getStatsDf}
 \title{Obtain stat data.frame}
 \usage{
 getStats(object, with_meta = TRUE, with_cluster = TRUE, phase = "first_tmt")
+
+getStatsDf(object, with_meta = TRUE, with_cluster = TRUE, phase = "first_tmt")
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
