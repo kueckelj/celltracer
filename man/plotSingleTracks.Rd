@@ -4,14 +4,12 @@
 \alias{plotSingleTracks}
 \title{Plot single cell migration}
 \usage{
-plotSingleTracks(object, cell_ids, color_to = NULL, scales = "free")
+plotSingleTracks(object, cell_ids, color_by = NULL, scales = "free")
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
 
 \item{cell_ids}{Character vector. Denotes the cell ids of interest.}
-
-\item{color_to}{Character value. The variable that is to be displayed or highlighted by the dots color.}
 
 \item{scales}{Character value. Given to argument \code{scales} of
 \code{ggplot2::facet_wrap()}.}

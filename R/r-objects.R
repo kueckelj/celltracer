@@ -1,4 +1,8 @@
 
+
+
+
+
 # Well plate information --------------------------------------------------
 
 
@@ -23,6 +27,10 @@ file_regex <- "[A-Z]{1}\\d{1,2}_\\d{1}\\.(csv|xls|xlsx)$"
 
 # Column names ------------------------------------------------------------
 
+non_data_track_variables <- c("well", "well_image", "well_plate_index", "well_plate_name",
+                             "frame_itvl", "frame_num", "frame_time", "cell_line",
+                             "cl_condition", "condition", "phase", 
+                             "x_coords", "y_coords") # keeps cell_id!!
 
 original_ct_variables <- c("y-coordinate [pixel]", "x-coordinate [pixel]", "Frame number", "Cell ID",
                            "Distance from origin", "Distance from last point", "Instantaneous speed",
@@ -39,8 +47,8 @@ app_title <- "Cell Tracer"
 
 ambiguity_colors <- c("Clear" = "#1CE35B", "Ambiguous" = "#E02424", "Dismissed" = "lightgrey")
 
-
-colors_grey <- c("unknown" = "lightgrey", 
+colors_grey <- c("unknown" = "lightgrey",
+                 "unknown & unknown" = "lightgrey",
                  "Dismissed" = "lightgrey")
 
 colors_unnamed <- c("#D4E8CF", "#EBAAAA", "#EBBCD6", "#A0E8CB", "#DEDEAB", "#B6A8E0", "#9FBA8E",
@@ -51,6 +59,25 @@ colors_unnamed <- c("#D4E8CF", "#EBAAAA", "#EBBCD6", "#A0E8CB", "#DEDEAB", "#B6A
 debug_ct <- FALSE
 
 descr_variables <- c("cell_id", "cell_line", "condition")
+
+default_list <-
+  list(
+    clrp = "milo",
+    color_by = "condition",
+    k = 2,
+    make_pretty = TRUE, 
+    method_aggl = "ward.D",
+    method_corr = "pearson",
+    method_dist = "euclidean",
+    method_kmeans = "Hartigan-Wong",
+    method_pam = "euclidean",
+    phase = "first", 
+    phase_cluster = "first",
+    verbose = TRUE, 
+    well_plate = NULL, 
+    with_cluster = TRUE, 
+    with_meta = TRUE
+  )
 
 filetypes <- c("csv$", "xls$", "xlsx$")
 
@@ -73,11 +100,25 @@ numeric_stat_vars <- c("total_dist", "max_dist_fo", "avg_dist_fo", "max_dist_flp
 
 not_splitted <- c("No treatment", "From beginning")
 
+object_class <- "cto"
+base::attr(object_class, which = "package") <- "celltracer"
+
+set_up_funs <- list(experiment_design = "designExperiment()", 
+                    load_data = "loadData()", 
+                    quality_check = "checkDataQuality()", 
+                    process_data = "processData()")
+
 shiny_bar_positions <- c("Stacked" = "stack", "Dodged" = "dodge", "Filled" = "fill")
 
 shiny_discrete_vars <- c("Cell Line and Condition" = "cl_condition", 
                          "Cell Line" = "cell_line", 
                          "Condition" = "condition")
+
+stat_funs <- list("mean" = base::mean,
+                  "max" = base::max,
+                  "median" = stats::median,
+                  "sd" = stats::sd,
+                  "var" = stats::var)
 
 status_colors <- c("Missing" = "#B31010",
                    "Incomplete" = "#FFD700",
@@ -170,10 +211,17 @@ pretty_names_list <-
 
 ct_warnings <- list(
   
+  # renaming
+  "how_to_name_input" = "Input needs to be named like this: 'new_group_name' = 'old_group_name'",
+
+  
   # statistical tests
   "stat_test_requirements" = "In order to perform statistical tests please choose 'boxplot' or 'violinplot' as input for argument 'plot_type' and specify only one variable as input for argument 'variables'."
   
+  
 )
+
+
 
 
 # -----

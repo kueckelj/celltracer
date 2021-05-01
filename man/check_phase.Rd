@@ -9,7 +9,10 @@ check_phase(object, phase, max_phases = NULL)
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{phase}{A character value referring to the phase.}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'} or \emph{'second'}).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
 
 \item{max_phase}{Numeric value or NULL. If numeric it regulates the maximal number of phases allowed.}
 }

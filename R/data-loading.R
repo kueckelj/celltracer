@@ -23,8 +23,6 @@ evaluate_file_availability <- function(wp_list, recursive = TRUE, keep_filetype 
   wp_df <- wp_list$wp_df
   relevant_wp_df <- dplyr::filter(.data = wp_df, information_status == "Complete")
 
-  print(directory)
-  
   ignore_filetypes <- filetypes[filetypes != keep_filetype]
   
   ipw <- wp_df$ipw %>% base::unique()

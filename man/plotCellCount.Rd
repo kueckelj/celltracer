@@ -4,7 +4,7 @@
 \alias{plotCellCount}
 \title{Plot cell count}
 \usage{
-plotCellCount(object, across, color_to)
+plotCellCount(object, across, color_by)
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
@@ -12,8 +12,6 @@ plotCellCount(object, across, color_to)
 \item{across}{Character value. Denotes the discrete variable in the data.frame
 across which the variables of interest are to be analyzed or displayed. Valid input
 options can be obtained via \code{getAcrossOptions()}.}
-
-\item{color_to}{Character value. The variable that is to be displayed or highlighted by the dots color.}
 }
 \value{
 A ggplot.

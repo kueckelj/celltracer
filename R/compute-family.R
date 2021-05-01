@@ -84,6 +84,36 @@ compute_distances_from_origin <- function(x_coords, y_coords){
     base::round(digits = 2) %>% 
     purrr::prepend(values = 0)
   
+  base::return(distances_from_origin)
+  
+}
+
+#' @rdname compute_distances_from_origin
+compute_distances_from_last_point <- function(x_coords, y_coords){
+  
+  n_coords <- base::length(x_coords)
+  
+  origins <- 
+    purrr::map2(.x = x_coords[1:(n_coords-1)],
+                .y = y_coords[1:(n_coords-1)],
+                .f = ~ c(.x, .y))
+  
+  subsequent_positions <- 
+    purrr::map2(.x = x_coords[2:n_coords],
+                .y = y_coords[2:n_coords],
+                .f = ~ c(.x, .y))
+  
+  distances_from_last_point <- 
+    purrr::map2(
+      .x = origins, 
+      .y = subsequent_positions, 
+      .f = ~ compute_distance(starting_pos = .x, final_pos = .y)
+    ) %>% 
+    purrr::flatten_dbl() %>% 
+    purrr::prepend(values = 0)
+  
+  base::return(distances_from_last_point)
+  
 }
 
 
@@ -107,6 +137,9 @@ compute_migration_efficiency <- function(x_coords, y_coords, actual_distance){
   # compute effective distance travelled ( = value of direction vector)
   effective_distance <- base::sqrt(drvc[1]^2 + drvc[2]^2)
   
+  # make sure that length == 1 if calculated inside dplyr::mutate()
+  actual_distance <- base::unique(actual_distance)
+  
   # divide effective distance by actual distance
   migration_efficiency <- actual_distance/(actual_distance/effective_distance)
   
@@ -121,7 +154,60 @@ compute_migration_efficiency <- function(x_coords, y_coords, actual_distance){
 #'
 #' @return A summarized data.frame. 
 
-compute_stat <- function(track_df){
+compute_cell_stats <- function(df, phase, verbose, software){
+  
+  confuns::give_feedback(
+    msg = glue::glue("Computing cell statistics and summary for {phase} phase."), 
+    verbose = verbose
+  )
+  
+  # group data 
+  df <- dplyr::group_by(df, cell_id)
+  
+  if(software$name == "cell_tracker" | base::isTRUE(software$tracking)){
+    
+    # compute migration efficiency 
+    mgr_eff_df <- 
+      dplyr::summarise(.data = df, 
+                       total_dist = base::sum(dflp),
+                       mgr_eff = compute_migration_efficiency(x_coords, y_coords, actual_distance = total_dist)
+      )
+    
+    select_vars <- non_data_track_variables
+      
+  } else {
+    
+    mgr_eff_df <- dplyr::select(df, cell_id) %>% dplyr::distinct()
+    
+    select_vars <- non_data_track_variables[!non_data_track_variables %in% c("x_coords", "y_coords")]
+    
+  }
+  
+  selected_df <- dplyr::select(.data = df, -dplyr::all_of(x = select_vars))
+  
+  stat_vars <- stringr::str_subset(base::colnames(selected_df), pattern = "cell_id", negate = TRUE)
+  
+  # summarise statistics
+  stat_df <- 
+    dplyr::mutate(.data = selected_df,
+                  dplyr::across(
+                    .cols = where(fn = base::is.numeric), 
+                    .fns = stat_funs, 
+                    .names = "{.fn}_{.col}"
+                  )
+    ) %>% 
+    dplyr::select(-dplyr::all_of(x = stat_vars)) %>% 
+    dplyr::distinct() %>% 
+    dplyr::left_join(y = mgr_eff_df, by = "cell_id") %>% # join with migration efficiency
+    dplyr::mutate(phase = {{phase}}) %>% 
+    dplyr::ungroup()
+  
+  base::return(stat_df)
+  
+}
+
+#' @rdname compute_cell_stats
+compute_stat <- function(track_df){ # deprecated
   
   dplyr::group_by(.data = track_df,
                   cell_id, condition, cell_line, cl_condition,

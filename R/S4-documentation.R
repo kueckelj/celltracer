@@ -5,11 +5,13 @@
 
 cto <- setClass(Class = "cto", 
                 slots = c(
+                  analysis = "list",
+                  compatibility = "list",
                   data = "list",
-                  cluster_info = "list",
-                  wp_info = "list",
+                  default = "list",
+                  information = "list",
+                  name = "character",
                   set_up = "list",
-                  storage_info = "list",
-                  background_info = "list" 
+                  well_plates = "list"
                   )
                 )

@@ -4,22 +4,22 @@
 #' about the file availability evaluation undergone for every well
 #' plate.
 #'
-#' @param all_wp_lists A list of well plate lists. 
+#' @param well_plate_list A list of well plate lists. 
 #' 
 #' @usage In shiny-module \code{moduleLoadData}.
 #'
 
-loading_status_table_shiny <- function(all_wp_lists){
+loading_status_table_shiny <- function(well_plate_list){
   
-  well_plates <- base::names(all_wp_lists)
+  well_plates <- base::names(well_plate_list)
   
-  directories <- purrr::map_chr(.x = all_wp_lists, .f = hlpr_wp_directories)
+  directories <- purrr::map_chr(.x = well_plate_list, .f = hlpr_wp_directories)
   
-  num_files <- purrr::map_int(.x = all_wp_lists, hlpr_wp_file_number)
+  num_files <- purrr::map_int(.x = well_plate_list, hlpr_wp_file_number)
   
-  num_ambiguous <- purrr::map_int(.x = all_wp_lists, .f = hlpr_wp_ambiguous_number)
+  num_ambiguous <- purrr::map_int(.x = well_plate_list, .f = hlpr_wp_ambiguous_number)
   
-  num_files_expected <- purrr::map_int(.x = all_wp_lists, hlpr_wp_exp_file_number)
+  num_files_expected <- purrr::map_int(.x = well_plate_list, hlpr_wp_exp_file_number)
   
   status_df <- 
     base::data.frame(
@@ -62,13 +62,24 @@ loading_status_table_shiny <- function(all_wp_lists){
 #' @return The read in data.frame with three additional informative columns: \emph{well_image, condition}
 #' and \emph{cell_line}.
 
-read_ct_data_shiny <- function(directory, progress_n, progress){
+read_track_data_shiny <- function(directory, progress_n, progress, object){
   
   progress$set(value = progress_n)
   
   if(stringr::str_detect(string = directory, pattern = "csv$")){
     
-    track_df <- readr::read_csv(file = directory)
+    track_df <- 
+      
+      base::suppressMessages({
+        
+        base::suppressWarnings({
+          
+          readr::read_csv(file = directory)
+          
+        })
+        
+      })
+      
     
   } else if(stringr::str_detect(string = directory, pattern = "xls$")){
     
@@ -86,9 +97,34 @@ read_ct_data_shiny <- function(directory, progress_n, progress){
     stringr::str_extract(string = directory, pattern = file_regex) %>% 
     stringr::str_extract(pattern = well_image_regex)
   
+  software <- object@set_up$software$name
+  
+  if(software == "cell_tracker"){
+    
+    variable_names <- original_ct_variables
+    
+    denoted_columns <- NULL
+    additional_columns <- NULL
+    
+  } else if(software == "cell_profiler") {
+    
+    denoted_columns_list <- object@set_up$software$denoted_columns
+    
+    denoted_columns <- 
+      c(x_coords = denoted_columns_list$x_coords, 
+        y_coords = denoted_columns_list$y_coords, 
+        frame = denoted_columns_list$frame, 
+        cell_id = denoted_columns_list$cell_id)
+    
+    additional_columns <- denoted_columns_list$additional
+    
+    variable_names <- c(base::unname(denoted_columns), additional_columns)
+    
+  }
+  
   missing_columns <- 
-    purrr::map(.x = original_ct_variables, 
-               .f = check_cell_track_variables,
+    purrr::map(.x = variable_names, 
+               .f = check_track_df_variables,
                df = track_df) %>%
     purrr::discard(.p = base::is.null) %>% 
     purrr::flatten_chr()
@@ -105,7 +141,10 @@ read_ct_data_shiny <- function(directory, progress_n, progress){
   }
   
   df_return <-
-    hlpr_rename_cell_track_cols(track_df = track_df) %>% 
+    hlpr_rename_track_df_cols(track_df = track_df, 
+                              software = software, 
+                              denoted_columns = denoted_columns, 
+                              additional_columns = additional_columns) %>% 
     dplyr::mutate(well_image = {{well_image}}) 
   
   list_return <- 
@@ -131,7 +170,7 @@ read_ct_data_shiny <- function(directory, progress_n, progress){
 #' 
 #' @export
 
-load_cell_track_files_shiny <- function(wp_list, wp_name, session){
+load_track_files_shiny <- function(wp_list, wp_name, session, object){
   
   directories <- wp_list$valid_directories
   
@@ -146,13 +185,19 @@ load_cell_track_files_shiny <- function(wp_list, wp_name, session){
   progress$set(message = glue::glue("Reading data for well plate '{wp_name}' :"), 
                detail = glue::glue("Total of {num_files} files."))
   
-  # read files
+  
+  software_name <- object@set_up$software$name
+  
+  
   data_list <- 
-    purrr::map2(.x = directories,
-                .y = base::seq_along(directories),
-                .f = purrr::safely(read_ct_data_shiny),
+    purrr::map2(.x = directories, 
+                .y = base::seq_along(directories), 
+                .f = purrr::safely(read_track_data_shiny),
+                object = object, 
                 progress = progress) %>% 
     purrr::set_names(nm = well_image_files)
+  
+
   
   # sort successfull and failed loading 
   track_data_list <- 
@@ -172,7 +217,7 @@ load_cell_track_files_shiny <- function(wp_list, wp_name, session){
 #'
 #' @return A track data.frame
 
-assemble_track_df_shiny <- function(track_data_list, all_wp_lists){
+assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
   
   track_df_list <- 
     purrr::map(.x = track_data_list, ~.x[["successful"]]) %>% 
@@ -181,7 +226,7 @@ assemble_track_df_shiny <- function(track_data_list, all_wp_lists){
   
   all_data_list <- 
     list(track_df_list,
-         all_wp_lists,
+         well_plate_list,
          base::seq_along(track_df_list), 
          base::names(track_df_list)
          )
@@ -197,9 +242,69 @@ assemble_track_df_shiny <- function(track_data_list, all_wp_lists){
     dplyr::mutate(.data = track_df, 
                   cell_line = base::factor(x = cell_line, levels = cell_lines), 
                   condition = base::factor(x = condition, levels = conditions), 
-                  cl_condition = base::factor(x = cl_condition, levels = cl_conditions))
+                  cl_condition = base::factor(x = cl_condition, levels = cl_conditions)
+                  )
   
-  base::return(track_df)
+  
+  phases <- object@set_up$phases
+  
+  measurements <- object@set_up$measurement_string
+  conditions <- 
+    stringi::stri_split(str = base::unique(final_track_df$condition), regex = "->")
+  
+  phase_starts <-
+    purrr::map_dbl(.x = phases, .f = ~ base::which(x = measurements == .x))
+  
+  if(base::length(phase_starts) > 1){
+    
+    phase_endings <- 
+      phase_starts[2:base::length(phase_starts)] %>% 
+      base::append(x = ., values = base::max(final_track_df$frame)) %>% 
+      purrr::set_names(nm = base::names(phases))
+    
+    phase_info <-
+      purrr::pmap(
+        .l = list(x = phase_starts, y = phase_endings, z = base::seq_along(phases)),
+        .f = function(x, y, z){ list("start" = x, "end" = y, "index" = z)}
+        ) %>% 
+      purrr::set_names(nm = base::names(phases))
+    
+    track_list <- 
+      purrr::map(.x = phase_info, 
+                 .f = function(phase){
+                   
+                   phase_index <- phase$index
+                   phase_start <- phase$start
+                   phase_end <- phase$end
+                   
+                   phase_pattern <- stringr::str_c("^", phase_index, "\\.",sep = "")
+                   
+                   df <-
+                     dplyr::filter(final_track_df, frame >= {{phase_start}} & frame < {{phase_end}})
+                   
+                   condition_split <- 
+                     stringr::str_split_fixed(df$condition, pattern = " -> ", n = base::length(phase_endings)) 
+                   
+                   condition_vec <- 
+                     stringr::str_remove_all(string = base::as.character(condition_split[,phase_index]), pattern = phase_pattern)
+                   
+                   df$condition <- condition_vec
+                   df$cl_condition <- stringr::str_c(df$cell_line, df$condition, sep = " & ")
+                   df$phase <- english::ordinal(x = phase_index)
+                   
+                   base::return(df)
+                   
+                 }) %>% 
+      magrittr::set_names(value = base::names(phase_endings))
+    
+  } else {
+    
+    track_list <- base::list("first" = dplyr::mutate(final_track_df, phase = "first"))
+    
+  }
+  
+  
+  base::return(track_list)
   
 }
 
@@ -230,7 +335,7 @@ shiny_fdb <- function(in_shiny, ui, type = "message", ...){
 
 quality_check_summary_shiny <- function(track_df){
   
-  dplyr::group_by(.data = track_df, cell_id, cl_condition) %>% 
+  dplyr::group_by(.data = track_df, cell_id) %>% 
     dplyr::summarise(
       last_meas = base::max(frame), 
       first_meas = base::min(frame), 
@@ -261,7 +366,8 @@ quality_check_summary_shiny <- function(track_df){
 plot_well_plate_shiny <- function(wp_df,
                                   selected_wells_df = NULL,
                                   aes_fill,
-                                  fill_values, 
+                                  fill_values = NULL, 
+                                  fill_guide = FALSE,
                                   aes_color,
                                   color_values,
                                   pt_size = 13.5,
@@ -284,12 +390,33 @@ plot_well_plate_shiny <- function(wp_df,
     
   }
   
+  if(base::is.null(fill_values)){
+    
+    fill_add_on <- confuns::scale_color_add_on(aes = "fill",
+                                variable = wp_df[[aes_fill]],
+                                clrp.adjust = c("unknown" = "lightgrey", "unknown & unknown" = "lightgrey"),
+                                clrp = "milo", 
+                                guide = FALSE) 
+
+  } else {
+    
+    fill_add_on <- ggplot2::scale_fill_manual(values = fill_values, drop = FALSE, guide = FALSE) 
+    
+  }
+  
+  if(base::isTRUE(fill_guide)){
+    
+    fill_guide <- ggplot2::guide_legend(override.aes = list(size = 15, shape = 21))
+    
+  } 
+  
+  
   # plot output
   ggplot2::ggplot(data = wp_df, mapping = ggplot2::aes(x = col_num,y = row_num)) + 
     ggplot2::geom_point(
       data = wp_df, 
       mapping = ggplot2::aes(fill = .data[[aes_fill]], color = .data[[aes_color]]),
-      size = pt_size, shape = 21, alpha = 1, stroke = pt_stroke, 
+      size = pt_size, shape = 21, alpha = 0.9, stroke = pt_stroke, 
     ) + 
     geom_point_add_on +
     ggplot2::geom_text(mapping = ggplot2::aes(label = well)) +
@@ -300,11 +427,12 @@ plot_well_plate_shiny <- function(wp_df,
     ggplot2::scale_x_continuous(limits = c(-border, limit_x)) +
     ggplot2::scale_y_reverse(limits = c(border + limit_y, -border)) +
     ggplot2::theme_void() +
-    ggplot2::scale_color_manual(values = color_values, drop = FALSE) +
-    ggplot2::scale_fill_manual(values = fill_values, drop = FALSE) +
+    #ggplot2::scale_color_manual(values = color_values, drop = FALSE) +
+    confuns::scale_color_add_on(aes = "color", variable = wp_df[[aes_color]], clrp.adjust = color_values, clrp = "milo") + 
+    fill_add_on +
     ggplot2::guides(
       color = ggplot2::guide_legend(override.aes = list(size = 15, shape = 21)), 
-      fill = ggplot2::guide_legend(override.aes = list(size = 15, shape = 21))
+      fill = fill_guide
     )
   
   

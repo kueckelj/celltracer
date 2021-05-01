@@ -4,7 +4,7 @@
 \alias{moduleExperimentDesignServer}
 \title{Server logic: Experiment Design}
 \usage{
-moduleExperimentDesignServer(id)
+moduleExperimentDesignServer(id, usage = "in_function")
 }
 \arguments{
 \item{id}{Namespace ID}

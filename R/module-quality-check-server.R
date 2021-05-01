@@ -8,7 +8,7 @@
 #'
 #' @return A named list:
 
-moduleQualityCheckServer <- function(id, ld_input){
+moduleQualityCheckServer <- function(id, object){
   
   shiny::moduleServer(
     id = id,
@@ -17,7 +17,9 @@ moduleQualityCheckServer <- function(id, ld_input){
 
 # Reactive values ---------------------------------------------------------
       
-      track_df <- shiny::reactiveVal(value = data.frame())
+      phase_max_frames <- shiny::reactiveVal(value = purrr::map(.x = object@data$tracks, .f = ~ base::max(.x[["frame"]])))
+      
+      track_df <- shiny::reactiveVal(value = purrr::map_df(.x = object@data$tracks, .f = ~ .x) %>% dplyr::ungroup())
       
       filter <- shiny::reactiveValues(
         
@@ -123,22 +125,11 @@ moduleQualityCheckServer <- function(id, ld_input){
         )
         
       })
-
       
       
       # -----
-      
-      
 
 # Observe events ----------------------------------------------------------
-      
-
-      
-      oe <- shiny::observeEvent(ld_input()$proceed, {
-        
-        track_df(ld_input()$track_df)
-        
-      })
       
       oe <- shiny::observeEvent(input$qc_proceed, {
         
@@ -152,13 +143,13 @@ moduleQualityCheckServer <- function(id, ld_input){
           case_false = "no_cells_remaining"
         )
         
-        qc_list$info_list <- 
-          list(all_wp_lists = ld_input()$all_wp_lists, 
-               ed_list = ld_input()$ed_list)
+        object@data$tracks <- 
+          purrr::map(.x = base::names(object@set_up$phases), .f = ~ dplyr::filter(remaining_cells_df(), phase == {{.x}})) %>% 
+          purrr::set_names(nm = base::names(object@set_up$phases))
         
-        qc_list$data <- remaining_cells_df()
+        qc_list$object <- object
         
-        shiny_fdb(in_shiny = TRUE, ui = glue::glue("Results have been saved. Proceed by clicking on the button below."))
+        shiny_fdb(in_shiny = TRUE, ui = glue::glue("Results have been saved.  Click on 'Return Celltracer Object' and proceed with processData()."))
         
         
       })
@@ -311,18 +302,13 @@ moduleQualityCheckServer <- function(id, ld_input){
         
         filtered_df <- 
           dplyr::filter(.data = track_df(), cell_id %in% remaining_cell_ids()) %>% 
-          dplyr::select(cell_id, condition, cell_line, cl_condition) %>% 
+          dplyr::select(cell_id, cell_line) %>% 
           dplyr::distinct()
-        
-        print(track_df())
-        print(filtered_df)
-        
-        print(filtered_df)
-        
+
         plot_qc_barplot_shiny(df = filtered_df, 
-                              aes_x = input$qc_aes_x, 
-                              aes_fill = input$qc_aes_fill, 
-                              bar_position = input$qc_bar_position) + 
+                              aes_x = "cell_line", 
+                              aes_fill = "cell_line", 
+                              bar_position = "stack") + 
           confuns::scale_color_add_on(aes = "fill", variable = "discrete", clrp = "milo")
         
       })
@@ -425,7 +411,8 @@ moduleQualityCheckServer <- function(id, ld_input){
 
 # Return value ------------------------------------------------------------
 
-  
+  # currently not in use !!! ------- start
+      
   return_value <- shiny::reactive({ 
     
     filter_fdb <- 
@@ -443,9 +430,10 @@ moduleQualityCheckServer <- function(id, ld_input){
     return(rv)
     
     })
+      
+  # currently not in use !!! ------- start
   
-  base::return(return_value)
-  
+  base::return(qc_list)
   
   })
   

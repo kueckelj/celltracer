@@ -132,6 +132,19 @@ hlpr_create_track_list <- function(phase, track_df){
 }
 
 
+
+#' @title Create Cell Meta Data
+#'
+#' @description Filters meta variables from track data. To be used in purrr::map2().
+hlpr_create_meta_data <- function(df, phase, verbose){
+  
+  dplyr::select(df, dplyr::all_of(x = meta_variables)) %>% 
+    dplyr::mutate(phase = {{phase}}) %>% 
+    dplyr::distinct()
+  
+}
+
+
 #' @title ggplot2 add on helpers
 #' 
 #' @description Functions that either return an empty list 
@@ -219,19 +232,36 @@ hlpr_pretty_vec <- function(vec){
 #'
 #' @return A renamed data.frame. 
 
-hlpr_rename_cell_track_cols <- function(track_df){
+hlpr_rename_track_df_cols <- function(track_df,
+                                        software = "cell_tracker",
+                                        denoted_columns = NULL,
+                                        additional_columns = NULL){
   
-  dplyr::select(.data = track_df, 
-                cell_id = `Cell ID`, 
-                x_coords = `x-coordinate [pixel]`,
-                y_coords = `y-coordinate [pixel]`, 
-                frame = `Frame number`,
-                dfo = tidyselect::starts_with("Distance from origin "), 
-                dflp = tidyselect::starts_with("Distance from last point "),
-                speed = tidyselect::starts_with("Instantaneous speed "), 
-                afo = tidyselect::starts_with("Angle from origin "), 
-                aflp = tidyselect::starts_with("Angle from last point ")
-                )
+  if(software == "cell_tracker"){
+    
+    df <- 
+      dplyr::select(.data = track_df, 
+                    cell_id = `Cell ID`, 
+                    x_coords = `x-coordinate [pixel]`,
+                    y_coords = `y-coordinate [pixel]`, 
+                    frame = `Frame number`,
+                    dfo = tidyselect::starts_with("Distance from origin "), 
+                    dflp = tidyselect::starts_with("Distance from last point "),
+                    speed = tidyselect::starts_with("Instantaneous speed "), 
+                    afo = tidyselect::starts_with("Angle from origin "), 
+                    aflp = tidyselect::starts_with("Angle from last point ")
+      )
+    
+  } else if(software == "cell_profiler"){
+    
+    df <- 
+      dplyr::select(track_df, dplyr::all_of(x = c(base::unname(denoted_columns), additional_columns))) %>% 
+      dplyr::rename(!!denoted_columns)
+    
+  }
+  
+  base::return(df)
+
   
 }
 
@@ -257,6 +287,46 @@ hlpr_order_input <- function(order_input){
   
 }
 
+
+
+#' @title Split subset input 
+#' @description Splits input in a named list.  
+hlpr_split_subset <- function(subset_input){
+  
+  return_list <- list()
+  
+  return_list$discard <- stringr::str_subset(subset_input, pattern = "^-")
+  
+  return_list$keep <-  stringr::str_subset(subset_input, pattern = "^-", negate = TRUE)
+  
+  base::return(return_list)
+  
+}
+
+#' @rdname hlpr_split_subset
+hlpr_select <- function(df, variables_subset){
+  
+  if(base::is.character(variables_subset)){
+    
+    vars <- hlpr_split_subset(subset_input = variables_subset)
+    
+    if(base::length(vars$discard) >= 1){
+      
+      df <- dplyr::select(df, -dplyr::all_of(x = vars$discard))
+      
+    }
+    
+    if(base::length(vars$keep) >= 1){
+      
+      df <- dplyr::select(df, dplyr::all_of(x = vars$keep))
+      
+    }
+    
+  }
+  
+  base::return(df)
+  
+}
 
 #' @title Return directory of well plate
 #' 

@@ -4,9 +4,16 @@
 \alias{argument_dummy}
 \title{argument_dummy}
 \usage{
-argument_dummy(pt_alpha, pt_clr, pt_clrp, pt_clrsp, pt_size)
+argument_dummy(object, phase, pt_alpha, pt_clr, pt_clrp, pt_clrsp, pt_size)
 }
 \arguments{
+\item{object}{A valid cell tracer object.}
+
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'} or \emph{'second'}).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
+
 \item{pt_alpha}{Numeric value. Specifies the degree of transparency of all points.}
 
 \item{pt_clr}{Character value. Specifies the color of all points.}
@@ -53,6 +60,9 @@ to FALSE a list is returned.}
 the computational progress will be printed.
 
 (Warning messages will always be printed.)}
+
+\item{well_plate}{Character value. Denotes the well plate of interest. Use function \code{getWellPlateNames()}
+to obtain all valid input options.}
 }
 \description{
 argument_dummy

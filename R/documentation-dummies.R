@@ -3,10 +3,6 @@
 #' @return An updated celltracer-object. 
 updated_object <- function(){}
 
-#' dummy
-#' @param object A valid cell tracer object. 
-check_object <- function(object){}
-
 
 # Data.frame documentation  -----------------------------------------------
 
@@ -50,6 +46,10 @@ dim_red_df <- function(dim_red_df){}
 
 #' @title argument_dummy
 #' 
+#' 
+#' @inherit check_object params
+#' @inherit check_phase params
+#' 
 #' @param clrp Character value. Specifies the color palette to be used to represent
 #' groups of discrete variables. Run \code{validColorPalettes()} to obtain valid
 #' input options.
@@ -90,9 +90,12 @@ dim_red_df <- function(dim_red_df){}
 #' the computational progress will be printed.
 #'
 #' (Warning messages will always be printed.)
+#' 
+#' @param well_plate Character value. Denotes the well plate of interest. Use function \code{getWellPlateNames()}
+#' to obtain all valid input options.
 #'
 
-argument_dummy <- function(pt_alpha, pt_clr, pt_clrp, pt_clrsp, pt_size){}
+argument_dummy <- function(object, phase, pt_alpha, pt_clr, pt_clrp, pt_clrsp, pt_size){}
 
 
 #' @title across

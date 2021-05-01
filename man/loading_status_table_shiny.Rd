@@ -7,7 +7,7 @@
 In shiny-module \code{moduleLoadData}.
 }
 \arguments{
-\item{all_wp_lists}{A list of well plate lists.}
+\item{well_plate_list}{A list of well plate lists.}
 }
 \description{
 Creates a data.frame that displays information

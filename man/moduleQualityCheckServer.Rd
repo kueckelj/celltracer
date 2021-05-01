@@ -4,7 +4,7 @@
 \alias{moduleQualityCheckServer}
 \title{Server logic: Quality Check}
 \usage{
-moduleQualityCheckServer(id, ld_input)
+moduleQualityCheckServer(id, object)
 }
 \arguments{
 \item{id}{Namespace ID}

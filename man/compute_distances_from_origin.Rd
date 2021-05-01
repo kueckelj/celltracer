@@ -2,9 +2,12 @@
 % Please edit documentation in R/compute-family.R
 \name{compute_distances_from_origin}
 \alias{compute_distances_from_origin}
+\alias{compute_distances_from_last_point}
 \title{Compute the distances from origin}
 \usage{
 compute_distances_from_origin(x_coords, y_coords)
+
+compute_distances_from_last_point(x_coords, y_coords)
 }
 \arguments{
 \item{x_coords}{Numeric vector. Refers to x-coordinates of object.}

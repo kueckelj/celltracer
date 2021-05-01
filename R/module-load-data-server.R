@@ -10,7 +10,7 @@
 #' 
 #' @export
 
-moduleLoadDataServer <- function(id, ed_input){
+moduleLoadDataServer <- function(id, object){
   
   shiny::moduleServer(
     id = id, 
@@ -19,8 +19,8 @@ moduleLoadDataServer <- function(id, ed_input){
       
       # Reactive values ---------------------------------------------------------
       
-      all_wp_lists <- shiny::reactiveVal(value = list())
-      all_wp_names <- shiny::reactiveVal(value = character())
+      well_plate_list <- shiny::reactiveVal(value = object@well_plates)
+      well_plate_names <- shiny::reactiveVal(value = base::names(object@well_plates))
       
       read_in_data <- shiny::reactiveVal(value = list())
       
@@ -28,8 +28,8 @@ moduleLoadDataServer <- function(id, ed_input){
       # - the return value of this module
       ld_output <- shiny::reactiveValues(
         
-        track_df = list(),
-        all_wp_lists = list(),
+        track_list = list(),
+        well_plate_list = list(),
         proceed = numeric()
         
       )
@@ -42,19 +42,11 @@ moduleLoadDataServer <- function(id, ed_input){
         
         ns <- session$ns
         
-        shiny::validate(
-          shiny::need(
-            expr = all_wp_names(), 
-            message = "No well plates have been added yet."
-          )
-        )
-        
-        
         shiny::tagList(
           #shiny::h5(shiny::strong("Added Well Plates:")),
           shiny::selectInput(inputId = ns("ld_added_well_plates"), 
                              label = NULL, 
-                             choices = all_wp_names())
+                             choices = well_plate_names())
         )
         
       })
@@ -98,67 +90,98 @@ moduleLoadDataServer <- function(id, ed_input){
         
       })
       
-      output$ld_ignore_errors <- shiny::renderUI({
+      
+      output$ld_loading_box <- shiny::renderUI({
+        
+        ns <- session$ns 
+        
+        if(base::all(loading_status()[["Ready to load"]] == "Yes")){
+          
+          status <- "success"
+          
+        } else {
+          
+          status <- "warning"
+          
+        }
+        
+        shinydashboard::box(title = "Well Plate Status", status = status, width = 12, 
+                            solidHeader = TRUE,
+                            shiny::fluidRow(
+                              shiny::column(width = 12, 
+                                            DT::dataTableOutput(outputId = ns("ld_loading_status"))
+                              )
+                            ),
+                            shiny::HTML("<br><br>"), 
+                            shiny::fluidRow(width = 12, 
+                                            hs(12, align = "center",
+                                               shiny::actionButton(inputId = ns("ld_load_data"), label = "Load Data")
+                                            )
+                            )
+        )
+        
+      })
+      
+      
+      output$ld_save_and_proceed_box <- shiny::renderUI({
         
         ns <- session$ns
         
-        shiny::validate(
-          shiny::need(
-            expr = base::is.list(read_in_data()) & base::length(read_in_data()) != 0, 
-            message = "No folders have been loaded yet."
-          )
-        )
+        if(base::is.list(read_in_data()) & base::length(read_in_data()) != 0){
+          
+          status <- "success"
+          
+        } else {
+          
+          status <- "warning"
+          
+        }
         
-        shiny::validate(
-          shiny::need(
-            expr = well_plates_with_errors(), 
-            message = "No loading errors occured."
-          )
-        )
         
-        shiny::checkboxInput(inputId = ns("ld_ignore_errors"), 
-                             label = "Ignore errors", 
-                             value = FALSE)
+        shinydashboard::box(title = "Load Files & Proceed", status = status, width = 12, 
+                            solidHeader = TRUE, collapsible = FALSE, 
+                            shiny::uiOutput(outputId = ns("ld_well_plate_errors")),
+                            shiny::uiOutput(outputId = ns("ld_well_image_errors")),
+                            shiny::textOutput(outputId = ns("ld_error_message")),
+                            shiny::HTML("<br>"),
+                            shiny::column(width = 12, align = "center",
+                                          shiny::splitLayout(
+                                            cellWidths = c("50%", "50%"),
+                                            shiny::actionButton(inputId = ns("ld_proceed"), label = "Save & Proceed")
+                                          )
+                            )
+        )
         
       })
+      
       
       # -----
       
       # Observe events ----------------------------------------------------------
 
-      # initiate data loading by clicking 'proceed' in previous module
-      oe <- shiny::observeEvent(ed_input()$proceed, {
-
-        all_wp_lists_new <- ed_input()$set_up$all_well_plate_lists
-        
-        # update well_plate_list
-        all_wp_lists(all_wp_lists_new)
-        all_wp_names(base::names(all_wp_lists_new))
-        
-      })
       
       # add new directory to well plate
       oe <- shiny::observeEvent(dir_string(), {
         
         # actual code !!!
-        checkpoint(evaluate = !base::is.null(all_wp_lists()),
+        checkpoint(evaluate = !base::is.null(well_plate_list()),
                    case_false = "no_set_up_saved")
         
-        all_wp_lists_new <- all_wp_lists()
+        well_plate_list_new <- well_plate_list()
         wp_name <- input$ld_added_well_plates
         
-        all_wp_lists_new[[wp_name]][["directory"]] <- dir_string()
+        well_plate_list_new[[wp_name]][["directory"]] <- dir_string()
         
-        all_wp_lists_new[[wp_name]] <-
+        well_plate_list_new[[wp_name]] <-
           evaluate_file_availability(
-            wp_list = all_wp_lists_new[[wp_name]],
+            wp_list = well_plate_list_new[[wp_name]],
             recursive = input$ld_recursive, 
             keep = input$ld_keep_filetype
           )
         
-        assign(x = "xlist", value = all_wp_lists_new, .GlobalEnv)
+        assign(x = "xlist", value = well_plate_list_new, .GlobalEnv)
         
-        check <- check_wp_directories(all_wp_lists = all_wp_lists_new)
+        check <- check_wp_directories(well_plate_list = well_plate_list_new)
         
         if(check != "unique"){
           
@@ -174,9 +197,9 @@ moduleLoadDataServer <- function(id, ed_input){
           
         }
         
-        # update all_wp_lists and -names
-        all_wp_lists(all_wp_lists_new)
-        all_wp_names(base::names(all_wp_lists()))
+        # update well_plate_list and -names
+        well_plate_list(well_plate_list_new)
+        well_plate_names(base::names(well_plate_list()))
         
       })
       
@@ -187,9 +210,10 @@ moduleLoadDataServer <- function(id, ed_input){
                    case_false = "well_plates_not_ready")
         
         data_list <- 
-          purrr::map2(.x = all_wp_lists(),
-                      .y = all_wp_names(),
-                      .f = load_cell_track_files_shiny, 
+          purrr::map2(.x = well_plate_list(),
+                      .y = well_plate_names(),
+                      .f = load_track_files_shiny, 
+                      object = object, 
                       session = session)
         
         shiny::showNotification(ui = "Reading done.", type = "message")
@@ -207,21 +231,16 @@ moduleLoadDataServer <- function(id, ed_input){
         checkpoint(evaluate = base::is.list(read_in_data()) & base::length(read_in_data()) != 0,
                    case_false = "no_data_read_in")
         
-        if(shiny::isTruthy(well_plates_with_errors())){
-          
-          checkpoint(evaluate = base::isTRUE(input$ld_ignore_errors),
-                     case_false = "errors_left",
-                     duration = 15)
-          
-        }
+        ld_output$well_plate_list <- well_plate_list()
+        ld_output$track_list <- track_list()
         
-        ld_output$all_wp_lists <- all_wp_lists()
-        
-        ld_output$track_df <- track_df()
+        object@well_plates <- well_plate_list()
+        object@data$tracks <- track_list()
         
         ld_output$proceed <- input$ld_proceed
+        ld_output$object <- object
         
-        shiny_fdb(in_shiny = TRUE, ui = "Proceed below with 'Quality Check'.")
+        shiny_fdb(in_shiny = TRUE, ui = "Results have been saved. Click on 'Return Celltracer Object' and proceed with checkDataQuality().")
         
         
       })
@@ -295,7 +314,7 @@ moduleLoadDataServer <- function(id, ed_input){
         
         shiny::req(input$ld_added_well_plates)
         
-        all_wp_lists()[[input$ld_added_well_plates]]
+        well_plate_list()[[input$ld_added_well_plates]]
         
       })
       
@@ -319,12 +338,12 @@ moduleLoadDataServer <- function(id, ed_input){
         
         shiny::validate(
           shiny::need(
-            expr = all_wp_names(), 
+            expr = well_plate_names(), 
             message = "No well plates have been added yet."
           )
         )
         
-        loading_status_table_shiny(all_wp_lists = all_wp_lists())
+        loading_status_table_shiny(well_plate_list = well_plate_list())
         
       })
       
@@ -335,6 +354,7 @@ moduleLoadDataServer <- function(id, ed_input){
                               selected_wells_df = NULL, 
                               aes_fill = "availability_status", 
                               aes_color = "availability_status", 
+                              fill_guide = TRUE,
                               fill_values = ggplot2::alpha(status_colors, .5),
                               color_values = ggplot2::alpha(status_colors, .5)
         ) + 
@@ -391,10 +411,11 @@ moduleLoadDataServer <- function(id, ed_input){
       
       # assemble track data.frame
       
-      track_df <- shiny::reactive({
+      track_list <- shiny::reactive({
         
-        assemble_track_df_shiny(track_data_list = read_in_data(),
-                                all_wp_lists = all_wp_lists())
+        assemble_track_list_shiny(track_data_list = read_in_data(),
+                                well_plate_list = well_plate_list(), 
+                                object = object)
         
       })
       
@@ -485,12 +506,14 @@ moduleLoadDataServer <- function(id, ed_input){
       
       # Module return value -----------------------------------------------------
       
+      # currently not in use !!! ------- start
       return_value <- shiny::reactive({ 
         
         rv <- 
-        list(all_wp_lists = ld_output$all_wp_lists,
-             track_df = ld_output$track_df, 
-             proceed = ld_output$proceed)
+        list(well_plate_list = ld_output$well_plate_list,
+             track_list = ld_output$track_list, 
+             proceed = ld_output$proceed, 
+             object = ld_output$object)
         
         assign(x = "rv_load_data", value = rv, .GlobalEnv)
         
@@ -498,7 +521,10 @@ moduleLoadDataServer <- function(id, ed_input){
         
       })
       
-      base::return(return_value)
+      # currently not in use !!! ------- end
+      
+      
+      base::return(ld_output)
       
       
     })

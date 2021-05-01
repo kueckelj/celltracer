@@ -7,19 +7,39 @@
 checkpoint(
   evaluate = TRUE,
   case_false = NULL,
-  error_notifications = list(no_well_plate_chosen =
-    "Please choose a well plate first.", invalid_image_number =
-    "The number of images per well must not be 0.", invalid_wp_name =
-    "Invalid or already existing well plate name.", missing_software =
-    "Please choose the software from which the files derived.", no_well_plates_added =
-    "No well plates have been added yet.", no_set_up_saved =
-    "No experiment set up has been saved yet.", well_plates_not_ready =
-    "There are still well plates left that do not match the requirements to be loaded.", 
-        no_data_read_in = "No files have been loaded yet.", no_cells_remaining =
+  error_notifications = list(incomplete_cto =
+    "The celltracer object has not been initiated yet.", incomplete_cto2 =
+    "The results have not been saved yet. Click on 'Save & Proceed' first.",
+    cell_line_condition_overlap =
+    "Could not save well information. Cell line name and condition name must not overlap.",
+    empty_well_plate =
+    "Could not add well plate. At least one well must have information regarding cell line and condition.",
+    incomplete_software_input =
+    "Please load a valid example file and provide the information required.",     
+    invalid_column_input =
+    "If x-coordinates and y-coordinates are not part of the example file you must at least choose one additional column.",
+    invalid_example_df = "The example data must have at least four columns.",
+    invalid_image_number = "The number of covered areas per well must not be 0.",
+    invalid_meas_number = "The number of measurements must not be 0.", invalid_wp_name =
+    "Invalid or already existing well plate name.", missing_both_inputs =
+    "Please specify at least one of cell line or condition input.",     
+    missing_condition_input =
+    "Could not save well information. Please make sure to denote a condition for all phases before clicking on 'Add Info'.",
+    missing_software = "Please choose the software from which the files derived.",
+    no_software_input =
+    "Please denote the software you used to generate the data files.",
+    no_storage_directory =
+    "Please choose a folder in which to store the celltracer object and name the experiment.",
+    no_well_plates_added = "No well plates have been added yet.", no_well_plate_chosen =
+    "Please choose a well plate first.",      no_wells_chosen =
+    "Could not save well information. Please select at least one well.", no_set_up_saved
+    = "No experiment set up has been saved yet.", well_plates_not_ready =
+    "There are still well plates left that do not match the requirements to be loaded.",
+    no_data_read_in = "No files have been loaded yet.", no_cells_remaining =
     "The filter criteria discard all cells. At least one cell must remain.", errors_left
     =
     "Trying to load some files resulted in errors. To proceed without them enable 'Ignore Errors'. If you want the files to be included fix the error and load the files again.",
-    no_qc_data =
+         no_qc_data =
     "Data has to undergo quality check first before the cell tracer object can be returned.",
     no_features_selected = "Please selecte at least one feature."),
   warning_notifications = list(),

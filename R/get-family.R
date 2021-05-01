@@ -2,7 +2,7 @@
 # Helper ------------------------------------------------------------------
 time_displaced_tmt <- function(object){
   
-  if(object@set_up$tmt_start %in% c("From beginning", "No treatment")){
+  if(base::length(getPhases(object)) == 1){
     
     base::return(FALSE)
     
@@ -14,9 +14,9 @@ time_displaced_tmt <- function(object){
   
 }
 
-join_with_meta <- function(object, df){
+join_with_meta <- function(object, df, phase){
   
-  dplyr::left_join(x = df, y = object@data$meta, by = "cell_id")
+  dplyr::left_join(x = df, y = purrr::map_df(phase, .f = ~ object@data$meta[[.x]]), by = "cell_id")
   
 }
 
@@ -34,14 +34,31 @@ join_with_meta <- function(object, df){
 #' @export
 #'
 
-getClusterData <- function(object, phase = "first_tmt"){
+getClusterDf <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_df <- object@data$cluster[[phase]]
+  
+  base::return(cluster_df)
+  
+}
 
+
+#' @rdname getClusterDf
+#' @export
+getClusterData <- function(object, phase = NULL){
+  
+  warning("deprecatd in favor of getClusterDf()")
+  
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
   object@data$cluster[[phase]]
-
+  
 }
-
 
 #' @title Obtain data slots
 #' 
@@ -81,58 +98,6 @@ getData <- function(object, data_slot, phase){
 }
 
 
-#' @title Obtain dimensional reduction data 
-#'
-#' @inherit check_object params 
-#' @inherit dim_red_method params
-#' @inherit with_meta params
-#' @inherit with_stats params
-#' @inherit phase_single params
-#'
-#' @return The data.frame of interest. 
-#' @export
-#'
-
-getDimRed <- function(object,
-                      dim_red_method = "umap",
-                      with_meta = TRUE,
-                      with_stats = TRUE,
-                      phase = "first_tmt"){
-  
-  if(!time_displaced_tmt(object)){
-    
-    dim_red_df <- 
-      purrr::map_df(.x = object@data$dim_red_method[[dim_red_method]], .f = ~ .x)
-    
-  } else {
-    
-    dim_red_df <- 
-      object@data$dim_red_method[[dim_red_method]][[phase]]
-    
-  }
-  
-  if(base::isTRUE(with_meta)){
-    
-    dim_red_df <- dplyr::left_join(x = dim_red_df, 
-                                   y = getMeta(object, phase), 
-                                   by = "cell_id")
-    
-  }
-  
-  if(base::isTRUE(with_stats)){
-    
-    stat_df <- getStats(object, phase = phase, with_meta = FALSE)
-    
-    dim_red_df <- dplyr::left_join(x = dim_red_df, 
-                                   y = stat_df, 
-                                   by = "cell_id")
-    
-  }
-  
-  base::return(dim_red_df)
-  
-}
-
 
 #' @title Obtain meta data
 #'
@@ -142,9 +107,15 @@ getDimRed <- function(object,
 #' @export
 #'
 
-getMeta <- function(object){
+
+getMetaDf <- function(object, phase = NULL){
   
-  object@data$meta
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase, max_phases = 1)
+  
+  object@data$meta[[phase]]
   
 }
 
@@ -161,72 +132,58 @@ getMeta <- function(object){
 #' @export
 #'
 
-getStats <- function(object,
-                     with_meta = TRUE,
-                     with_cluster = TRUE,
-                     phase = "first_tmt"){
+getStatsDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL){
   
-  stat_df <-
-    getData(object = object,
-            data_slot = "stats", 
-            phase = phase)
+  check_object(object)
+  assign_default(object)
   
-  if(base::isTRUE(with_meta)){
-    
-    stat_df <- 
-      join_with_meta(object = object, df = stat_df)
-    
-  } 
+  phase <- check_phase(object, phase, max_phases = 1)
   
+  stat_df <- object@data$stats[[phase]]
+  
+  # add cluster
   if(base::isTRUE(with_cluster)){
     
-    stat_df <- 
-      dplyr::left_join(
-        x = stat_df, 
-        y = getClusterData(object, phase = phase), 
-        by = "cell_id"
-      )
+    cluster_df <- dplyr::select(object@data$cluster[[phase]], -phase)  
+    
+    if(base::ncol(cluster_df) == 1){
+      
+      if(time_displaced_tmt(object)){
+        
+        add <- glue::glue(" for the {phase} phase.")
+        
+      } else {
+        
+        add <- "."
+        
+      }
+      
+      base::warning(glue::glue("You set 'with_cluster' to TRUE but no cluster variables have been calculated yet{add}"))
+      
+    } else {
+      
+      stat_df <- dplyr::left_join(x = stat_df, y = cluster_df, by = "cell_id")  
+      
+    }
     
   }
   
-  base::return(stat_df)
+  # add meta
+  if(base::isTRUE(with_meta)){
+    
+    meta_df <- dplyr::select(object@data$meta[[phase]], -phase)
+    
+    stat_df <- dplyr::left_join(x = stat_df, y = meta_df, by = "cell_id")
+    
+  }
+  
+  base::return(stat_df)  
   
 }
 
-
-#' @rdname getStats
+#' @rdname getStatsDf
 #' @export
-getStatsDf <- function(object,
-                       with_meta = TRUE,
-                       with_cluster = TRUE,
-                       phase = "first_tmt"){
-  
-  stat_df <-
-    getData(object = object,
-            data_slot = "stats", 
-            phase = phase)
-  
-  if(base::isTRUE(with_meta)){
-    
-    stat_df <- 
-      join_with_meta(object = object, df = stat_df)
-    
-  } 
-  
-  if(base::isTRUE(with_cluster)){
-    
-    stat_df <- 
-      dplyr::left_join(
-        x = stat_df, 
-        y = getClusterData(object, phase = phase), 
-        by = "cell_id"
-      )
-    
-  }
-  
-  base::return(stat_df)
-  
-}
+getStats <- getStatsDf
 
 
 
@@ -244,81 +201,58 @@ getStatsDf <- function(object,
 #' @export
 #'
 
-getTracks <- function(object,
-                      with_meta = TRUE,
-                      with_cluster = TRUE,
-                      phase = "all",
-                      phase_cluster = "first_tmt",
-                      verbose = TRUE){
+getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL){
   
+  check_object(object)
+  assign_default(object)
   
-  # check if input for phase-arguments makes sense
+  phase <- check_phase(object, phase = phase)
   
-  phase <-
-    check_phase(object, phase = phase)
-  
-  if(time_displaced_tmt(object) & base::isTRUE(with_cluster)){
-    
-    if(base::length(phase_cluster) > 1){
+  track_df_final <- purrr::map_df(
+    .x = phase, 
+    .f = function(p){
       
-      base::stop("To avoid ambiguous clusternames binding the data with clusters of more than one phase is not allowed.")
+      track_df <- object@data$tracks[[p]]
       
-    }
-    
-    phase_cluster <- 
-      check_phase(object, phase = phase_cluster)
-    
-    ref_phase <- 
-      stringr::str_c(phase, collapse = "', '")
-    
-    if(!phase_cluster %in% phase){
-      
-      base::warning(glue::glue("You are adding cluster variables derived from data of phase '{phase_cluster}' to tracking data of phase(s) '{ref_phase}'."))
-      
-    } else if(!base::all(phase %in% phase_cluster)){
-      
-      if(base::isTRUE(verbose)){
+      if(base::isTRUE(with_cluster)){
         
-        base::message(glue::glue("Note: The added clustering variables base on the data of phase '{phase_cluster}'. The tracking data includes phase(s) '{ref_phase}'. "))
-      
+        cluster_df <- dplyr::select(object@data$cluster[[p]], - phase)
+        
+        if(base::ncol(cluster_df)){
+          
+          msg <- glue::glue("No custer variables found for {p} phase. Set argument 'with_cluster' to FALSE to proceed.")
+          
+          give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+          
+        } else {
+          
+          track_df <- dplyr::left_join(x = track_df, y = cluster_df, by = "cell_id")
+          
+        }
+        
       }
       
-    }
-    
-  }
-  
-  track_df <- 
-    getData(object = object, 
-            data_slot = "tracks", 
-            phase = phase)
-  
-  if(base::isTRUE(with_meta)){
-    
-    track_df <- 
-      join_with_meta(object = object, df = track_df)
-    
-  } 
-  
-  if(base::isTRUE(with_cluster)){
-
-    if(!time_displaced_tmt(object)){
+      if(base::isTRUE(with_meta)){
+        
+        meta_df <- dplyr::select(object@data$meta[[p]], -phase)
+        
+        track_df <- dplyr::left_join(x = track_df, y = meta_df, by = "cell_id")
+        
+      }
       
-      phase_cluster <- phase
+      base::return(track_df)
       
     }
-    
-    track_df <- 
-      dplyr::left_join(
-        x = track_df, 
-        y = getClusterData(object, phase = phase_cluster), 
-        by = "cell_id"
-      )
-    
-  }
+  )
   
-  base::return(track_df)          
+  base::return(track_df_final)
   
 }
+
+
+#' @rdname getTracksDf
+#' @export
+getTracks <- getTracksDf
 
 
 #' @title Obtain pam-clustering results. 
@@ -470,7 +404,9 @@ getGroups <- function(object, option){
 #' @return An informative list. 
 #' @export
 
-getGroupingOptions <- function(object, phase = "first_tmt"){
+getGroupingOptions <- function(object, phase = NULL){
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
   
   getVariableNames(object = object, 
                    phase = phase, 
@@ -482,7 +418,7 @@ getGroupingOptions <- function(object, phase = "first_tmt"){
 #' @export
 getAcrossOptions <- function(object, phase = "first_tmt"){
   
-  warning("getAcrossOptions() is deprecated. Use getGroupingOption()")
+  warning("getAcrossOptions() is deprecated. Use getGroupingOptions()")
   
   getVariableNames(object = object, 
                    phase = phase, 
@@ -505,23 +441,46 @@ getAcrossOptions <- function(object, phase = "first_tmt"){
 
 getStatVariableNames <- function(object){
   
-  getStats(object, with_meta = FALSE, with_cluster = FALSE) %>% 
-    dplyr::select(-cell_id) %>% 
+  getStatsDf(object, with_meta = FALSE, with_cluster = FALSE) %>% 
+    dplyr::select(-cell_id, -phase) %>% 
     base::colnames()
   
 }
 
 
-#' @title Obtain well plate names 
+#' @title Obtain well plate information 
 #'
 #' @inherit check_object params
+#' @inherit argument_dummy params
+#'
+#' @return
+#' @export
+#'
+
+getWellPlateDf <- function(object, well_plate = NULL){
+  
+  confuns::check_one_of(
+    input = well_plate, 
+    against = getWellPlateNames(object)
+  )
+  
+  wp_df <- object@well_plates[[well_plate]]$wp_df_eval
+  
+  base::return(wp_df)
+  
+}
+
+#' @title Obtain well plate names
+#'
+#' @inherit check_object params
+#' @inherit argument_dummy params
 #'
 #' @return A character vector. 
 #' @export
 
 getWellPlateNames <- function(object){
   
-  object@wp_info %>% base::names()
+  object@well_plates %>% base::names()
   
 }
 
@@ -584,26 +543,57 @@ getVariableValues <- function(object, phase = "first_tmt", variable_name){
 
 getCellLines <- function(object){
   
-  getMeta(object) %>% 
+  getMetaDf(object, phase = "first") %>% 
     dplyr::pull(var = "cell_line") %>% 
-    base::unique()
+    base::levels()
   
 }
 
 #' @rdname getCellLines
 #' @export
 #' 
-getConditions <- function(object){
+getConditions <- function(object, phase = NULL){
   
-  getMeta(object) %>% 
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  getMeta(object, phase = phase) %>% 
     dplyr::pull(var = "condition") %>% 
-    base::unique()
+    base::levels()
   
 }
 
 
-# Not exported ---
 
+# NOT EXPORTED ------------------------------------------------------------
+
+
+
+
+#' @title Helper functions to extract 
+#'
+#' @param object 
+#'
+#' @return
+
+getCategoricalVariablesNames <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  getStats(object = object, phase = phase) %>% 
+    dplyr::select_if(.predicate = base::is.factor) %>% 
+    base::colnames()
+  
+}
+
+
+#' @rdname getNumericVariableNames
+#' @export
 getNumericVariableNames <- function(object){
   
   getStats(object = object) %>% 
@@ -612,15 +602,16 @@ getNumericVariableNames <- function(object){
   
 }
 
-getCategoricalVariablesNames <- function(object){
-  
-  getStats(object = object) %>% 
-    dplyr::select_if(.predicate = base::is.factor) %>% 
-    base::colnames()
-  
-}
 
-getFrameSeq <- function(object, phase = "all"){
+
+#' @rdname getNumericVariableNames
+#' @export
+getFrameSeq <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
   
   getTracks(object, phase = phase) %>% 
     dplyr::pull(var = "frame_num") %>% 
@@ -628,7 +619,14 @@ getFrameSeq <- function(object, phase = "all"){
   
 }
 
-getFrameTimeSeq <- function(object, phase = "all"){
+#' @rdname getNumericVariableNames
+#' @export
+getFrameTimeSeq <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
   
   getTracks(object, phase = phase) %>% 
     dplyr::pull(var = "frame_time") %>% 
@@ -637,82 +635,67 @@ getFrameTimeSeq <- function(object, phase = "all"){
 }
 
 
-getGroups <- function(object, option){
-  
-  group_vec <- 
-    getMeta(object) %>% 
-    dplyr::pull(var = {{option}}) 
-  
-  if(base::is.factor(group_vec)){
-    
-    base::levels(x = group_vec)
-    
-  } else if(base::is.character(group_vec)){
-    
-    base::unique(group_vec)
-    
-  } else {
-    
-    base::stop(glue::glue("The result of grouping option '{option}' must be a character vector or a factor."))
-    
-  }
-  
-}
-
+#' @rdname getNumericVariableNames
+#' @export
 getInterval <- function(object){
   
   object@set_up$itvl
   
 }
 
+
+#' @rdname getNumericVariableNames
+#' @export
 getIntervalUnit <- function(object){
   
   object@set_up$itvl_u
   
 }
 
+
+#' @rdname getNumericVariableNames
+#' @export
 getPhases <- function(object){
   
   object@data$tracks %>% base::names()
   
 }
 
+#' @rdname getNumericVariableNames
+#' @export
 getVariableNames <- function(object,
-                             phase = "first_tmt",
-                             variable_classes = c("cluster", "input", "well_plate", "stats"),
-                             algorithm_subset = NULL, 
+                             phase = NULL,
+                             variable_classes = c("cluster", "meta", "stats", "well_plate"),
                              flatten = TRUE){
+  
+  check_object(object)
+  assign_default(object)
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
   select_list <- list()
   
-  # cluster
   if("cluster" %in% variable_classes){
     
-    select_list$Cluster <- 
-      getClusterNames(object,
-                      phase = phase,
-                      algorithm_subset = algorithm_subset) %>% 
-      purrr::flatten() %>% 
-      purrr::flatten_chr()
+    cluster <- 
+      getClusterDf(object, phase = phase) %>% 
+      dplyr::select(-cell_id, -phase) %>% 
+      base::colnames()
+    
+    select_list$cluster <- cluster
     
   }
   
   # meta input
   
-  if("input" %in% variable_classes){
+  if("meta" %in% variable_classes){
     
-    groups <- 
-      getStats(object, phase = phase) %>% 
+    meta <-
+      getMetaDf(object, phase = phase) %>% 
+      dplyr::select(-dplyr::all_of(x = invalid_groups), -phase) %>% 
       base::colnames()
     
-    #!!! add cluster options
-    
-    valid_groups <-
-      groups[!groups %in% c(invalid_groups, numeric_stat_vars)]
-    
-    select_list$Meta <- valid_groups
+    select_list$meta <- meta
     
   }
   
@@ -720,8 +703,8 @@ getVariableNames <- function(object,
   
   if("well_plate" %in% variable_classes){
     
-    select_list[["Well Plate"]] <- 
-      getMeta(object) %>% 
+    select_list$well_plate <- 
+      getMetaDf(object, phase = phase) %>% 
       dplyr::select(dplyr::starts_with(match = "well"), -well_plate_index) %>% 
       base::colnames()
     
@@ -731,7 +714,7 @@ getVariableNames <- function(object,
   
   if("stats" %in% variable_classes){
     
-    select_list[["Cell Statistics"]] <- 
+    select_list[["stats"]] <- 
       getStatVariableNames(object)
     
   }

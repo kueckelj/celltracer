@@ -4,7 +4,7 @@
 \alias{moduleLoadDataServer}
 \title{Server logic: Load Data}
 \usage{
-moduleLoadDataServer(id, ed_input)
+moduleLoadDataServer(id, object)
 }
 \arguments{
 \item{id}{Namespace ID}

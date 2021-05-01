@@ -4,10 +4,10 @@
 \alias{check_wp_directories}
 \title{Detect double directories}
 \usage{
-check_wp_directories(all_wp_lists)
+check_wp_directories(well_plate_list)
 }
 \arguments{
-\item{all_wp_lists}{A list of well plate lists.}
+\item{well_plate_list}{A list of well plate lists.}
 }
 \value{
 A character value that contains either \emph{'unique'} or the

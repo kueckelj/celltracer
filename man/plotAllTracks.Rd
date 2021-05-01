@@ -9,10 +9,10 @@ plotAllTracks(
   across = "condition",
   across_subset = NULL,
   time_subset = NULL,
-  phase = "all",
-  phase_cluster = "first_tmt",
+  phase = NULL,
+  phase_cluster = NULL,
   n_cells = 100,
-  color_to = NULL,
+  color_by = NULL,
   linetype = "solid",
   linesize = 0.75,
   clrp = "milo",
@@ -57,8 +57,6 @@ started right from the beginning.}
 
 \item{n_cells}{Numeric calue. Determines the number of cells that are randomly chosen from
 every group to be displayed. Useful to keep plots insightful and aesthetically pleasing.}
-
-\item{color_to}{Character value. The variable that is to be displayed or highlighted by the dots color.}
 
 \item{linetype}{Character value. Valid options are \emph{'solid', 'twodash', 'longdash', 'dotted'}
 and \emph{'dotdash'}.}

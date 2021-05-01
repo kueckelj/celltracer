@@ -5,7 +5,7 @@
 \alias{getAcrossOptions}
 \title{Obtain variable names that group the cells}
 \usage{
-getGroupingOptions(object, phase = "first_tmt")
+getGroupingOptions(object, phase = NULL)
 
 getAcrossOptions(object, phase = "first_tmt")
 }

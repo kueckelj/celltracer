@@ -64,22 +64,14 @@ moduleQualityCheckUI <- function(id){
                                                                  solidHeader = TRUE, status = "success",
                                                                  tags$h4(shiny::strong("Remaining Cells")), 
                                                                  shiny::plotOutput(outputId = ns("remaining_cells_plot")),
-                                                                 shiny::HTML("<br>"),
-                                                                 shiny::fluidRow(
-                                                                   shiny::column(width = 4, shiny::selectInput(inputId = ns("qc_aes_x"), label = "X-Axis",
-                                                                                                               choices = shiny_discrete_vars)), 
-                                                                   shiny::column(width = 4, shiny::selectInput(inputId = ns("qc_aes_fill"), label = "Color to:", 
-                                                                                                               choices = shiny_discrete_vars)),
-                                                                   shiny::column(width = 4, shiny::selectInput(inputId = ns("qc_bar_position"), label = "Bar Position", 
-                                                                                                               choices = shiny_bar_positions[1:2]))
-                                                                 ),
                                                                  shiny::fluidRow(
                                                                    shiny::column(width = 12, align = "center", 
-                                                                     shiny::actionButton(inputId = ns("apply_filter"), label = "Apply Filter"), 
-                                                                     shiny::actionButton(inputId = ns("qc_proceed"), label = "Save & Proceed")
+                                                                                 shiny::actionButton(inputId = ns("apply_filter"), label = "Apply Filter"), 
+                                                                                 shiny::actionButton(inputId = ns("qc_proceed"), label = "Save & Proceed")
                                                                    )
                                                                  )
                                              )
+          
                                ), 
                                shiny::column(width = 2)
                )

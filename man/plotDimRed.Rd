@@ -7,15 +7,13 @@
 plotDimRed(
   object,
   dim_red = "umap",
-  color_to = NULL,
+  color_by = NULL,
   pt_size = 1,
   pt_alpha = 0.9
 )
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
-
-\item{color_to}{Character value. The variable that is to be displayed or highlighted by the dots color.}
 
 \item{pt_size}{Numeric value. Denotes the size and alpha values of the points of the scatterplot.}
 

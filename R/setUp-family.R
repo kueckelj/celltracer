@@ -8,7 +8,7 @@
 #' @export
 #'
 
-setUpWellPlateDf <- function(type){
+setUpWellPlateDf <- function(type = "8x12 (96)", phases = NULL){
   
   # row- and column number of current well plate
   well_plate_used <- 
@@ -30,6 +30,25 @@ setUpWellPlateDf <- function(type){
       cl_condition = "unknown & unknown", 
       type = {{type}}
     )
+  
+  if(!base::is.null(phases)){
+    
+    phases_names <- 
+      english::ordinal(x = base::seq_along(phases)) %>%
+      confuns::make_capital_letters(collapse.with = NULL) %>% 
+      stringr::str_c(., "Phase:", sep = " ")
+    
+    well_plate_df_new$condition_df <- 
+      purrr::map(.x = base::seq_along(well_plate_df_new$well), 
+                 .f = function(x){
+                   
+                   base::matrix(ncol = base::length(phases_names), nrow = 1) %>% 
+                   base::as.data.frame() %>% 
+                   magrittr::set_colnames(value = phases_names)
+                   
+                 })
+    
+  }
   
   base::return(well_plate_df_new)
   

@@ -7,7 +7,7 @@
 \usage{
 getCellLines(object)
 
-getConditions(object)
+getConditions(object, phase = NULL)
 }
 \arguments{
 \item{object}{A valid cell tracer object.}

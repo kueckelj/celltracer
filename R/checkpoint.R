@@ -19,12 +19,27 @@ checkpoint <- function(evaluate = TRUE,
                        case_false = NULL,
                        error_notifications = list(
                          
+                         # miscellaneous
+                         "incomplete_cto" = "The celltracer object has not been initiated yet.",
+                         "incomplete_cto2" = "The results have not been saved yet. Click on 'Save & Proceed' first.",
+                         
                          # experiment set up
-                         "no_well_plate_chosen" = "Please choose a well plate first.",
-                         "invalid_image_number" = "The number of images per well must not be 0.",
+                         "cell_line_condition_overlap" = "Could not save well information. Cell line name and condition name must not overlap.", 
+                         "empty_well_plate" = "Could not add well plate. At least one well must have information regarding cell line and condition.",
+                         "incomplete_software_input" = "Please load a valid example file and provide the information required.",
+                         "invalid_column_input" = "If x-coordinates and y-coordinates are not part of the example file you must at least choose one additional column.",
+                         "invalid_example_df" = "The example data must have at least four columns.",
+                         "invalid_image_number" = "The number of covered areas per well must not be 0.",
+                         "invalid_meas_number" = "The number of measurements must not be 0.",
                          "invalid_wp_name" = "Invalid or already existing well plate name.",
+                         "missing_both_inputs" = "Please specify at least one of cell line or condition input.",
+                         "missing_condition_input" = "Could not save well information. Please make sure to denote a condition for all phases before clicking on 'Add Info'.",
                          "missing_software" = "Please choose the software from which the files derived.", 
+                         "no_software_input" = "Please denote the software you used to generate the data files.",
+                         "no_storage_directory" = "Please choose a folder in which to store the celltracer object and name the experiment.",
                          "no_well_plates_added" = "No well plates have been added yet.",
+                         "no_well_plate_chosen" = "Please choose a well plate first.",
+                         "no_wells_chosen" = "Could not save well information. Please select at least one well.",
                          
                          # load data
                          "no_set_up_saved" = "No experiment set up has been saved yet.",

@@ -6,9 +6,10 @@
 \usage{
 plotWellPlate(
   object,
-  well_plate = "",
-  color_to = NULL,
-  fill_to = "cl_condition"
+  well_plate = NULL,
+  color_by = NULL,
+  clrp_adjust = NULL,
+  make_pretty = NULL
 )
 }
 \arguments{
@@ -16,10 +17,6 @@ plotWellPlate(
 
 \item{well_plate}{Character value. The name of the well plate of interest. Valid inputs can be obtained
 via \code{getWellPlateNames()}.}
-
-\item{color_to}{Character value. The variable that is to be displayed or highlighted by the dots color.}
-
-\item{fill_to}{Character value. The varaible that is to be displayed or highlighted by the dots filling.}
 }
 \value{
 A ggplot.

@@ -53,42 +53,8 @@ moduleLoadDataUI <- function(id){
                                              )
                                ), 
                                shiny::column(width = 6,
-                                             shinydashboard::box(title = "Missing Well-Image Directories", status = "warning", width = 12,
-                                                                 solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE, 
-                                                                 shiny::textOutput(outputId = ns("ld_all_missing_files"))
-                                             ),
-                                             shinydashboard::box(title = "Ambiguous Well-Image Directories", status = "warning", width = 12,
-                                                                 solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
-                                                                 DT::dataTableOutput(outputId = ns("ld_ambiguous_directories"))
-                                             ),
-                                             shinydashboard::box(title = "Well Plate Status", status = "warning", width = 12, 
-                                                                 solidHeader = TRUE,
-                                                                 shiny::fluidRow(
-                                                                   shiny::column(width = 12, 
-                                                                                 DT::dataTableOutput(outputId = ns("ld_loading_status"))
-                                                                                 )
-                                                                 ),
-                                                                 shiny::HTML("<br><br>"), 
-                                                                 shiny::fluidRow(width = 12, 
-                                                                                 hs(12, align = "center",
-                                                                                    shiny::actionButton(inputId = ns("ld_load_data"), label = "Load Data")
-                                                                                    )
-                                                                 )
-                                             ), 
-                                             shinydashboard::box(title = "Load Files & Proceed", status = "success", width = 12, 
-                                                                 solidHeader = TRUE, collapsible = FALSE, 
-                                                                 shiny::uiOutput(outputId = ns("ld_well_plate_errors")),
-                                                                 shiny::uiOutput(outputId = ns("ld_well_image_errors")),
-                                                                 shiny::textOutput(outputId = ns("ld_error_message")),
-                                                                 shiny::HTML("<br>"),
-                                                                 shiny::column(width = 12, align = "center",
-                                                                               shiny::splitLayout(
-                                                                                 cellWidths = c("50%", "50%"),
-                                                                                 shiny::actionButton(inputId = ns("ld_proceed"), label = "Save & Proceed"),
-                                                                                 shiny::uiOutput(outputId = ns("ld_ignore_errors"))
-                                                                               )
-                                                                 )
-                                             )
+                                             shiny::uiOutput(outputId = ns("ld_loading_box")), 
+                                             shiny::uiOutput(outputId = ns("ld_save_and_proceed_box"))
                                 )
                )
       )

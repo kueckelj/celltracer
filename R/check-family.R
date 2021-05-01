@@ -1,3 +1,56 @@
+
+
+#' @title Check content availability 
+#'
+#' @param evaluate The test that must be TRUE. 
+#' @inherit argument_dummy params
+#' @param ref_input glue reference
+#' @param ref_fun glue reference
+#'
+check_availability <- function(evaluate, phase, ref_input, ref_fun){
+  
+  if(!base::isTRUE(evaluate)){
+    
+    msg <- glue::glue("Could not find {ref_input} of {phase} phase. You might have to use function '{ref_fun}' first.")
+    
+    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    
+  }
+  
+  
+}
+
+#' @title Check Celltracer Object Input
+#' 
+#' @description Makes sure that object input is of class celltracer and 
+#' that it contains the relevant information needed for the function.
+#' @param object A valid cell tracer object. 
+check_object <- function(object, experiment = NULL, set_up_req = "process_data"){
+  
+  input_class <- base::class(object)
+  input_attribute <- base::attr(input_class, "package")
+  
+  if(!input_class == object_class & input_attribute == "celltracer"){
+    
+    msg <- "Input for argument 'object' must be of class 'cto' from package 'celltracer'."
+    
+    give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    
+  }
+  
+  if(!base::isTRUE(object@set_up$progress[[set_up_req]])){
+    
+    missing_fun <- set_up_funs[[set_up_req]]
+    
+    msg <- glue::glue("Seems like you've missed some object processing steps. Make sure to run '{missing_fun}' first and then try again.")
+    
+    give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    
+  }
+  
+  base::invisible(TRUE)
+  
+}
 #' @title Detect missing variables
 #' 
 #' @description Returns \code{variable} if it was not detected in the column names 
@@ -7,7 +60,7 @@
 #' @param df A read in cell track data.frame.
 #'
 
-check_cell_track_variables <- function(variable, df){
+check_track_df_variables <- function(variable, df){
   
   cnames <- base::colnames(df)
   
@@ -31,42 +84,54 @@ check_cell_track_variables <- function(variable, df){
 #' @title Check phase input 
 #' 
 #' @inherit check_object params
-#' @param phase A character value referring to the phase. 
+#' @param phase Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+#' referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+#' 
+#' Ignored if the experiment design contains only one phase. 
+#' 
 #' @param max_phase Numeric value or NULL. If numeric it regulates the maximal number of phases allowed. 
 #' 
 check_phase <- function(object, phase, max_phases = NULL){
   
-  if(!time_displaced_tmt(object)){
+  if(base::is.numeric(max_phases)){
     
-    phase <- "entire"
-    
-  } else {
-    
-    
-    if(base::all(phase == "all")){
+    if(max_phases == 1){
       
-      phase <- getPhases(object)
+      confuns::is_vec(x = phase, mode = "character", of.length = max_phases)
       
-    }
-    
-    if(base::is.numeric(max_phases)){
+    } else {
       
-      base::stopifnot(base::length(phase) <= base::length(max_phases))
+      confuns::is_vec(x = phase, mode = "character", max.length = max_phases)
       
     }
-    
-    
-    phase <- 
-      confuns::check_vector(
-        input = phase, 
-        against = getPhases(object), 
-        verbose = TRUE, 
-        ref.input = "input for argument 'phase'", 
-        ref.against = "valid phases"
-      )
     
   }
   
+  if(base::all(phase == "all") & base::is.null(max_phases)){
+    
+    phase <- getPhases(object)
+    
+  } else if(base::is.numeric(max_phases) && base::length(phase) > max_phases){
+    
+    msg <- glue::glue("Length of input for argument phase must be equal to or lower than {max_phases}.")
+    
+    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    
+  } else if(base::all(phase == "all") && base::is.numeric(max_phases) && base::length(getPhases(object) > max_phases)){
+    
+    msg <- glue::glue("Length of input for argument phase must be equal to or lower than {max_phases}. All phases sum up to {base::length(getPhases(object))}.")
+    
+    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    
+  } else {
+    
+    confuns::check_one_of(
+      input = phase, 
+      against = getPhases(object)
+    )
+    
+  }
+    
   base::return(phase)
   
 }
@@ -117,12 +182,13 @@ check_wp_df_shiny <- function(wp_df){
   } else if(base::any(wp_df$condition == "unknown")) {
     
     result_list$evaluate <- FALSE
-    result_list$case_false <- "There are still unknown conditions left. Please add respective information or enable 'Discard unknown'."
+    result_list$case_false <- "There are still missing or incomplete wells left. Please add respective information or enable 'Empty Wells'."
     
   } else if(base::any(wp_df$cell_line == "unknown")){
     
     result_list$evaluate <- FALSE
-    result_list$case_false <- "There are still unknown cell lines left. Please add respective information or enable 'Discard unknown"
+    result_list$case_false <- "There are still missing or incomplete wells left. Please add respective information or enable 'Empty Wells"
+    
   }
   
   return(result_list)
@@ -131,19 +197,19 @@ check_wp_df_shiny <- function(wp_df){
 
 #' @title Detect double directories
 #'
-#' @param all_wp_lists A list of well plate lists.
+#' @param well_plate_list A list of well plate lists.
 #'
 #' @return A character value that contains either \emph{'unique'} or the 
 #' directories that are not unique. 
 
-check_wp_directories <- function(all_wp_lists){
+check_wp_directories <- function(well_plate_list){
   
-  all_wp_lists <- 
-    purrr::discard(.x = all_wp_lists, 
+  well_plate_list <- 
+    purrr::discard(.x = well_plate_list, 
                    .p = ~ base::is.null(.x[["directory"]]))
   
   count_dirs <- 
-    purrr::map_chr(.x = all_wp_lists, "directory") %>% 
+    purrr::map_chr(.x = well_plate_list, "directory") %>% 
     base::table() %>% 
     base::as.data.frame() %>% 
     magrittr::set_colnames(value = c("dir", "count"))
