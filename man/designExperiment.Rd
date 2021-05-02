@@ -2,13 +2,14 @@
 % Please edit documentation in R/object-initiation.R
 \name{designExperiment}
 \alias{designExperiment}
-\title{Title}
+\title{Object initiation: Step 1}
 \usage{
 designExperiment()
 }
 \value{
-
+An empty celltracer object.
 }
 \description{
-Title
+Opens an interactive application in which the experiment can be set
+up. This includes in particular the design of the well plates.
 }

@@ -11,8 +11,8 @@ plotSingleTracks(object, cell_ids, color_by = NULL, scales = "free")
 
 \item{cell_ids}{Character vector. Denotes the cell ids of interest.}
 
-\item{scales}{Character value. Given to argument \code{scales} of
-\code{ggplot2::facet_wrap()}.}
+\item{scales}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+are displayed.}
 }
 \value{
 A ggplot.

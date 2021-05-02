@@ -2,36 +2,77 @@
 % Please edit documentation in R/clustering-pam.R
 \name{plotAvgSilhouetteWidths}
 \alias{plotAvgSilhouetteWidths}
-\title{Title}
+\alias{plotSilhouetteWidths}
+\title{Plot pam cluster quality}
 \usage{
 plotAvgSilhouetteWidths(
   object,
-  k = NULL,
+  k,
+  method_pam = NULL,
   phase = NULL,
   clr = "steelblue",
   display_cols = TRUE,
   display_line = TRUE,
   display_points = TRUE
 )
+
+plotSilhouetteWidths(
+  object,
+  k,
+  method_pam = NULL,
+  phase = NULL,
+  clrp = NULL,
+  ncol = NULL,
+  nrow = NULL,
+  verbose = NULL
+)
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{k}{}
+\item{k}{Numeric vector. The k-values of interest.}
 
-\item{phase}{}
+\item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
+Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}
 
-\item{clr}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{display_cols}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{display_line}{}
+\item{display_cols}{Logical value. If set to TRUE columns are used additionally
+to display the results.}
 
-\item{display_points}{}
+\item{display_line}{Logical value. If set to TRUE a line is used additionally
+to display the results.}
+
+\item{display_points}{Logical value. If set to TRUE points are used additionally
+to display the results.}
+
+\item{clrp}{Character value. Specifies the color palette to be used to represent
+groups of discrete variables. Run \code{validColorPalettes()} to obtain valid
+input options.}
+
+\item{ncol}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+are displayed.}
+
+\item{nrow}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+are displayed.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
 
+
+A ggplot.
 }
 \description{
-Title
+Visualizes the cluster quality of different partitioning
+around medoids results.
+}
+\details{
+Specify \code{method_pam} as a character value.
 }

@@ -51,34 +51,6 @@ check_object <- function(object, experiment = NULL, set_up_req = "process_data")
   base::invisible(TRUE)
   
 }
-#' @title Detect missing variables
-#' 
-#' @description Returns \code{variable} if it was not detected in the column names 
-#' of the specified data.frame. To be used in \code{purrr::map()} with argument \code{.x}
-#' set to \code{original_ct_variables}
-#' @param variable Character value. The variable to be checked.
-#' @param df A read in cell track data.frame.
-#'
-
-check_track_df_variables <- function(variable, df){
-  
-  cnames <- base::colnames(df)
-  
-  if(variable %in% cnames){
-    
-    NULL
-    
-  } else if(base::any(stringr::str_detect(cnames, pattern = variable))){
-    
-    NULL
-    
-  } else {
-    
-    base::return(variable)
-    
-  }
-  
-}
 
 
 #' @title Check phase input 
@@ -92,6 +64,23 @@ check_track_df_variables <- function(variable, df){
 #' @param max_phase Numeric value or NULL. If numeric it regulates the maximal number of phases allowed. 
 #' 
 check_phase <- function(object, phase, max_phases = NULL){
+  
+  if(base::is.numeric(phase)){
+    
+    lp <- base::length(getPhases(object))
+    
+    confuns::is_vec(phase, mode = "numeric", max.length = lp)
+    
+    if(base::max(phase) > lp){
+      
+      base::stop(glue::glue("Input for argument phase must not exceed the number of phases of the experiment which is {lp}."))
+      
+    }
+    
+    phase <- base::names(object@set_up$phases)[phase]
+    
+  }
+  
   
   if(base::is.numeric(max_phases)){
     
@@ -131,10 +120,42 @@ check_phase <- function(object, phase, max_phases = NULL){
     )
     
   }
-    
+  
   base::return(phase)
   
 }
+
+#' @title Detect missing variables
+#' 
+#' @description Returns \code{variable} if it was not detected in the column names 
+#' of the specified data.frame. To be used in \code{purrr::map()} with argument \code{.x}
+#' set to \code{original_ct_variables}
+#' @param variable Character value. The variable to be checked.
+#' @param df A read in cell track data.frame.
+#'
+
+check_track_df_variables <- function(variable, df){
+  
+  cnames <- base::colnames(df)
+  
+  if(variable %in% cnames){
+    
+    NULL
+    
+  } else if(base::any(stringr::str_detect(cnames, pattern = variable))){
+    
+    NULL
+    
+  } else {
+    
+    base::return(variable)
+    
+  }
+  
+}
+
+
+
 
 
 #' @title Check track data.frame 

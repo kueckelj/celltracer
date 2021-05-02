@@ -2,8 +2,8 @@
 
 #' @title Rename cluster of cells
 #' 
-#' @description Allows to rename groups within a cluster variable 
-#' of the cluster data of the specified phase.
+#' @description Allows to rename particular clusters within a cluster variable
+#' of the celltracer object's overall data.
 #'
 #' @inherit argument_dummy params
 #' @param cluster_variable Character value. The name of the cluster variable
@@ -11,7 +11,7 @@
 #' @param ... The clusters to be renamed specified according to the following
 #' syntax: \emph{'new_cluster_name'} \code{=} \emph{'old_cluster_name'}.
 #' 
-#' @return An updated cto object.
+#' @return An updated celltracer object.
 #' @export
 #'
 renameCluster <- function(object, phase = NULL, cluster_variable = NULL, ...){
@@ -59,7 +59,6 @@ renameCluster <- function(object, phase = NULL, cluster_variable = NULL, ...){
       .data = cluster_df,
       {{cluster_variable}} := forcats::fct_recode(.f = !!rlang::sym(cluster_variable), !!!rename_input)
     )
-
   
   object@data$cluster[[phase]] <- renamed_cluster_df
   

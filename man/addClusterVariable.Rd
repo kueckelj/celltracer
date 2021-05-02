@@ -2,19 +2,16 @@
 % Please edit documentation in R/add-family.R
 \name{addClusterVariable}
 \alias{addClusterVariable}
-\alias{addGroupingVariable}
 \title{Add discrete/categorical variables}
 \usage{
 addClusterVariable(
   object,
   cluster_df,
   cluster_name,
-  phase = "first_tmt",
+  phase = NULL,
   overwrite = FALSE,
   verbose = TRUE
 )
-
-addGroupingVariable(object, input_df, variable_name, phase = "first_tmt")
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
@@ -28,27 +25,20 @@ addGroupingVariable(object, input_df, variable_name, phase = "first_tmt")
 
 \item{cluster_name, variable_name}{Character value. The name of the variable that is to be joined.}
 
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-}
+Ignored if the experiment design contains only one phase.}
 
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
 
-\item{input_df}{A data.frame that contains at least two variables:
-
-\describe{
-\item{\emph{cell_id}}{Character. The cells ids that are used to join the cluster variable unambiguously}
-\item{\code{variable__name}}{Character or factor. The discrete variable that is to be joined.}
-}}
+(Warning messages will always be printed.)}
 }
 \value{
 An updated cell tracer object that contains the data added.
 }
 \description{
-These functions allow to join new discrete/categorical variables that can be referred
+Allows to join new discrete/categorical variables that can be referred
 to via the \code{across}-argument of many functions.
 }

@@ -2,16 +2,22 @@
 % Please edit documentation in R/object-initiation.R
 \name{processData}
 \alias{processData}
-\title{Title}
+\title{Object initiation: Step 4}
 \usage{
 processData(object, verbose = TRUE)
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Processes the data and constructs all needed slots. Afterwards the
+celltracer object is set for all subsequent analysis and visualization steps.
 }

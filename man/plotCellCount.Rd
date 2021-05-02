@@ -9,9 +9,10 @@ plotCellCount(object, across, color_by)
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{across}{Character value. Denotes the discrete variable in the data.frame
-across which the variables of interest are to be analyzed or displayed. Valid input
-options can be obtained via \code{getAcrossOptions()}.}
+\item{across}{Character value or NULL. Specifies the grouping variable of interest.
+
+Use \code{getGroupingOptions()} to obtain all variable names that group the
+cells of your experiment in a certain manner.}
 }
 \value{
 A ggplot.

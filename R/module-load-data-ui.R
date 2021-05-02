@@ -15,7 +15,8 @@ moduleLoadDataUI <- function(id){
                                                                shiny::column(width = 12, 
                                                                              shiny::fluidRow(width = 12,
                                                                                              shiny::column(width = 12, 
-                                                                                                           shiny::h4(shiny::strong("Assign Folder to Well Plate"))
+                                                                                                           shiny::h4(shiny::strong("Assign Folder to Well Plate")) %>% 
+                                                                                                             add_helper(content = helper_content$assign_folder)
                                                                                              )
                                                                              ), 
                                                                              shiny::fluidRow(width = 12,
@@ -53,8 +54,13 @@ moduleLoadDataUI <- function(id){
                                              )
                                ), 
                                shiny::column(width = 6,
-                                             shiny::uiOutput(outputId = ns("ld_loading_box")), 
-                                             shiny::uiOutput(outputId = ns("ld_save_and_proceed_box"))
+                                             shiny::fluidRow(
+                                               hs(1), hs(10, shiny::uiOutput(outputId = ns("ld_loading_box")), hs(1))
+                                             ), 
+                                             shiny::fluidRow(
+                                               hs(1), hs(10,shiny::uiOutput(outputId = ns("ld_save_and_proceed_box"))), hs(1)
+                                             )
+                                             
                                 )
                )
       )

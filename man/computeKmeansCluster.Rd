@@ -2,30 +2,45 @@
 % Please edit documentation in R/clustering-kmeans.R
 \name{computeKmeansCluster}
 \alias{computeKmeansCluster}
-\title{Title}
+\title{Compute cluster according to Kmeans}
 \usage{
 computeKmeansCluster(
   object,
+  k,
   phase = NULL,
   method_kmeans = NULL,
-  k = NULL,
   verbose = NULL
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{k}{Numeric vector. For every value the kmeans cluster assignment is calculated via
+\code{stats::kmeans()}.}
 
-\item{method_kmeans}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{k}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{verbose}{}
+\item{method_kmeans}{Character vector (or value see details for more.) Denotes the algorithm of interest defaults
+to \emph{'Hartigan-Wong'}.
+
+Use \code{validKmeansMethods()} to obtain all valid input options.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Performs kmeans clustering for every combination of \code{method_kmeans} and
+\code{k} and saves the results in the celltracer object.
+}
+\details{
+As this function iterates over all valid combinations of \code{k} and \code{method_kmeans}
+both inputs can be specified as vectors.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/clustering-hierarchical.R
 \name{computeDistanceMatrices}
 \alias{computeDistanceMatrices}
-\title{Title}
+\title{Compute distance matrices}
 \usage{
 computeDistanceMatrices(
   object,
@@ -14,15 +14,39 @@ computeDistanceMatrices(
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_dist}{}
+Ignored if the experiment design contains only one phase.}
+
+\item{method_dist}{Character vector (or value see details for more.) Denotes the distance method(s)
+of interest (e.g. \emph{'euclidean'} or \emph{'manhattan'}).
+
+Use \code{validDistanceMethods()} to obtain all valid input options.}
+
+\item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
+set up.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Calculates distance matrices for every valid input value of argument \code{method_dist} and stores
+the results in the celltracer object. Requires that \code{initiateHierarchicalClustering()} has been called.
+}
+\details{
+\code{computeDistanceMatrices()} is the second step in the convenient hierarchical clustering
+of celltracer. It calculates the distance matrices according to all methods you are interested in in a
+loop. Argument \code{method_dist} therefore either takes a value or a vector of valid character strings.
+Each input value is given to argument \code{method} of function \code{stats::dist()}.
+
+Based on the distance matrices computed and saved this way the function \code{agglomerateHierarchicalCluster()} can be used as the third
+step of the hierarchical clustering pipeline.
 }

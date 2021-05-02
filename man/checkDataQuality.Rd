@@ -2,16 +2,17 @@
 % Please edit documentation in R/object-initiation.R
 \name{checkDataQuality}
 \alias{checkDataQuality}
-\title{Title}
+\title{Object initiation: Step 3}
 \usage{
 checkDataQuality(object)
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Opens an interactive application in which the quality of the data can be assessed and
+where the data set can be filtered accordingly.
 }

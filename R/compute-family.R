@@ -1,35 +1,4 @@
 
-#' @title Compute Umap data
-#' 
-#' @description A wrapper around the umap algorithm and \code{addDimRedData()}.
-#'
-#'
-#' @inherit check_object params
-#'
-#' @inherit updated_object return
-#' @export
-
-computeUmapData <- function(object){
-  
-  stat_df <- getStats(object)
-  
-  umap_obj <- 
-    tibble::column_to_rownames(stat_df, var = "cell_id") %>% 
-    dplyr::select_if(.predicate = base::is.numeric) %>% 
-    base::as.matrix() %>% 
-    base::scale() %>% 
-    umap::umap()
-  
-  umap_df <-
-    base::as.data.frame(x = umap_obj$layout) %>% 
-    magrittr::set_colnames(value = c("umap1", "umap2")) %>% 
-    tibble::rownames_to_column(var = "cell_id")
-  
-  object@data$dim_red[["umap"]] <- umap_df
-  
-  base::return(object)
-  
-}
 
 #' @title Compute the distance between to points
 #'

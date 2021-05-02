@@ -2,7 +2,7 @@
 % Please edit documentation in R/correlation-analysis.R
 \name{initiateCorrelation}
 \alias{initiateCorrelation}
-\title{Title}
+\title{Set up correlation with celltracer}
 \usage{
 initiateCorrelation(
   object,
@@ -14,19 +14,39 @@ initiateCorrelation(
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{force}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{verbose}{}
+\item{variables_subset}{Character vector or NULL. Specifies the numeric variables the subsequent correlation
+steps will include..
 
-\item{...}{}
+If set to NULL all of them are chosen. You can prefix variables you do NOT want to influence the clustering
+with a \emph{'-'}. (Saves writing if there are more variables you are interested in
+than variables you are not interested in.)
+
+Use \code{getNumericVariableNames()} to obtain all valid input options.}
+
+\item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
+set up.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Set up the necessary object to perform correlation analysis.
+}
+\details{
+All grouping variables that exist at the time this function is used are added to the correlation slot which can be used to compare
+correlation results between different groups. Clustering variables that are added to the overall data via
+\code{addHierarchicalCluster(), addKmeansCluster() etc.} are added as options for \code{correlateAcross()}
+automatically.
 }

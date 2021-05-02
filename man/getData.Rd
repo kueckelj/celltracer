@@ -11,15 +11,10 @@ getData(object, data_slot, phase)
 
 \item{data_slot}{Character value. One of \emph{'stats', 'tracks', 'meta'} or \emph{'cluster'}.}
 
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
+Ignored if the experiment design contains only one phase.}
 }
 \value{
 The data.frame of interest.

@@ -2,22 +2,38 @@
 % Please edit documentation in R/clustering-hierarchical.R
 \name{getHclustObj}
 \alias{getHclustObj}
-\title{Title}
+\title{Obtain the original clustering objects}
 \usage{
 getHclustObj(object, phase = NULL, method_dist = NULL, method_aggl = NULL)
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_dist}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{method_aggl}{}
+\item{method_dist}{Character vector (or value see details for more.) Denotes the distance method(s)
+of interest (e.g. \emph{'euclidean'} or \emph{'manhattan'}).
+
+Use \code{validDistanceMethods()} to obtain all valid input options.}
+
+\item{method_aggl}{Character vector (or value see details for more.) Denotes the agglomeration
+method(s) of interest according to which the existing distance matrices are agglomerated to hierarchical
+trees.
+
+Use \code{validAgglomerationMethods()} to obtain all valid input options.}
 }
 \value{
-
+The respective clustering results as their original objects.
 }
 \description{
-Title
+These functions extract the resulting objects
+of the respective algorithms calculated with the respective methods denoted
+by the \code{method_*}-arguments.
+}
+\details{
+In this case all \code{method_*}-arguments must be specified as
+character values as the objects are returned one by one.
 }

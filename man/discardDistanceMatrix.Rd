@@ -2,22 +2,38 @@
 % Please edit documentation in R/clustering-hierarchical.R
 \name{discardDistanceMatrix}
 \alias{discardDistanceMatrix}
-\title{Title}
+\title{Discard calculated distance matrix}
 \usage{
 discardDistanceMatrix(object, phase = NULL, method_dist = NULL, verbose = NULL)
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_dist}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{verbose}{}
+\item{method_dist}{Character vector (or value see details for more.) Denotes the distance method(s)
+of interest (e.g. \emph{'euclidean'} or \emph{'manhattan'}).
+
+Use \code{validDistanceMethods()} to obtain all valid input options.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Allows to discard distance matrices that have been already used
+by \code{agglomerateHierarchicalCluster()}. (Distance matrices are usually
+objects of several hundred megabytes.) Once discarded it can not be used any longer but
+can be calculated again via \code{computeDistanceMatrix()}.
+}
+\details{
+Distance matrices are discarded one by one. Input for argument \code{method_dist}
+must be a single character value.
 }

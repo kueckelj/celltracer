@@ -5,11 +5,7 @@
 #' \code{across} is specified. \code{plotViolinplot()} and \code{plotBoxplot}
 #' allow for statistical tests such as t-test or ANOVA.
 #'
-#' @inherit across_dummy params
 #' @inherit argument_dummy params
-#' @inherit check_object params
-#' @inherit check_pt params
-#' @inherit phase_single params
 #' @inherit variables_num params
 #'
 #' @param test_groupwise Character value or NULL. Specifies the groupwise statistical
@@ -257,7 +253,7 @@ plotViolinplot <- function(object,
 #'
 #' @inherit plotBoxplot params return
 #'
-#' @param variables Character vector. The discrete features whose group count or
+#' @param variables Character vector. The grouping variables whose group count or
 #' proportion you want to display. Must not contain the feature specified in
 #' \code{across} - if \code{across} is not set to NULL.
 

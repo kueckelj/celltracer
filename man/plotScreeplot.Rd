@@ -2,13 +2,13 @@
 % Please edit documentation in R/clustering-kmeans.R
 \name{plotScreeplot}
 \alias{plotScreeplot}
-\title{Title}
+\title{Plot a scree plot}
 \usage{
 plotScreeplot(
   object,
   phase = NULL,
   method_kmeans = NULL,
-  k = NULL,
+  k = 2:10,
   clr = "steelblue",
   display_cols = TRUE,
   display_line = TRUE,
@@ -16,23 +16,39 @@ plotScreeplot(
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_kmeans}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{k}{}
+\item{method_kmeans}{Character vector (or value see details for more.) Denotes the algorithm of interest defaults
+to \emph{'Hartigan-Wong'}.
 
-\item{display_cols}{}
+Use \code{validKmeansMethods()} to obtain all valid input options.}
 
-\item{display_line}{}
+\item{clr}{Character value. Denotes the color of the columns.}
 
-\item{display_points}{}
+\item{display_cols}{Logical value. If set to TRUE columns are used additionally
+to display the results.}
+
+\item{display_line}{Logical value. If set to TRUE a line is used additionally
+to display the results.}
+
+\item{display_points}{Logical value. If set to TRUE points are used additionally
+to display the results.}
 }
 \value{
 
+
+A ggplot.
 }
 \description{
-Title
+Visualizes the within-group sum of squares of every calculated kmeans
+clustering.
+}
+\details{
+If \code{method_kmeans} is a vector a subplot for all valid input values
+is displayed via \code{ggplot2::facet_wrap()}.
 }

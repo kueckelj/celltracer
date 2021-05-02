@@ -39,16 +39,6 @@ options can be obtained via \code{getAcrossOptions()}.}
 \item{across_subset}{Character vector. The groups of interest that the \code{across}-
 variable contains. Valid input options can be obtained via \code{getVariableValues()}.}
 
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
-
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
-
 \item{plot_type}{Character value. One of \emph{'histogram', 'ridgeplot', 'boxplot',
 'violinplot'} or \emph{'density'} to visualize the value distribution of those
 variables specified via the \code{variables} argument.
@@ -61,17 +51,6 @@ specified statistical test can be performed.}
 \item{display_points}{Logical. If set to TRUE the value distribution of \code{n_cells} is additionally
 displayed by points.}
 
-\item{pt_size}{Numeric value. Denotes the size and alpha values of the points of the scatterplot.}
-
-\item{pt_alpha}{Numeric value. Denotes the size and alpha values of the points of the scatterplot.}
-
-\item{pt_color}{Character value. Denotes the color of the points of the scatterplot.}
-
-\item{n_cells}{Numeric calue. Determines the number of cells that are randomly chosen from
-every group to be displayed. Useful to keep plots insightful and aesthetically pleasing.}
-
-\item{shape_to}{Character value. The variable that is to be displayed or highlighted by the dots shape.}
-
 \item{test_pairwise}{Character value. One of \emph{'none', 't.test', 'wilcox.test'}.}
 
 \item{test_groupwise}{Character value. One of \emph{'none', 'anova', 'kruskal.test'}.}
@@ -79,18 +58,7 @@ every group to be displayed. Useful to keep plots insightful and aesthetically p
 \item{ref_group}{Character value. Denotes the reference group for the statistical tests. Must
 be one value of the variable specified in \code{across}.}
 
-\item{clrp}{Character value. The color panel to be used. Valid input options can be obtained
-via \code{allColorpanels()}.}
-
 \item{...}{Additional arguments given to \code{ggplot2::facet_wrap()}.}
-
-\item{pretty_names}{Logical. If set to TRUE the function attempts to convert the concisely named
-variables into more aesthetically pleasing ones.}
-
-\item{verbose}{Logical. If set to TRUE informative messages regarding
-the computational progress will be printed.
-
-(Warning messages will always be printed.)}
 }
 \value{
 A ggplot.

@@ -9,7 +9,7 @@ renameCluster(object, phase = NULL, cluster_variable = NULL, ...)
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'} or \emph{'second'}).
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
@@ -17,13 +17,13 @@ Ignored if the experiment design contains only one phase.}
 \item{cluster_variable}{Character value. The name of the cluster variable
 whoose cluster are to be renamed.}
 
-\item{...}{The groups to be renamed specified according to the following
-syntax: \emph{'new_group_name'} \code{=} \emph{'old_group_name'}.}
+\item{...}{The clusters to be renamed specified according to the following
+syntax: \emph{'new_cluster_name'} \code{=} \emph{'old_cluster_name'}.}
 }
 \value{
-An updated cto object.
+An updated celltracer object.
 }
 \description{
-Allows to rename groups within a cluster variable
-of the cluster data of the specified phase.
+Allows to rename particular clusters within a cluster variable
+of the celltracer object's overall data.
 }

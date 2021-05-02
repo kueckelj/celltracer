@@ -7,20 +7,10 @@
 \usage{
 getGroupingOptions(object, phase = NULL)
 
-getAcrossOptions(object, phase = "first_tmt")
+getAcrossOptions(object, phase = NULL)
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
-
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
-
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
 }
 \value{
 An informative list.

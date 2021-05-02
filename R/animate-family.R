@@ -6,13 +6,8 @@
 #' @description This function animates the movement of cells that were covered 
 #' within one well-image. 
 #'
-#' @inherit check_object params
-#' @inherit well_plate params
-#' @inherit well params 
-#' @inherit image params
-#' @inherit aes_to params
+#' @inherit argument_dummy params
 #' @param style Character value. If set to \emph{'cell_tracker'} imitates the tracking process of the CellTracker software.  
-#' @param add_on_list 
 #' @param ... Additional arguments given to \code{gganimate::animate()}.
 #'
 #' @return An animated GIF.
@@ -22,15 +17,29 @@ animateWellImage <- function(object,
                              well_plate,
                              well,
                              image,
+                             phase = "all",
                              style = "normal",
                              add_on_list = list(), 
                              ...){
   
+  
+  check_object(object)
+  assign_default(object)
+  
+  
+  confuns::is_value(x = image, mode = "numeric")
+  
+  
   well_image <- stringr::str_c(well, image, sep = "_")
   
-  track_df <- 
-    getTracks(object) %>% 
-    dplyr::filter(well_image == {{well_image}} & well_plate_name == {{well_plate}})
+  track_df <- getTracksDf(object, phase = phase) 
+  
+  confuns::check_one_of(
+    input = well_image, 
+    against = track_df$well_image %>% base::unique()
+  )
+  
+  track_df <-   dplyr::filter(track_df, well_image == {{well_image}} & well_plate_name == {{well_plate}})
   
   
   if(style == "normal"){
@@ -78,29 +87,53 @@ animateWellImage <- function(object,
 
 
 
-#' Title
-#'
+#' @title Animate all tracks
+#' 
+#' @description Animates the output of function \code{plotAllTracks()}.
+#' 
+#' @inherit argument_dummy params
 #' @inherit plotAllTracks params
-#' @inherit add_on_list params
 #' @param ... Additional arguments given to \code{gganimte::animate()}.
 #'
 #' @return An animated GIF.
 #' @export
 #'
 animateAllTracks <- function(object,
-                             across = "condition",
+                             across = "cell_line",
                              across_subset = NULL,
                              frame_subset = NULL,
-                             tmt = "afterwards",
+                             phase = "all",
                              n_cells = 100,
-                             color_to = NULL, 
+                             color_by = across, 
                              linetype = "solid", 
                              linesize = 0.75, 
                              add_on_list = list(), 
+                             verbose = NULL,
                              ...){
   
-  track_df <-
-    hlpr_subset_across(getTracks(object, tmt = tmt), across, across_subset)
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase)
+  
+  
+  track_df <- 
+    getTracksDf(object = object,
+                phase = phase,
+                with_meta = TRUE, 
+                with_cluster = TRUE,
+                verbose = FALSE) %>% 
+    hlpr_merge_conditions(
+      track_df = ., 
+      phase = phase, 
+      across = across, 
+      verbose = verbose
+    ) %>% 
+    confuns::check_across_subset(
+      df = ., 
+      across = across, 
+      across.subset = across_subset
+    )  
   
   cell_id_df <- 
     dplyr::select(track_df, dplyr::all_of(x = c("cell_id", across))) %>% 
@@ -132,9 +165,9 @@ animateAllTracks <- function(object,
     
   }
   
-  if(base::is.character(color_to)){
+  if(base::is.character(color_by)){
     
-    mapping <- ggplot2::aes(group = cell_id, color = .data[[color_to]])
+    mapping <- ggplot2::aes(group = cell_id, color = .data[[color_by]])
     
   } else {
     
@@ -164,7 +197,7 @@ animateAllTracks <- function(object,
     ggplot2::facet_wrap(facets = ~ facet, scales = "fixed") + 
     gganimate::transition_reveal(along = frame_time) + 
     ggplot2::labs(title = "Frame: {base::round(frame_along)}", x = NULL, y = NULL) +  
-    hlpr_caption_add_on(object = object, tmt = tmt) + 
+    hlpr_caption_add_on(object = object, phase = phase) + 
     add_on_list()
   
   gganimate::animate(plot = gif, ...)

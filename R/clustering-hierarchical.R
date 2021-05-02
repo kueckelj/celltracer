@@ -1,83 +1,26 @@
 
 
 
-#' Title
-#'
-#' @param object 
-#' @param force 
-#' @param verbose 
-#' @param ... 
-#'
-#' @return
-#' @export
-#'
-initiateHierarchicalClustering <- function(object,
-                                           phase = NULL, 
-                                           variables_subset = NULL, 
-                                           force = FALSE, 
-                                           verbose = NULL, 
-                                           ...){
-  
-  check_object(object)
-  assign_default(object)
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_obj <- object@analysis$clustering$hclust[[phase]]
-  
-  if(base::class(cluster_obj) != "hclust_conv" | base::isTRUE(force)){
-    
-    stat_df <- getStatsDf(object = object, 
-                          phase = phase,
-                          with_cluster = FALSE, 
-                          with_meta = FALSE) %>% 
-      dplyr::select(-phase)
-    
-    cell_ids <- stat_df$cell_id
-    stat_df$cell_id <- NULL
-    
-    stat_df <- hlpr_select(stat_df, variables_subset = variables_subset)
 
-    stat_df <- base::as.data.frame(stat_df)
-    base::rownames(stat_df) <- cell_ids
-    
-    cluster_obj <- 
-      confuns::initiate_hclust_object(
-        hclust.data = stat_df, 
-        key.name = "cell_id",
-        default.aggl = object@default$method_aggl, 
-        default.dist = object@default$method_dist
-      )
-    
-    msg <- glue::glue("Successfully initiated hierarchical clustering for {phase} phase with variables: '{remaining_vars}'", 
-                      remaining_vars = glue::glue_collapse(x = base::colnames(stat_df), sep = "', '", last = "' and '"))
-    
-    confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
-    
-    
-  } else {
-    
-    msg <- glue::glue("Hierarchical clustering for {phase} phase already exists. Set argument 'force' to TRUE in order to overwrite it.")
-    
-    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
-    
-  }
-  
-  object@analysis$clustering$hclust[[phase]] <- cluster_obj
-  
-  base::return(object)
-  
-}
 
-#' Title
+#' @title Compute distance matrices 
+#' 
+#' @description Calculates distance matrices for every valid input value of argument \code{method_dist} and stores 
+#' the results in the celltracer object. Requires that \code{initiateHierarchicalClustering()} has been called. 
 #'
-#' @param object 
-#' @param phase 
-#' @param method_dist 
+#' @inherit argument_dummy params
+#' 
+#' @details \code{computeDistanceMatrices()} is the second step in the convenient hierarchical clustering 
+#' of celltracer. It calculates the distance matrices according to all methods you are interested in in a
+#' loop. Argument \code{method_dist} therefore either takes a value or a vector of valid character strings.  
+#' Each input value is given to argument \code{method} of function \code{stats::dist()}.
+#' 
+#' Based on the distance matrices computed and saved this way the function \code{agglomerateHierarchicalCluster()} can be used as the third 
+#' step of the hierarchical clustering pipeline.
 #'
-#' @return
+#' @return An updated celltracer object.
 #' @export
-#'
+
 computeDistanceMatrices <- function(object,
                                     phase = NULL,
                                     method_dist = NULL,
@@ -115,13 +58,23 @@ computeDistanceMatrices <- function(object,
 }
 
 
-#' Title
+#' @title Agglomerate hierarchical cluster 
+#' 
+#' @description Agglomerates the existing distance measurements to hierarchical trees. 
 #'
-#' @param object 
-#' @param phase 
-#' @param method_dist 
+#' @inherit argument_dummy params
+#' 
+#' @details \code{agglomerateHierarchicalCluster()} is the third step in the convenient hierarchical clustering
+#' pipeline of celltracer. It uses the distance matrices calculated with \code{computeDistanceMatrices()} and denoted in the 
+#' argument \code{method_dist} and agglomerates them to hierarchical trees according to all methods denoted 
+#' in argument \code{method_aggl} (input for the latter is given to argument \code{method} of function \code{stats::hclust()}).
+#' Both \code{method_*}-arguments therefore take a vector of character strings as input.
+#' 
+#' Use \code{plotDendrogram()} to visualize the agglomeration results of the distance/agglomeration combinations of interest and 
+#' \code{addHierarchicalCluster} - the fourth and final step - to make the clustering results available for all other plotting 
+#' functions and the \code{across}-argument. 
 #'
-#' @return
+#' @return An updated celltracer object. 
 #' @export
 #'
 agglomerateHierarchicalCluster <- function(object, phase = NULL, method_dist = NULL, method_aggl = NULL, force = FALSE, verbose = NULL){
@@ -156,133 +109,36 @@ agglomerateHierarchicalCluster <- function(object, phase = NULL, method_dist = N
 
 
 
-#' Title
-#'
-#' @param object 
-#' @param phase 
-#' @param method_dist 
-#' @param method_aggl 
-#' @param k 
-#' @param h 
-#'
-#' @return
-#' @export
-#'
-addHierarchicalCluster <- function(object,
-                                   phase = NULL,
-                                   method_dist = NULL,
-                                   method_aggl = NULL,
-                                   k = NULL,
-                                   h = NULL, 
-                                   verbose = NULL){
-  
-  check_object(object)
-  assign_default(object)
 
-  cluster_obj <- getHclustConv(object, phase = phase)
-  
-  new_cluster_df <- 
-    confuns::get_hclust_df(
-      hcl.obj = cluster_obj, 
-      methods.dist = method_dist, 
-      methods.aggl = method_aggl, 
-      k = k, 
-      h = h
-    )
-  
-  new_cluster_names <- 
-    dplyr::select(new_cluster_df, -cell_id) %>% 
-    base::colnames()
-  
-  cluster_df <- object@data$cluster[[phase]]
-  
-  existing_cluster_names <- 
-    dplyr::select(cluster_df, -cell_id, -phase) %>% 
-    base::colnames()
-  
-  if(base::length(existing_cluster_names) >= 1){
-    
-    new_cluster_names <- 
-      confuns::discard_if(
-        input = new_cluster_names, 
-        one_of = existing_cluster_names, 
-        ref.input = "cluster variables to be added", 
-        ref.of = "already part of existing cluster variables", 
-        v.empty = NULL,
-        ref.empty = "Cluster data stays the same",
-        verbose = TRUE
-      )
-    
-  }
-  
-  cluster_df <-
-    dplyr::left_join(x = cluster_df, y = new_cluster_df[, c("cell_id", new_cluster_names)], by = "cell_id")
-  
-  object@data$cluster[[phase]] <- cluster_df
-  
-  if(!base::is.null(new_cluster_names)){
-    
-    msg <- glue::glue("Successfully added {n} cluster {ref_variables} to data of {phase} phase: '{ref_new_cluster_names}'.", 
-                      n = base::length(new_cluster_names), 
-                      ref_variables = confuns::adapt_reference(new_cluster_names, sg = "variable", pl = "variables"),
-                      ref_new_cluster_names = glue::glue_collapse(new_cluster_names, sep = "', '", last = "' and '"))
-    
-    confuns::give_feedback(msg = msg, verbose = verbose)
-    
-  }
-  
-  base::return(object)
-  
-}
 
 
 
 
 # get-functions -----------------------------------------------------------
 
-#' Title
-#'
-#' @param object 
-#' @param phase 
-#'
-#' @return
-#' @export
-#'
-getHclustConv <- function(object, phase = NULL){
-  
-  check_object(object)
-  assign_default(object)
-  
-  phase <- check_phase(object, phase, max_phase = 1)
-  
-  cluster_obj <- object@analysis$clustering$hclust[[phase]]
-  
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "hclust_conv",
-    phase = phase, 
-    ref_input = "hierarchical clustering object", 
-    ref_fun = "initiateHierarchicalClustering()"
-  )
-  
-  base::return(cluster_obj)
-  
-}
 
 
-#' Title
+
+#' @title Obtain the original clustering objects 
+#' 
+#' @description These functions extract the resulting objects 
+#' of the respective algorithms calculated with the respective methods denoted 
+#' by the \code{method_*}-arguments. 
 #'
-#' @param object 
-#' @param phase 
-#' @param method_dist 
-#' @param method_aggl 
+#' @inherit argument_dummy params
+#' 
+#' @details In this case all \code{method_*}-arguments must be specified as 
+#' character values as the objects are returned one by one. 
 #'
-#' @return
+#' @return The respective clustering results as their original objects. 
 #' @export
 #'
 getHclustObj <- function(object, phase = NULL, method_dist = NULL, method_aggl = NULL){
   
   check_object(object)
   assign_default(object)
+  
+  confuns::are_values("method_dist", "method_aggl")
   
   phase <- check_phase(object, phase, max_phase = 1)
   
@@ -307,14 +163,19 @@ getHclustObj <- function(object, phase = NULL, method_dist = NULL, method_aggl =
 # miscellaneous -----------------------------------------------------------
 
 
-#' Title
+#' @title Discard calculated distance matrix
+#' 
+#' @description Allows to discard distance matrices that have been already used 
+#' by \code{agglomerateHierarchicalCluster()}. (Distance matrices are usually 
+#' objects of several hundred megabytes.) Once discarded it can not be used any longer but 
+#' can be calculated again via \code{computeDistanceMatrix()}.
 #'
-#' @param object 
-#' @param phase 
-#' @param method_dist 
-#' @param verbose 
-#'
-#' @return
+#' @inherit argument_dummy params
+#' 
+#' @details Distance matrices are discarded one by one. Input for argument \code{method_dist}
+#' must be a single character value.
+#' 
+#' @return An updated celltracer object. 
 #' @export
 #'
 discardDistanceMatrix <- function(object, phase = NULL, method_dist = NULL, verbose = NULL){
@@ -351,24 +212,23 @@ discardDistanceMatrix <- function(object, phase = NULL, method_dist = NULL, verb
 
 
 
-#' Title
+#' @title Visualize hierarchical clustering 
+#' 
+#' @description Plots the hierarchical tress agglomerated by \code{agglomerateHierarchicalCluster()}. 
 #'
-#' @param object 
-#' @param phase 
-#' @param method_dist 
-#' @param method_aggl 
-#' @param k 
-#' @param h 
-#' @param branch_size 
-#' @param display_legend 
-#' @param display_title 
-#' @param clrp 
-#' @param clrp_adjust 
-#' @param ncol 
-#' @param nrow 
-#' @param ... 
+#' @inherit argument_dummy params 
+#' @param k Numeric value or NULL. If numeric the branches are colored according to their cluster assignment
+#' whereby the number of clusters is equal to \code{k}. 
+#' @param h Numeric value or NULL. If numeric the branches are colored according to their cluster assignment
+#' whereby the number of clusters is equal to the results of cutting the hierarchical tree at height \code{h}..
+#' @param branch_size Numeric value. Denotes the thickness of the branches. 
+#' @param ... Additional arguments given to \code{ggdendro::ggdendrogram()}.
+#' 
+#' @details Iterates over all valid combinations of the \code{method_*} arguments and creates a dendrogram
+#' if the respective clustering results are found. \code{nrow} and \code{ncol} can be used to 
+#' align the plots. 
 #'
-#' @return
+#' @inherit ggplot_family return
 #' @export
 #'
 plotDendrogram <- function(object, 
@@ -384,6 +244,7 @@ plotDendrogram <- function(object,
                            clrp_adjust = NULL, 
                            ncol = NULL, 
                            nrow = NULL, 
+                           verbose = NULL, 
                            ...
                            ){
 
@@ -396,6 +257,11 @@ plotDendrogram <- function(object,
   
   if(base::length(method_dist) == 1 & base::length(method_aggl) == 1){
     
+    msg <- "Plotting dendrogram. This might take a few moments."
+    
+    confuns::give_feedback(msg = msg, verbose = verbose)
+    
+    p <- 
     confuns::plot_dendrogram(
       hcl.obj = cluster_obj, 
       method.dist = method_dist, 
@@ -413,6 +279,7 @@ plotDendrogram <- function(object,
     
   } else {
     
+    p <- 
     confuns::plot_dendrograms(
       hcl.obj = cluster_obj, 
       methods.dist = method_dist, 
@@ -432,6 +299,10 @@ plotDendrogram <- function(object,
     
   }
   
+  
+  confuns::give_feedback(msg = "Done.", verbose = verbose)
+  
+  base::return(p)
   
 }
 

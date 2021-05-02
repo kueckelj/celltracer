@@ -2,7 +2,7 @@
 % Please edit documentation in R/correlation-analysis.R
 \name{plotCorrplot}
 \alias{plotCorrplot}
-\title{Title}
+\title{Plot a correlation plot}
 \usage{
 plotCorrplot(
   object,
@@ -33,59 +33,92 @@ plotCorrplot(
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_corr}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{across}{}
+\item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
+or \code{'spearman'}.}
 
-\item{across_subset}{}
+\item{across}{Character value or NULL. Specifies the grouping variable of interest.
 
-\item{relevel}{}
+Use \code{getGroupingOptions()} to obtain all variable names that group the
+cells of your experiment in a certain manner.}
 
-\item{variables_subset}{}
+\item{across_subset}{Character vector or NULL. Specifies the particular groups
+of interest the grouping variable specified in argument \code{across} contains.
 
-\item{plot_type}{}
+If set to NULL all of them are chosen. You can prefix groups you are NOT interested in
+with a \emph{'-'}. (Saves writing if there are more groups you are interested in
+than groups you are not interested in.)
 
-\item{display_diagonal}{}
+Use \code{getGroupNames()} to obtain all valid input options.}
 
-\item{signif_level}{}
+\item{relevel}{Logical value. If set to TRUE the input order of \code{across_subset}
+determines the order in which the groups of interest are displayed. Groups that
+are not included are dropped which affects the colors with which they are displayed.}
 
-\item{clr_low}{}
+\item{variables_subset}{Character vector or NULL. Specifies the numeric variables you
+want to be included in the correlation plot.
 
-\item{clr_high}{}
+If set to NULL all of them are chosen. You can prefix variables you do NOT want to influence the clustering
+with a \emph{'-'}. (Saves writing if there are more variables you are interested in
+than variables you are not interested in.)
 
-\item{shape}{}
+Use \code{getNumericVariableNames()} to obtain all valid input options.}
 
-\item{shape_size}{}
+\item{plot_type}{Character value. Either \emph{'upper'}, \emph{'lower'} or \emph{'complete'}. Specifies
+how the correlation matrix is displayed.}
 
-\item{size_aes}{}
+\item{display_diagonal}{Logical value. Specifies if the diagonal of the correlation matrix is supposed to be included
+in the correlation plot.}
 
-\item{display_values}{}
+\item{signif_level}{Numeric value or NULL. If numeric, specifies the minimum significance level a correlation pair
+must feature in order to be displayed. Insignificant correlation values are crossed out.}
 
-\item{values_alpha}{}
+\item{clr_low}{Character value. Specifies the color used for the lower end of the colorspectrum (negative correlations).}
 
-\item{values_clr}{}
+\item{clr_high}{Character value. Specifies the color used for the upper end of the colorspectrum (positive correlations).}
 
-\item{values_digits}{}
+\item{shape}{Character value. Specifies the geometric objects with which to display the correlation pairs. Either \emph{'tile'} or one of
+\emph{'circle'} and \emph{'rect'}. In the latter two cases the size of the geometric objects can be used to emphasize the correlation
+in addtion to the colorspectrum if \code{size_aes} is set to TRUE.}
 
-\item{values_size}{}
+\item{shape_size}{Numeric value. Specifies the size with which to display the circles or rectangulars. If \code{shape_aes} is set to TRUE
+it Specifies the maximum size possible.}
 
-\item{draw_grid}{}
+\item{size_aes}{Logical value. If set to TRUE the size of the circles or rectangulars is used to display the correlation.}
 
-\item{grid_clr}{}
+\item{display_values}{Logical value. If set to TRUE the actual correlation values are printed on the geometric objects.}
 
-\item{grid_size}{}
+\item{values_alpha}{Numeric value. Specifies the transparency of the values.}
 
-\item{ncol}{}
+\item{values_clr}{Character value. Specifies the color of the values.}
 
-\item{nrow}{}
+\item{values_digits}{Numeric value. Specifies the number of digits to which the correlation values are rounded before beeing displayed.}
+
+\item{values_size}{Numeric value. Specifies the size of the values.}
+
+\item{draw_grid}{Logical value. If set to TRUE a grid is drawn separating all circles or shapes.}
+
+\item{grid_clr}{Character value. Specifies the color of the grid.}
+
+\item{grid_size}{Numeric value. Specifies the thickness of the grid's lines.}
+
+\item{ncol}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+are displayed.}
+
+\item{nrow}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+are displayed.}
 }
 \value{
 
+
+A ggplot.
 }
 \description{
-Title
+Visualizes the correlation results computed by \code{correlateAll()} and \code{correlateAcross()}.
 }

@@ -117,7 +117,7 @@ plotViolinplot(
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'} or \emph{'second'}).
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
@@ -199,6 +199,8 @@ function. E.g. \code{plotViolinplot()} relies on \code{ggplot2::geom_violin()}.}
 }
 \value{
 
+
+A ggplot.
 }
 \description{
 These functions display the distribution of numeric

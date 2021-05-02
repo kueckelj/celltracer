@@ -4,20 +4,10 @@
 \alias{getVariableValues}
 \title{Obtain variable overview}
 \usage{
-getVariableValues(object, phase = "first_tmt", variable_name)
+getVariableValues(object, phase = NULL, variable_name)
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
-
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
-
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
 
 \item{variable_name}{Character value. Denotes the variable of interest. Valid inputs can be
 obtained via the function \code{getVariableNames()}.}

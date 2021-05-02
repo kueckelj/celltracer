@@ -5,23 +5,19 @@ ggplot_return <- function(){}
 
 
 
+#' @title ggplot_return
+#' @return A ggplot. 
+ggplot_family <- function(){}
+
 
 #' @title Plot cell migration 
 #' 
-#' @description 
+#' @description Visualizes the cells migration in a typical migration plot.
+#' Scales the cell's x- and y-coordinates such that all cell's migration
+#' paths start from the same position.
 #'
-#' @inherit check_object params
-#' @inherit hlpr_subset_across params 
-#' @param time_subset Numeric value. Refers to the time up to which the migration
-#' is plotted. If set to NULL the entire timespan is used. 
-#' @inherit phase_all params
-#' @inherit phase_cluster params 
-#' @inherit n_cells params
-#' @inherit aes_to params
-#' @inherit linetype params
-#' @inherit linesize params
-#' @inherit verbose params 
-#'
+#' @inherit argument_dummy params
+#' 
 #' @inherit ggplot_return return
 #' @export
 #'
@@ -31,25 +27,53 @@ plotAllTracks <- function(object,
                           across_subset = NULL,
                           time_subset = NULL,
                           phase = NULL,
-                          phase_cluster = NULL,
                           n_cells = 100,
-                          color_by = NULL, 
+                          color_by = across, 
                           linetype = "solid", 
                           linesize = 0.75,
                           clrp = "milo", 
                           ...,
                           verbose = TRUE){
   
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase)
+  
+  confuns::is_value(across, "character")
+  
+  if(base::length(phase) >= 2 & !across %in% c("condition", "cl_condition")){
+    
+    base::stop(
+      "Plotting all tracks over several phases while splitting by clustering variables is not allowed as cluster variables are calculated for every phase respectively."
+    )
+    
+  } else if(base::length(phase) == 1) {
+    
+    confuns::check_one_of(
+      input = across, 
+      against = getGroupingOptions(object, phase = phase) %>% purrr::flatten_chr()
+    )
+    
+  }
+  
   track_df <- 
-    getTracks(object = object,
-              phase = phase,
-              phase_cluster = phase_cluster,
-              verbose = verbose) %>% 
+    getTracksDf(object = object,
+                phase = phase,
+                with_meta = TRUE, 
+                with_cluster = TRUE,
+                verbose = FALSE) %>% 
+    hlpr_merge_conditions(
+      track_df = ., 
+      phase = phase, 
+      across = across, 
+      verbose = verbose
+    ) %>% 
     confuns::check_across_subset(
       df = ., 
       across = across, 
       across.subset = across_subset
-    )
+    ) 
   
   cell_id_df <- 
     dplyr::select(track_df, dplyr::all_of(x = c("cell_id", across))) %>% 
@@ -57,7 +81,11 @@ plotAllTracks <- function(object,
     dplyr::group_by(!!rlang::sym(across)) %>% 
     dplyr::slice_sample(n = n_cells)
   
-  cell_ids <- 
+  confuns::check_across_subset(
+    df = ., 
+    across = across, 
+    across.subset = across_subset
+  ) %>% cell_ids <- 
     dplyr::pull(.data = cell_id_df, var = "cell_id")
   
   plot_df <- 
@@ -113,7 +141,7 @@ plotAllTracks <- function(object,
       axis.ticks = ggplot2::element_blank()
     ) + 
     ggplot2::facet_wrap(facets = ~ facet, scales = "fixed", ...) + 
-    ggplot2::labs(x = NULL, y = NULL,
+    ggplot2::labs(x = NULL, y = NULL, color = confuns::make_capital_letters(string = across),
                   subtitle = glue::glue("Time: {time_subset} {getIntervalUnit(object)}")) + 
     hlpr_caption_add_on(object = object, phase = phase) + 
     confuns::scale_color_add_on(variable = "discrete", clrp = clrp)
@@ -128,9 +156,7 @@ plotAllTracks <- function(object,
 #' @description Visualizes the number and distribution of cells across 
 #' a discrete feature of choice. 
 #'
-#' @inherit check_object params
-#' @inherit hlpr_subset_across params  
-#' @inherit aes_to params
+#' @inherit argument_dummy params
 #'
 #' @inherit ggplot_return return
 #' @export
@@ -138,7 +164,7 @@ plotAllTracks <- function(object,
 
 plotCellCount <- function(object, across, color_by){
   
-  stat_df <- getStats(object)
+  stat_df <- getStatsDf(object)
   
   ggplot2::ggplot(data = stat_df, mapping = ggplot2::aes(x = .data[[across]])) + 
     ggplot2::geom_bar(mapping = ggplot2::aes(fill = .data[[color_by]])) + 
@@ -149,63 +175,11 @@ plotCellCount <- function(object, across, color_by){
 }
 
 
-
-#' @title Plot dimensional reduction 
-#' 
-#' @description Visualizes the dimensional reduction method of choice.
-#'
-#' @inherit check_object params
-#' @inherit dim_red_method params
-#' @inherit aes_to params
-#' @inherit pt_args 
-#'
-#' @inherit ggplot_return return
-#' @export
-#'
-
-plotDimRed <- function(object,
-                       dim_red = "umap",
-                       color_by = NULL,
-                       pt_size = 1,
-                       pt_alpha = 0.9){
-  
-  dim_red_df <-
-    getDimRed(object = object, dim_red_method = dim_red_method)
-  
-  x_y <- stringr::str_c(dim_red, 1:2, sep = "")
-  
-  if(base::is.character(color_by)){
-    
-    mapping <- ggplot2::aes(color = !!rlang::sym(color_by))
-    
-  } else {
-    
-    mapping <- ggplot2::aes()
-    
-  }
-  
-  ggplot2::ggplot(data = dim_red_df,
-                  mapping = ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]])
-  ) + 
-    ggplot2::geom_point(mapping = mapping, size = pt_size, alpha = pt_alpha) + 
-    ggplot2::theme_classic() 
-  
-  
-}
-
-
-
-
-
 #' @title Plot single cell migration 
 #' 
 #' @description Visualizes the migration of single cells of interest. 
 #'
-#' @inherit check_object params
-#' @inherit cell_ids params
-#' @inherit aes_to params 
-#' @param scales Character value. Given to argument \code{scales} of
-#' \code{ggplot2::facet_wrap()}.
+#' @inherit argument_dummy params
 #'
 #' @inherit ggplot_return return
 #' @export
@@ -257,15 +231,9 @@ plotSingleTracks <- function(object,
 #' @description Uses the design of a heatmap to visualize the velocity 
 #' dynamics over time across a variable of interest. 
 #' 
-#' @inherit check_object params 
-#' @inherit hlpr_subset_across params
-#' @inherit phase_all params
-#' @inherit phase_cluster params 
-#' @inherit n_cells params 
-#' @param color The colorspectrum to be used. 
+#' @inherit argument_dummy params
+#' @param colors A vector of colors that is used as the heatmap's color spectrum. 
 #' @param arrange_rows Character value. Either \emph{'maxima'} or \emph{'none'}.
-#' @inherit check_smooth params
-#' @inherit verbose params
 #' 
 #' @export
  
@@ -273,21 +241,54 @@ plotVelocityHeatmap <- function(object,
                                 across = "cl_condition", 
                                 across_subset = NULL,
                                 phase = "all",
-                                phase_cluster = "first_tmt",
                                 n_cells = 100,
-                                color = viridis::viridis(15), 
+                                color = NA, 
+                                colors = viridis::viridis(15),
                                 smooth = TRUE, 
                                 smooth_span = 0.25,
                                 arrange_rows = "maxima",
                                 verbose = TRUE, 
                                 in_shiny = FALSE){
   
+  check_object(object)
+  assign_default(object)
+  
+  if(!base::is.na(color)){
+    
+    base::warning("Argument 'color' is deprecated due to naming issues. Please use argument 'colors' instead.")
+    
+  }
+  
+  phase <- check_phase(object, phase = phase)
+  
+  confuns::is_value(across, mode = "character")
+  
+  if(base::length(phase) >= 2 & !across %in% c("condition", "cl_condition")){
+    
+    base::stop(
+      "Plotting velocity over several phases across clustering variables is not allowed as cluster variables are calculated for every phase respectively."
+    )
+    
+  } else if(base::length(phase) == 1) {
+    
+    confuns::check_one_of(
+      input = across, 
+      against = getGroupingOptions(object, phase = phase) %>% purrr::flatten_chr()
+    )
+    
+  }
+  
   # the speed data shifted and sliced
   speed_df <- 
-    getTracks(object,
-              phase = phase,
-              phase_cluster = phase_cluster, 
-              verbose = verbose) %>% 
+    getTracksDf(object,
+                phase = phase,
+                verbose = FALSE) %>% 
+    hlpr_merge_conditions(
+      track_df = ., 
+      phase = phase, 
+      across = across, 
+      verbose = verbose
+    ) %>% 
     confuns::check_across_subset(
       df = ., 
       across = across, 
@@ -397,7 +398,7 @@ plotVelocityHeatmap <- function(object,
       cluster_cols = FALSE, 
       show_rownames = FALSE, 
       show_colnames = FALSE, 
-      color = color
+      color = colors
       )
   
   base::return(velocity_heatmap)
@@ -409,15 +410,9 @@ plotVelocityHeatmap <- function(object,
 #'
 #' @description Visualizes the percentage of active cells over time. 
 #' 
-#' @inherit check_object params 
-#' @inherit phase_all params
-#' @inherit phase_cluster params 
-#' @inherit hlpr_subset_across params
+#' @inherit argument_dummy params
 #' @param threshold Numeric value or NULL. If set to NULL (the default) the 
 #' threshold to consider a cell 'active' is equal to \code{base::mean(speed) + base::sd(speed)}
-#' @inherit check_smooth params
-#' @inherit colors params 
-#' @inherit verbose params
 #' 
 #' @inherit ggplot_return params
 #' 
@@ -426,23 +421,29 @@ plotVelocityHeatmap <- function(object,
 plotVelocityLineplot <- function(object, 
                                  across = "cl_condition", 
                                  across_subset = NULL, 
-                                 phase = "all",
-                                 phase_cluster = "first_tmt",
+                                 phase = NULL,
                                  threshold = NULL,
+                                 linesize = 1,
                                  smooth = TRUE, 
                                  smooth_span = 0.25, 
                                  smooth_se = FALSE,
                                  clrp = "milo", 
                                  verbose = TRUE, 
+                                 ...,
                                  in_shiny = FALSE){
   
   # speed data shifted 
   speed_df <- 
+    getTracksDf(object,
+              phase = phase,
+              verbose = verbose) %>% 
+    hlpr_merge_conditions(
+      track_df = ., 
+      phase = phase, 
+      across = across, 
+      verbose = verbose
+    ) %>% 
     hlpr_subset_across(
-      data = getTracks(object,
-                       phase = phase,
-                       phase_cluster = phase_cluster,
-                       verbose = verbose),
       across = across, 
       across_subset = across_subset
       ) %>% 
@@ -501,14 +502,16 @@ plotVelocityLineplot <- function(object,
         span = smooth_span, 
         formula = y ~ x, 
         method = "loess", 
-        se = smooth_se
+        se = smooth_se, 
+        size = linesize
         )
     
   } else {
     
     geom_line_add_on <- 
       ggplot2::geom_path(
-        mapping = ggplot2::aes(group = cl_condition, color = .data[[across]])
+        mapping = ggplot2::aes(group = .data[[across]], color = .data[[across]]), 
+        size = linesize
         )  
     
   }
@@ -524,7 +527,10 @@ plotVelocityLineplot <- function(object,
       panel.grid.major.y = ggplot2::element_line(colour = "lightgrey")
     ) + 
     ggplot2::labs(x = stringr::str_c("Time [", object@set_up$itvl_u, "]", sep = ""), 
-                  y = "Active Cells [%]")
+                  y = "Active Cells [%]") + 
+    confuns::scale_color_add_on(
+      aes = "color", variable = plot_df[[across]], clrp = clrp, ...
+    )
   
 }
 
@@ -532,17 +538,15 @@ plotVelocityLineplot <- function(object,
 
 #' @title Plot the well plate set up 
 #' 
-#' @inherit check_object params
-#' @inherit well_plate params
-#' @inherit aes_to params
+#' @inherit argument_dummy params
 #'
 #' @inherit ggplot_return return 
 #' @export
 #'
 
 plotWellPlate <- function(object, 
-                          well_plate = NULL,
-                          color_by = NULL, 
+                          well_plate,
+                          color_by = "condition", 
                           clrp_adjust = NULL,
                           make_pretty = NULL){
   
@@ -559,7 +563,7 @@ plotWellPlate <- function(object,
   limit_x <- base::max(wp_df$col_num) + border
   limit_y <- base::max(wp_df$row_num) + border
   
-  if(color_by == "condition"){
+  if(base::is.character(color_by) && color_by == "condition"){
     
     getPhases(object)
     
@@ -605,7 +609,7 @@ plotWellPlate <- function(object,
       color = ggplot2::guide_legend(override.aes = list(size = 15, shape = 21)), 
       fill = ggplot2::guide_legend(override.aes = list(size = 15, shape = 21))
       ) + 
-    scale_color_add_on(
+    confuns::scale_color_add_on(
       aes = "fill", variable = wp_df[[color_by]], clrp = "milo", 
       clrp.adjust = c(clrp_adjust, "unknown" = "lightgrey", "unknown & unknown" = "lightgrey")
       ) + 

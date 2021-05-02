@@ -61,7 +61,6 @@ hlpr_assemble_track_df <- function(track_df, wp_data, wp_index, wp_name){
 #' no caption is returned.
 #'
 #' @inherit check_object params
-#' @inherit phase_all params   
 #'
 #' @return
 
@@ -69,22 +68,11 @@ hlpr_caption_add_on <- function(object, phase){
   
   if(time_displaced_tmt(object)){
     
-    if(phase == "entire"){
-      
-      add_on <- 
-        ggplot2::labs(caption = "Before & after treatment")
-      
-    } else if(phase == "first_tmt") {
-      
-      add_on <- 
-        ggplot2::labs(caption = "After treatment") 
-      
-    } else if(phase == "before_tmt"){
-      
-      add_on <- 
-        ggplot2::labs(caption = "Before treatment") 
-      
-    }
+    phases <-
+      purrr::map_chr(phase, .f = confuns::make_capital_letters) %>% 
+      glue::glue_collapse(sep = ", ", last = " & ")
+    
+    add_on <- ggplot2::labs(caption = stringr::str_c(phases, " Phase", sep = ""))
     
   } else {
     
@@ -107,8 +95,6 @@ hlpr_caption_add_on <- function(object, phase){
 #' To be used as input for \code{.f} in \code{purrr::map()}
 #' inside the function \code{compileCto()}.
 #'
-#' @inherit phase_single params  
-#' @inherit check_track_df params
 
 hlpr_create_track_list <- function(phase, track_df){
   
@@ -145,6 +131,48 @@ hlpr_create_meta_data <- function(df, phase, verbose){
 }
 
 
+
+
+#' @title Merge conditions
+hlpr_merge_conditions <- function(track_df, phase, across, verbose = TRUE){
+  
+  if(base::length(phase) > 1 & across %in% c("condition", "cl_condition")){
+    
+    confuns::give_feedback(msg = glue::glue("Merging conditions over {base::length(phase)} phases by cell ID."), verbose = verbose, with.time = FALSE)
+    
+    track_df <- 
+      dplyr::group_by(track_df, cell_id) %>% 
+      dplyr::mutate(
+        condition = hlpr_merge_condition_by_id(condition), 
+        cl_condition = stringr::str_c(cell_line, condition, sep = ": ")
+      )
+    
+  }
+  
+  base::return(track_df)
+  
+}
+
+#' @rdname hlpr_merge_conditions
+hlpr_merge_condition_by_id <- function(condition){
+  
+  n_obs <- base::length(condition)
+  
+  all_conditions <- base::unique(base::as.character(condition))
+  
+  merged_conditions <- 
+    purrr::map2_chr(.x = all_conditions, .y = base::seq_along(all_conditions),
+                    .f = ~ stringr::str_c(.y, .x, sep = ". ")) %>% 
+    stringr::str_c(collapse = " -> ")
+  
+  res <- base::rep(merged_conditions, n_obs)
+  
+  base::return(res)
+  
+  
+}
+
+
 #' @title ggplot2 add on helpers
 #' 
 #' @description Functions that either return an empty list 
@@ -163,7 +191,6 @@ hlpr_coords_flip_add_on <- function(flip_coords){
   }
   
 }
-
 
 #' @rdname hlpr_coords_flip_add_on
 hlpr_plot_well_plate_fill <- function(input){

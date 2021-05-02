@@ -2,30 +2,46 @@
 % Please edit documentation in R/clustering-pam.R
 \name{computePamCluster}
 \alias{computePamCluster}
-\title{Title}
+\title{Compute cluster accordint to Partitioning Around Medoids (PAM)}
 \usage{
 computePamCluster(
   object,
   phase = NULL,
   method_pam = NULL,
   k = NULL,
-  verbose = NULL
+  verbose = NULL,
+  ...
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_pam}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{k}{}
+\item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
+Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}
 
-\item{verbose}{}
+\item{k}{Numeric vector. Denotes the numbers of clusters the pam-algorithm
+is supposed to assign return. Values must be bigger than 2.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
+
+\item{...}{Additional arguments given to \code{cluster::pam()}.}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Performs partitioning around medoids for every combination of
+\code{method_pam} and \code{k} and saves the results in the celltracer object.
+}
+\details{
+As this function iterates over all valid combinations of \code{method_pam}
+and \code{k} both inputs can be specified as vectors.
 }

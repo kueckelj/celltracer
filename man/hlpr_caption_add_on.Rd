@@ -8,17 +8,6 @@ hlpr_caption_add_on(object, phase)
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
-
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
-
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-\item{\emph{'entire'}}{Uses the complete data of the entire timespan.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
 }
 \value{
 

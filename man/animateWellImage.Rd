@@ -9,6 +9,7 @@ animateWellImage(
   well_plate,
   well,
   image,
+  phase = "all",
   style = "normal",
   add_on_list = list(),
   ...
@@ -24,9 +25,15 @@ via \code{getWellPlateNames()}.}
 
 \item{image}{Numeric value. The well-image of interest.}
 
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
+
 \item{style}{Character value. If set to \emph{'cell_tracker'} imitates the tracking process of the CellTracker software.}
 
-\item{add_on_list}{}
+\item{add_on_list}{A list of ggplot2-add-ons that are supposed to be integrated in
+the visualization process.}
 
 \item{...}{Additional arguments given to \code{gganimate::animate()}.}
 }

@@ -9,11 +9,11 @@ getWellPlateDf(object, well_plate = NULL)
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{well_plate}{Character value. Denotes the well plate of interest. Use function \code{getWellPlateNames()}
-to obtain all valid input options.}
+\item{well_plate}{Character value. The name of the well plate of interest. Valid inputs can be obtained
+via \code{getWellPlateNames()}.}
 }
 \value{
-
+A data.frame in which each row contains information about a well.
 }
 \description{
 Obtain well plate information

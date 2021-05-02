@@ -2,31 +2,44 @@
 % Please edit documentation in R/animate-family.R
 \name{animateAllTracks}
 \alias{animateAllTracks}
-\title{Title}
+\title{Animate all tracks}
 \usage{
 animateAllTracks(
   object,
-  across = "condition",
+  across = "cell_line",
   across_subset = NULL,
   frame_subset = NULL,
-  tmt = "afterwards",
+  phase = "all",
   n_cells = 100,
-  color_to = NULL,
+  color_by = across,
   linetype = "solid",
   linesize = 0.75,
   add_on_list = list(),
+  verbose = NULL,
   ...
 )
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{across}{Character value. Denotes the discrete variable in the data.frame
-across which the variables of interest are to be analyzed or displayed. Valid input
-options can be obtained via \code{getAcrossOptions()}.}
+\item{across}{Character value or NULL. Specifies the grouping variable of interest.
 
-\item{across_subset}{Character vector. The groups of interest that the \code{across}-
-variable contains. Valid input options can be obtained via \code{getVariableValues()}.}
+Use \code{getGroupingOptions()} to obtain all variable names that group the
+cells of your experiment in a certain manner.}
+
+\item{across_subset}{Character vector or NULL. Specifies the particular groups
+of interest the grouping variable specified in argument \code{across} contains.
+
+If set to NULL all of them are chosen. You can prefix groups you are NOT interested in
+with a \emph{'-'}. (Saves writing if there are more groups you are interested in
+than groups you are not interested in.)
+
+Use \code{getGroupNames()} to obtain all valid input options.}
+
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
 
 \item{n_cells}{Numeric calue. Determines the number of cells that are randomly chosen from
 every group to be displayed. Useful to keep plots insightful and aesthetically pleasing.}
@@ -39,11 +52,16 @@ and \emph{'dotdash'}.}
 \item{add_on_list}{A list of ggplot2-add-ons that are supposed to be integrated in
 the visualization process.}
 
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
+
 \item{...}{Additional arguments given to \code{gganimte::animate()}.}
 }
 \value{
 An animated GIF.
 }
 \description{
-Title
+Animates the output of function \code{plotAllTracks()}.
 }

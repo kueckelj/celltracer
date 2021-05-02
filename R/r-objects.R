@@ -9,7 +9,7 @@
 valid_well_plates <- c("2x3 (6)", "3x4 (12)", "4x6 (24)", "6x8 (48)", "8x12 (96)")
 
 well_plate_info <- 
-  base::data.frame(
+  data.frame(
     type = valid_well_plates, 
     rows = c(2,3,4,6,8), 
     cols = c(3,4,6,8,12)
@@ -63,8 +63,7 @@ descr_variables <- c("cell_id", "cell_line", "condition")
 default_list <-
   list(
     clrp = "milo",
-    color_by = "condition",
-    k = 2,
+    clrsp = "viridis",
     make_pretty = TRUE, 
     method_aggl = "ward.D",
     method_corr = "pearson",
@@ -72,7 +71,10 @@ default_list <-
     method_kmeans = "Hartigan-Wong",
     method_pam = "euclidean",
     phase = "first", 
-    phase_cluster = "first",
+    pt_alpha = 0.9, 
+    pt_clr = "black",
+    pt_fill = "black",
+    pt_size = 3, 
     verbose = TRUE, 
     well_plate = NULL, 
     with_cluster = TRUE, 
@@ -80,6 +82,58 @@ default_list <-
   )
 
 filetypes <- c("csv$", "xls$", "xlsx$")
+
+helper_content <- list(
+  
+  # designExperiment()
+  overall_information = "Provide basic information such as the software the files derived from as well as the kind of files Cell Tracer is supposed to load.
+  The combination of experiment name and storage directory will result in the default directory under which the celltracer object is going to be stored. (You
+  can change the directory afterwards at any time.)", 
+  
+  imaging_set_up = "Provide information about the imaging process that generated the images from which Cell Tracker or Cell Profiler again generated the data 
+  tables you are about to analyze. 'Total Number of Images' refers to the number of times the imaging device made a picture (Cell Tracker refers to that as 'Frame Number'). 
+  'Interval' and 'Interval Unit' refer to the timelapse between these images beeing made. If the track files you read in contain data that exceed the number of images specified 
+  here the files will be filtered accordingly such that only data up to the 'Total Number of Images' is included.",
+  
+  experiment_phases = "If you have split your experiment in several phases (e.g. you started imaging with no treatment and after 24 hours you changed the condition of some wells and
+  24 hours later you changed the conditions again - while maintaining the imaging process) you can specify the number of phases as well as their respective 
+  starting point here. This will affect the way you can design the well plates (Step 4) which is why this step has to be done previously to that. Changing
+  the experiment phases set up will result in all well plates saved up to that point beeing lost.", 
+  
+  well_plate_set_up = "This step is of great importance as it provides the information about how your data files will be read in as well as how the cell information
+  of these files will be assigned to the different conditions and experiment phases. Clicking on 'New Well Plate' will create an empty well plate visualized on the right.
+  'Covered Areas per Well' refers to the number of images made per well per imaging interval. The area's number is denoted as the last number of the respective file name
+  (e.g. ~/A1_1.csv, ~/A1_2.csv, ~/A1_3.csv would require you to set 'Covered Areas per Well' to 3).
+  Once the well plate is visualized you can interactively select wells which highlights them in dark red. Continue with specifiying their cell line and their conditions via the respective text inputs.
+  After clicking on 'Add Info' you will see a small info box in the right lower corner telling you whether saving the information was successfull or not. If successfull click on the well plate plot again 
+  and you should see that the color of the wells have changed. 
+  
+  Before continuing with the next well plate make sure to add the well plate via 'Add Well Plate'. Not doing that before continuing with 'New Well Plate' results in all specifications beeing lost. Info boxes
+  as well as the table in the box 'Save Experiment Design & Proceed' will tell you whether your well plate set up has been saved successfully.",
+  
+  # loadData()
+  assign_folder = "In the left lower corner you see a select option that contains the names of the well plates you have set up in the module opened via 'designExperiment()'. 
+  In order for Cell Tracer to read in the data every well plate needs to be assigned to a directory in which Cell Tracer finds the files to read in. Clicking on 'Assign Folder: Browse'
+  opens a window that gives you access to the folders of your device. Select the one that contains the files of the respective well plate or that again contains (sub-)folders in which the files are stored.
+  (If you want Cell Tracer to look in subfolders, too, make sure that 'Include Subfolders' is enabled.) After you have assigned the folder by closing the window you will see a well plate plot appear right above the 
+  button 'Assign Folder: Browse'. The wells will be colored according to the number of files that have been found in the folder you specified. Green/Complete means that all files have been found. 
+  Yellow/Incomplete means that some files of the well have been found. (e.g. you set 'Covered Areas per Well' to 3 which made Cell Tracer expect files 'A1_1.csv', 'A1_2.csv' and 'A1_3.csv'.
+  However only 'A1_1.csv' and 'A1_3.csv' have been found). Missing/Red means that no files of that well have been found at all. Blue/Ambiguous might appear if you stored the files in 
+  subfolders of the assigned folder and some folders contain files with equal names due to typos while naming the files. (e.g. ~/Ctrl/A1_1.csv, ~/Treatment/A1_1.csv) If you realized that you assigned the wrong folder 
+  or that some files have been named incorrect you can fix what needs to be fixed and assign the directory again by clicking on 'Assign Folder: Browse'.", 
+  
+  well_plate_status = "This table provides summary information about the file availability for all well plates. It updates every time you assign a folder to a well plate. 'Number of Files' sums up the number of files found
+  and 'Expected Number of Files' sets that in relation to the number of files expected according to number of covered areas per well and the number of wells for which you specified cell line and conditions. Missing or incomplete
+  wells do not prevent you from reading in all other files found - no need to design the experiment again if you realize that some files are missing. Just click on 'Load Data' and the missing files will be ignored. In case of ambiguous
+  wells you need to rename or delete the files that are doubled before loading the data.",
+  
+  load_files_and_proceed = "After clicking on 'Load Data' you should see a progress bar for every well plate giving information about the reading progress. Once all files are read in you obtain information about any errors that occured while 
+  reading the files. In case of no errors you can simply click on 'Save & Proceed' and afterwards on 'Return Celltracer Object'. If the box hints at errors occured you can try and fix the cause for these errors and then click on 'Load Data' again
+  which will repeat the reading process. On the other hand you can ignore the errors and click on 'Save & Proceed' anyway which makes Cell Tracer ignore the files that were not suffessfully read in and continue with the rest."
+  
+  
+  
+)
 
 imp_filter_criteria <- c("total_meas", "skipped_meas", "first_meas", "last_meas")
 
@@ -114,9 +168,10 @@ shiny_discrete_vars <- c("Cell Line and Condition" = "cl_condition",
                          "Cell Line" = "cell_line", 
                          "Condition" = "condition")
 
-stat_funs <- list("mean" = base::mean,
-                  "max" = base::max,
+stat_funs <- list("max" = base::max,
+                  "mean" = base::mean,
                   "median" = stats::median,
+                  "min" = base::min,
                   "sd" = stats::sd,
                   "var" = stats::var)
 
@@ -129,6 +184,8 @@ status_colors <- c("Missing" = "#B31010",
 storage_slots <- c("directory", "valid_directories", "missing_files")
 
 testable_plottypes <- c("boxplot", "violinplot")
+
+well_plate_vars <- c("well_plate_name", "well_plate_index", "well",  "well_image")
 
 # -----
 

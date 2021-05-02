@@ -19,7 +19,8 @@ moduleExperimentDesignUI <- function(id){
                                                                                                shiny::column(width = 12,
                                                                                                              shiny::fluidRow(
                                                                                                                shiny::column(width = 6, 
-                                                                                                                             shiny::h4(shiny::strong("1. Overall Information"))           
+                                                                                                                             shiny::h4(shiny::strong("1. Overall Information")) %>% 
+                                                                                                                               add_helper(content = helper_content$overall_information)
                                                                                                                              )
                                                                                                              ),
                                                                                                              shiny::fluidRow(
@@ -67,8 +68,9 @@ moduleExperimentDesignUI <- function(id){
                                                                                                              shiny::fluidRow(width = 12, 
                                                                                                                              shiny::column(width = 12, 
                                                                                                                                            shiny::fluidRow(
-                                                                                                                                             shiny::column(width = 6, 
-                                                                                                                                                           shiny::h4(shiny::strong("2. Imaging Set Up"))
+                                                                                                                                             shiny::column(width = 12, 
+                                                                                                                                                           shiny::h4(shiny::strong("2. Imaging Set Up")) %>% 
+                                                                                                                                                             add_helper(content = helper_content$imaging_set_up)
                                                                                                                                                            )
                                                                                                                                            ), 
                                                                                                                                            shiny::fluidRow(
@@ -102,7 +104,7 @@ moduleExperimentDesignUI <- function(id){
                                                                              shiny::wellPanel(
                                                                                shiny::fluidRow(width = 12, 
                                                                                                shiny::column(width = 12, 
-                                                                                                             shiny::h4(shiny::strong("3. Experiment Phases")), 
+                                                                                                             shiny::h4(shiny::strong("3. Experiment Phases")) %>% add_helper(content = helper_content$experiment_phases), 
                                                                                                              shiny::fluidRow(width = 12, 
                                                                                                                              shiny::column(width = 8, 
                                                                                                                                            shiny::uiOutput(outputId = ns("ed_phases_number")), 
@@ -120,7 +122,7 @@ moduleExperimentDesignUI <- function(id){
                                                shiny::wellPanel(
                                                  shiny::fluidRow(
                                                    shiny::column(width = 12, 
-                                                                 shiny::h4(shiny::strong("4. Well Plate Set Up")),
+                                                                 shiny::h4(shiny::strong("4. Well Plate Set Up")) %>% add_helper(content = helper_content$well_plate_set_up),
                                                                  # new well plate
                                                                  shiny::fluidRow(width = 12,
                                                                                  shiny::column(width = 2,

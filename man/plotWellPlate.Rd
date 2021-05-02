@@ -6,8 +6,8 @@
 \usage{
 plotWellPlate(
   object,
-  well_plate = NULL,
-  color_by = NULL,
+  well_plate,
+  color_by = "condition",
   clrp_adjust = NULL,
   make_pretty = NULL
 )
@@ -17,6 +17,11 @@ plotWellPlate(
 
 \item{well_plate}{Character value. The name of the well plate of interest. Valid inputs can be obtained
 via \code{getWellPlateNames()}.}
+
+\item{clrp_adjust}{Named character vector or NULL. If character, it adjusts the
+color palette that is used to represent the groups. Names of the input vector must refer
+to the group and the respective named element denotes the color with which to
+represent the group.}
 }
 \value{
 A ggplot.

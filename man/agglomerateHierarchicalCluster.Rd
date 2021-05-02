@@ -2,7 +2,7 @@
 % Please edit documentation in R/clustering-hierarchical.R
 \name{agglomerateHierarchicalCluster}
 \alias{agglomerateHierarchicalCluster}
-\title{Title}
+\title{Agglomerate hierarchical cluster}
 \usage{
 agglomerateHierarchicalCluster(
   object,
@@ -14,15 +14,46 @@ agglomerateHierarchicalCluster(
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_dist}{}
+Ignored if the experiment design contains only one phase.}
+
+\item{method_dist}{Character vector (or value see details for more.) Denotes the distance method(s)
+of interest (e.g. \emph{'euclidean'} or \emph{'manhattan'}).
+
+Use \code{validDistanceMethods()} to obtain all valid input options.}
+
+\item{method_aggl}{Character vector (or value see details for more.) Denotes the agglomeration
+method(s) of interest according to which the existing distance matrices are agglomerated to hierarchical
+trees.
+
+Use \code{validAgglomerationMethods()} to obtain all valid input options.}
+
+\item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
+set up.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Agglomerates the existing distance measurements to hierarchical trees.
+}
+\details{
+\code{agglomerateHierarchicalCluster()} is the third step in the convenient hierarchical clustering
+pipeline of celltracer. It uses the distance matrices calculated with \code{computeDistanceMatrices()} and denoted in the
+argument \code{method_dist} and agglomerates them to hierarchical trees according to all methods denoted
+in argument \code{method_aggl} (input for the latter is given to argument \code{method} of function \code{stats::hclust()}).
+Both \code{method_*}-arguments therefore take a vector of character strings as input.
+
+Use \code{plotDendrogram()} to visualize the agglomeration results of the distance/agglomeration combinations of interest and
+\code{addHierarchicalCluster} - the fourth and final step - to make the clustering results available for all other plotting
+functions and the \code{across}-argument.
 }

@@ -2,16 +2,18 @@
 % Please edit documentation in R/object-initiation.R
 \name{loadData}
 \alias{loadData}
-\title{Title}
+\title{Object initiation: Step 2}
 \usage{
 loadData(object)
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 }
 \value{
-
+An updated celltracer object.
 }
 \description{
-Title
+Opens an interactive application in which the folders containing
+the data files are assigned to the well plates and where the data files
+are read in.
 }

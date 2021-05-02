@@ -5,29 +5,24 @@
 \alias{getTracks}
 \title{Obtain track data.frame.}
 \usage{
-getTracksDf(object, phase = NULL, with_cluster = NULL, with_meta = NULL)
+getTracksDf(
+  object,
+  phase = NULL,
+  with_cluster = NULL,
+  with_meta = NULL,
+  verbose = NULL
+)
 
-getTracks(object, phase = NULL, with_cluster = NULL, with_meta = NULL)
+getTracks(
+  object,
+  phase = NULL,
+  with_cluster = NULL,
+  with_meta = NULL,
+  verbose = NULL
+)
 }
 \arguments{
 \item{object}{A valid cell tracer object.}
-
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
-
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-\item{\emph{'entire'}}{Uses the complete data of the entire timespan.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
-
-\item{with_cluster}{Logical. If set to TRUE the discrete variables of the meta data slot are added
-to the output data.frame.}
-
-\item{with_meta}{Logical. If set to TRUE the discrete variables of the meta data slot are added
-to the output data.frame.}
 }
 \value{
 A data.frame in which each observation refers to a cell at a given frame.

@@ -23,11 +23,11 @@ plotBarchart(
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{variables}{Character vector. The discrete features whose group count or
+\item{variables}{Character vector. The grouping variables whose group count or
 proportion you want to display. Must not contain the feature specified in
 \code{across} - if \code{across} is not set to NULL.}
 
-\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'} or \emph{'second'}).
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
@@ -73,6 +73,8 @@ function. E.g. \code{plotViolinplot()} relies on \code{ggplot2::geom_violin()}.}
 }
 \value{
 
+
+A ggplot.
 }
 \description{
 Visualizes the count or the proportion of barcode spots falling

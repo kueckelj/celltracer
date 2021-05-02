@@ -17,24 +17,11 @@ plotDistributionDiscrete(
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
-
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
-
 \item{features}{Character vector. Denotes the discrete variables whoose distribution
 is to be visualized.}
 
 \item{feature_compare}{Character vector or NULL. The discrete feature you want to compare the
 features of \code{features} to.}
-
-\item{clrp}{Character value. The color panel to be used. Valid input options can be obtained
-via \code{allColorpanels()}.}
 
 \item{position}{Character value. Given to \code{position} of \code{ggplot2::geom_bar()}. One of
 \emph{'stack', 'dodge'} or \emph{'fill'}.}

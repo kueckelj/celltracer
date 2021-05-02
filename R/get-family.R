@@ -23,12 +23,9 @@ join_with_meta <- function(object, df, phase){
 
 # Data extraction ---------------------------------------------------------
 
-
-
 #' @title Obtain cluster data
 #'
-#' @inherit check_object params
-#' @inherit phase_single params
+#' @inherit argument_dummy params
 #' 
 #' @return A data.frame that contains the cell ids and their cluster belonging.
 #' @export
@@ -65,15 +62,15 @@ getClusterData <- function(object, phase = NULL){
 #' @description A wrapper around \code{purr::map_df()} and the respective 
 #' list of the data slot of interest. 
 #'
-#' @inherit check_object params
-#' @inherit phase_single params
+#' @inherit argument_dummy params
 #' @param data_slot Character value. One of \emph{'stats', 'tracks', 'meta'} or \emph{'cluster'}.
 #'
 #' @return The data.frame of interest. 
 #' @export
 #'
-
 getData <- function(object, data_slot, phase){
+  
+  warning("This function is deprecated and might be deleted in the future.")
   
   if(!time_displaced_tmt(object)){
     
@@ -106,7 +103,6 @@ getData <- function(object, data_slot, phase){
 #' @return The data.frame of interest. 
 #' @export
 #'
-
 
 getMetaDf <- function(object, phase = NULL){
   
@@ -201,7 +197,7 @@ getStats <- getStatsDf
 #' @export
 #'
 
-getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL){
+getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL, verbose = NULL){
   
   check_object(object)
   assign_default(object)
@@ -213,24 +209,6 @@ getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = N
     .f = function(p){
       
       track_df <- object@data$tracks[[p]]
-      
-      if(base::isTRUE(with_cluster)){
-        
-        cluster_df <- dplyr::select(object@data$cluster[[p]], - phase)
-        
-        if(base::ncol(cluster_df)){
-          
-          msg <- glue::glue("No custer variables found for {p} phase. Set argument 'with_cluster' to FALSE to proceed.")
-          
-          give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
-          
-        } else {
-          
-          track_df <- dplyr::left_join(x = track_df, y = cluster_df, by = "cell_id")
-          
-        }
-        
-      }
       
       if(base::isTRUE(with_meta)){
         
@@ -245,6 +223,24 @@ getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = N
     }
   )
   
+  if(base::isTRUE(with_cluster) & base::length(phase) == 1){
+    
+    cluster_df <- dplyr::select(object@data$cluster[[phase]], - phase)
+    
+    if(base::ncol(cluster_df) == 1){
+      
+      msg <- glue::glue("No custer variables found for {phase} phase. Set argument 'with_cluster' to FALSE to proceed.")
+      
+      confuns::give_feedback(msg = msg, with.time = FALSE, verbose = verbose)
+      
+    } else {
+      
+      track_df_final <- dplyr::left_join(x = track_df_final, y = cluster_df, by = "cell_id")
+      
+    }
+    
+  }
+  
   base::return(track_df_final)
   
 }
@@ -255,76 +251,115 @@ getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = N
 getTracks <- getTracksDf
 
 
-#' @title Obtain pam-clustering results. 
-#'
-#' @inherit check_object params 
-#' @param k Numeric value. The k-value for which the pam-object of interest has been computed.
-#' @inherit phase_single params
-#'
-#' @return A pam object - the return value of the function \code{cluster::pam()} that has been 
-#' computed via the function \code{doPamClustering()}.
-#' 
-#' @export
-#'
-
-getPamObject <- function(object, k, phase = "first_tmt"){
-  
-  cluster_ref <- stringr::str_c("pam_k", k, sep = "")
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  pam_obj <- 
-    object@cluster_info[["pam"]][[phase]][[cluster_ref]]
-  
-  base::return(pam_obj)
-  
-}
 
 # -----
 
 
-# Cluster related ---------------------------------------------------------
 
-#' @title Obtain valid cluster names 
-#' 
-#' @description Returns all valid cluster names that can be used as input 
-#' for the \code{across}-argument.
+
+# Cluster extraction ------------------------------------------------------
+
+#' @title Obtain celltracers clustering objects
 #'
-#' @inherit check_object params
-#' @inherit phase_single params  
-#' @param algorithm_subset Character value or NULL. If character only the cluster 
-#' names of the algorithms denoted are returned. 
+#' @inherit argument_dummy params 
 #'
-#' @return A list named according to all cluster algorithms found. Each named slot
-#' contains a character vector of all cluster names of the algorithm. 
-#' 
+#' @return An S4 object of \emph{'hclust_conv'}, \emph{'kmeans_conv'} or \emph{'pam_conv'}.
 #' @export
 #'
-getClusterNames <- function(object,
-                            phase = "first_tmt",
-                            algorithm_subset = NULL){
+getHclustConv <- function(object, phase = NULL){
   
-  phase <- check_phase(object, phase)
+  check_object(object)
+  assign_default(object)
   
-  # extract all algorithms that have been used
-  algorithms <- base::names(object@cluster_info)
+  phase <- check_phase(object, phase, max_phase = 1)
   
-  if(base::is.character(algorithm_subset)){
-    
-    algorithms <- algorithm_subset[algorithm_subset %in% algorithms]
-    
-  }
+  cluster_obj <- object@analysis$clustering$hclust[[phase]]
   
-  # filter the respective phases
-  cluster_list <- 
-    object@cluster_info %>% 
-    purrr::keep(.p = base::names(.) %in% algorithms) %>% 
-    purrr::map(.f = ~ purrr::keep(.x = .x, .p = base::names(.x) %in% phase)) %>% 
-    purrr::map(.f = ~ purrr::map(.x = .x, .f = ~ base::names(.x)))
+  check_availability(
+    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "hclust_conv",
+    phase = phase, 
+    ref_input = "hierarchical clustering object", 
+    ref_fun = "initiateHierarchicalClustering()"
+  )
   
-  base::return(cluster_list)
+  base::return(cluster_obj)
   
 }
+
+#' @rdname getHclustConv
+#' @export
+getKmeansConv <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_obj <- object@analysis$clustering$kmeans[[phase]]
+  
+  check_availability(
+    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "kmeans_conv",
+    phase = phase, 
+    ref_input = "kmeans clustering object", 
+    ref_fun = "initiateKmeansClustering()"
+  )
+  
+  base::return(cluster_obj)
+  
+}
+
+#' @rdname getHclustConv
+#' @export
+getPamConv <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_obj <- object@analysis$clustering$pam[[phase]]
+  
+  check_availability(
+    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "pam_conv",
+    phase = phase, 
+    ref_input = "partitioning around medoids (PAM) clustering object", 
+    ref_fun = "initiatePamClustering()"
+  )
+  
+  base::return(cluster_obj)
+  
+}
+
+
+#' @title Obtain celltracers correlation objects
+#'
+#' @inherit argument_dummy params
+#'
+#' @return An S4 object of class \emph{'corr_conv'}
+#' @export
+#'
+getCorrConv <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_obj <- object@analysis$correlation[[phase]]
+  
+  check_availability(
+    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "corr_conv",
+    phase = phase, 
+    ref_input = "correlation object", 
+    ref_fun = "initiateCorrelation()"
+  )
+  
+  base::return(cluster_obj)
+  
+}
+
+
+# -----
 
 # Other Info extraction ----------------------------------------------------
 
@@ -410,13 +445,14 @@ getGroupingOptions <- function(object, phase = NULL){
   
   getVariableNames(object = object, 
                    phase = phase, 
-                   variable_classes = c("input", "cluster"))
+                   variable_classes = c("meta", "cluster")
+                   )
   
 }
 
 #' @rdname getGroupingOptions
 #' @export
-getAcrossOptions <- function(object, phase = "first_tmt"){
+getAcrossOptions <- function(object, phase = NULL){
   
   warning("getAcrossOptions() is deprecated. Use getGroupingOptions()")
   
@@ -425,10 +461,6 @@ getAcrossOptions <- function(object, phase = "first_tmt"){
                    variable_classes = c("input", "cluster"))
   
 }
-
-
-
-
 
 
 #' @title Obtain all numeric stat-variables
@@ -453,7 +485,7 @@ getStatVariableNames <- function(object){
 #' @inherit check_object params
 #' @inherit argument_dummy params
 #'
-#' @return
+#' @return A data.frame in which each row contains information about a well. 
 #' @export
 #'
 
@@ -500,12 +532,15 @@ getWellPlateNames <- function(object){
 #' @export
 #'
 
-getVariableValues <- function(object, phase = "first_tmt", variable_name){
+getVariableValues <- function(object, phase = NULL, variable_name){
+  
+  check_object(object)
+  assign_default(object)
   
   confuns::is_value(variable_name, "character", ref = "variable_name")
   
   extracted_var <- 
-    getStats(object, phase = phase) %>% 
+    getStatsDf(object, phase = phase) %>% 
     dplyr::pull(var = {{variable_name}})
   
   
@@ -537,7 +572,7 @@ getVariableValues <- function(object, phase = "first_tmt", variable_name){
 #' @details Useful helper function when it comes to specify conditions and cell lines 
 #' of interest via the \code{across_subset}-argument.
 #' 
-#' @return
+#' @return Character vector.
 #' @export
 #'
 
@@ -572,9 +607,7 @@ getConditions <- function(object, phase = NULL){
 
 
 
-#' @title Helper functions to extract 
-#'
-#' @param object 
+#' @title Helper functions to extract information from the
 #'
 #' @return
 
@@ -591,9 +624,7 @@ getCategoricalVariablesNames <- function(object, phase = NULL){
   
 }
 
-
-#' @rdname getNumericVariableNames
-#' @export
+#' @rdname getCategoricalVariablesNames
 getNumericVariableNames <- function(object){
   
   getStats(object = object) %>% 
@@ -602,10 +633,7 @@ getNumericVariableNames <- function(object){
   
 }
 
-
-
-#' @rdname getNumericVariableNames
-#' @export
+#' @rdname getCategoricalVariablesNames
 getFrameSeq <- function(object, phase = NULL){
   
   check_object(object)
@@ -619,8 +647,7 @@ getFrameSeq <- function(object, phase = NULL){
   
 }
 
-#' @rdname getNumericVariableNames
-#' @export
+#' @rdname getCategoricalVariablesNames
 getFrameTimeSeq <- function(object, phase = NULL){
   
   check_object(object)
@@ -635,8 +662,7 @@ getFrameTimeSeq <- function(object, phase = NULL){
 }
 
 
-#' @rdname getNumericVariableNames
-#' @export
+#' @rdname getCategoricalVariablesNames
 getInterval <- function(object){
   
   object@set_up$itvl
@@ -644,8 +670,7 @@ getInterval <- function(object){
 }
 
 
-#' @rdname getNumericVariableNames
-#' @export
+#' @rdname getCategoricalVariablesNames
 getIntervalUnit <- function(object){
   
   object@set_up$itvl_u
@@ -653,16 +678,14 @@ getIntervalUnit <- function(object){
 }
 
 
-#' @rdname getNumericVariableNames
-#' @export
+#' @rdname getCategoricalVariablesNames
 getPhases <- function(object){
   
   object@data$tracks %>% base::names()
   
 }
 
-#' @rdname getNumericVariableNames
-#' @export
+#' @rdname getCategoricalVariablesNames
 getVariableNames <- function(object,
                              phase = NULL,
                              variable_classes = c("cluster", "meta", "stats", "well_plate"),

@@ -118,7 +118,7 @@ moduleLoadDataServer <- function(id, object){
                                                shiny::actionButton(inputId = ns("ld_load_data"), label = "Load Data")
                                             )
                             )
-        )
+        ) %>% add_helper(content = helper_content$well_plate_status)
         
       })
       
@@ -150,7 +150,7 @@ moduleLoadDataServer <- function(id, object){
                                             shiny::actionButton(inputId = ns("ld_proceed"), label = "Save & Proceed")
                                           )
                             )
-        )
+        )  %>% add_helper(content = helper_content$load_files_and_proceed)
         
       })
       

@@ -2,16 +2,39 @@
 % Please edit documentation in R/get-family.R
 \name{getCategoricalVariablesNames}
 \alias{getCategoricalVariablesNames}
-\title{Helper functions to extract}
+\alias{getNumericVariableNames}
+\alias{getFrameSeq}
+\alias{getFrameTimeSeq}
+\alias{getInterval}
+\alias{getIntervalUnit}
+\alias{getPhases}
+\alias{getVariableNames}
+\title{Helper functions to extract information from the}
 \usage{
 getCategoricalVariablesNames(object, phase = NULL)
-}
-\arguments{
-\item{object}{}
+
+getNumericVariableNames(object)
+
+getFrameSeq(object, phase = NULL)
+
+getFrameTimeSeq(object, phase = NULL)
+
+getInterval(object)
+
+getIntervalUnit(object)
+
+getPhases(object)
+
+getVariableNames(
+  object,
+  phase = NULL,
+  variable_classes = c("cluster", "meta", "stats", "well_plate"),
+  flatten = TRUE
+)
 }
 \value{
 
 }
 \description{
-Helper functions to extract
+Helper functions to extract information from the
 }

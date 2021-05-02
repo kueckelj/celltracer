@@ -1,15 +1,26 @@
 
 
 
-#' Title
+#' @title Set up correlation with celltracer
+#' 
+#' @description Set up the necessary object to perform correlation analysis. 
 #'
-#' @param object 
-#' @param phase 
-#' @param force 
-#' @param verbose 
-#' @param ... 
+#' @inherit argument_dummy
+#' @param variables_subset Character vector or NULL. Specifies the numeric variables the subsequent correlation 
+#' steps will include.. 
+#' 
+#' If set to NULL all of them are chosen. You can prefix variables you do NOT want to influence the clustering
+#' with a \emph{'-'}. (Saves writing if there are more variables you are interested in
+#' than variables you are not interested in.)
+#' 
+#' Use \code{getNumericVariableNames()} to obtain all valid input options.
+#' 
+#' @details All grouping variables that exist at the time this function is used are added to the correlation slot which can be used to compare 
+#' correlation results between different groups. Clustering variables that are added to the overall data via 
+#' \code{addHierarchicalCluster(), addKmeansCluster() etc.} are added as options for \code{correlateAcross()}
+#' automatically. 
 #'
-#' @return
+#' @return An updated celltracer object. 
 #' @export
 #'
 initiateCorrelation <- function(object,
@@ -50,7 +61,7 @@ initiateCorrelation <- function(object,
       dplyr::select(-dplyr::starts_with(match = "well"))
       
     
-    corr_obj <- initiate_corr_object(corr.data = stat_df)
+    corr_obj <- confuns::initiate_corr_object(corr.data = stat_df)
     
     msg <- glue::glue("Successfully initiated correlation analysis for {phase} phase with variables: '{remaining_vars}'", 
                       remaining_vars = glue::glue_collapse(x = base::colnames(numeric_df), sep = "', '", last = "' and '"))
@@ -75,17 +86,27 @@ initiateCorrelation <- function(object,
 
 
 
-#' Title
+#' @title Compute correlation between variables 
 #'
-#' @param object 
-#' @param phase 
-#' @param method_corr 
-#' @param verbose 
+#' @description Performs correlation analysis on the variables with which 
+#' the correlation analysis has been initiated via \code{initiateCorrelation()}.
+#' 
+#' @inherit argument_dummy params
+#' @param across Character vector or NULL. Specifies the grouping variables across which 
+#' correlation is computed. Meaning that before correlation is computed the data is split
+#' into the groups suggested by the respective grouping variable. 
+#' 
+#' If set to NULL defaults to all grouping variables. 
+#' 
+#' 
+#' @details \code{correlateAcross()} iterates over all grouping variables and computes the 
+#' correlation analysis for every group the respective grouping variables suggests. Use the 
+#' \code{across}-argument of \code{plotCorrplot()} to visualize the results of \code{correlateAcross()}.
 #'
-#' @return
+#' @return 
 #' @export
 #'
-correlateAll <- function(object, phase = NULL, method_corr = NULL, print_errors = FALSE, verbose = NULL){
+correlateAll <- function(object, method_corr = NULL, phase = NULL, print_errors = FALSE, verbose = NULL){
   
   check_object(object)
   assign_default(object)
@@ -141,33 +162,7 @@ correlateAcross <- function(object,
 # get ---------------------------------------------------------------------
 
 
-#' Title
-#'
-#' @param object 
-#' @param phase 
-#'
-#' @return
-#' @export
-#'
-getCorrConv <- function(object, phase = NULL){
-  
-  check_object(object)
-  assign_default(object)
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_obj <- object@analysis$correlation[[phase]]
-  
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "corr_conv",
-    phase = phase, 
-    ref_input = "correlation object", 
-    ref_fun = "initiateCorrelation()"
-  )
-  
-  base::return(cluster_obj)
-  
-}
+
 
 
 
@@ -175,35 +170,43 @@ getCorrConv <- function(object, phase = NULL){
 
 # plotting ----------------------------------------------------------------
 
-#' Title
+#' @title Plot a correlation plot
+#' 
+#' @description Visualizes the correlation results computed by \code{correlateAll()} and \code{correlateAcross()}. 
 #'
-#' @param object 
-#' @param phase 
-#' @param method_corr 
-#' @param across 
-#' @param across_subset 
-#' @param relevel 
-#' @param variables_subset 
-#' @param plot_type 
-#' @param display_diagonal 
-#' @param signif_level 
-#' @param clr_low 
-#' @param clr_high 
-#' @param shape 
-#' @param shape_size 
-#' @param size_aes 
-#' @param display_values 
-#' @param values_alpha 
-#' @param values_clr 
-#' @param values_digits 
-#' @param values_size 
-#' @param draw_grid 
-#' @param grid_clr 
-#' @param grid_size 
-#' @param ncol 
-#' @param nrow 
-#'
-#' @return
+#' @inherit argument_dummy params
+#' @param variables_subset Character vector or NULL. Specifies the numeric variables you 
+#' want to be included in the correlation plot.
+#' 
+#' If set to NULL all of them are chosen. You can prefix variables you do NOT want to influence the clustering
+#' with a \emph{'-'}. (Saves writing if there are more variables you are interested in
+#' than variables you are not interested in.)
+#' 
+#' Use \code{getNumericVariableNames()} to obtain all valid input options.
+#' @param plot_type Character value. Either \emph{'upper'}, \emph{'lower'} or \emph{'complete'}. Specifies
+#' how the correlation matrix is displayed. 
+#' @param display_diagonal Logical value. Specifies if the diagonal of the correlation matrix is supposed to be included 
+#' in the correlation plot. 
+#' @param signif_level Numeric value or NULL. If numeric, specifies the minimum significance level a correlation pair 
+#' must feature in order to be displayed. Insignificant correlation values are crossed out. 
+#' @param clr_low Character value. Specifies the color used for the lower end of the colorspectrum (negative correlations).
+#' @param clr_high Character value. Specifies the color used for the upper end of the colorspectrum (positive correlations).
+#' @param shape Character value. Specifies the geometric objects with which to display the correlation pairs. Either \emph{'tile'} or one of
+#' \emph{'circle'} and \emph{'rect'}. In the latter two cases the size of the geometric objects can be used to emphasize the correlation 
+#' in addtion to the colorspectrum if \code{size_aes} is set to TRUE. 
+#' @param shape_size Numeric value. Specifies the size with which to display the circles or rectangulars. If \code{shape_aes} is set to TRUE
+#' it Specifies the maximum size possible. 
+#' @param size_aes Logical value. If set to TRUE the size of the circles or rectangulars is used to display the correlation. 
+#' @param display_values Logical value. If set to TRUE the actual correlation values are printed on the geometric objects.
+#' @param values_alpha Numeric value. Specifies the transparency of the values. 
+#' @param values_clr Character value. Specifies the color of the values.
+#' @param values_digits Numeric value. Specifies the number of digits to which the correlation values are rounded before beeing displayed. 
+#' @param values_size Numeric value. Specifies the size of the values. 
+#' @param draw_grid Logical value. If set to TRUE a grid is drawn separating all circles or shapes.
+#' @param grid_clr Character value. Specifies the color of the grid. 
+#' @param grid_size Numeric value. Specifies the thickness of the grid's lines.
+#' 
+#' @inherit ggplot_family return
 #' @export
 #'
 plotCorrplot <- function(object, 
@@ -301,28 +304,28 @@ plotCorrplot <- function(object,
 
 
 
-#' Title
+#' @title Plot correlation variance across groups
+#' 
+#' @description Uses the style of correlation matrices to visualize 
+#' the standard deviation of the correlation values across groups of 
+#' a grouping variable - indicating which grouping is responsible for changes
+#' in correlation. 
 #'
-#' @param object 
-#' @param phase 
-#' @param method_corr 
-#' @param across 
-#' @param relevel 
-#' @param variables_subset 
-#' @param signif.level 
-#' @param clrsp 
+#' @inherit plotCorrelation params 
+#' 
+#' @param across Character vector (!). Denotes all grouping variables of interest. 
 #'
-#' @return
+#' @inherit ggplot_family return
 #' @export
 #'
-plotCorrerlationSD <- function(object, 
-                               phase = NULL, 
-                               method_corr = NULL, 
-                               across = NULL, 
-                               relevel = NULL, 
-                               variables_subset = NULL, 
-                               signif_level = NULL, 
-                               clrsp = "viridis"){
+plotCorrelationSD <- function(object, 
+                              method_corr = NULL, 
+                              phase = NULL,
+                              across = NULL, 
+                              relevel = NULL, 
+                              variables_subset = NULL, 
+                              signif_level = NULL, 
+                              clrsp = NULL){
   
   
   check_object(object)

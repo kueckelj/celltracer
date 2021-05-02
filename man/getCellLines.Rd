@@ -13,7 +13,7 @@ getConditions(object, phase = NULL)
 \item{object}{A valid cell tracer object.}
 }
 \value{
-
+Character vector.
 }
 \description{
 Obtain cell line and condition names

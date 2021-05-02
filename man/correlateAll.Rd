@@ -3,12 +3,12 @@
 \name{correlateAll}
 \alias{correlateAll}
 \alias{correlateAcross}
-\title{Title}
+\title{Compute correlation between variables}
 \usage{
 correlateAll(
   object,
-  phase = NULL,
   method_corr = NULL,
+  phase = NULL,
   print_errors = FALSE,
   verbose = NULL
 )
@@ -22,17 +22,36 @@ correlateAcross(
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
+or \code{'spearman'}.}
 
-\item{method_corr}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{verbose}{}
+Ignored if the experiment design contains only one phase.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
+
+\item{across}{Character vector or NULL. Specifies the grouping variables across which
+correlation is computed. Meaning that before correlation is computed the data is split
+into the groups suggested by the respective grouping variable.
+
+If set to NULL defaults to all grouping variables.}
 }
 \value{
 
 }
 \description{
-Title
+Performs correlation analysis on the variables with which
+the correlation analysis has been initiated via \code{initiateCorrelation()}.
+}
+\details{
+\code{correlateAcross()} iterates over all grouping variables and computes the
+correlation analysis for every group the respective grouping variables suggests. Use the
+\code{across}-argument of \code{plotCorrplot()} to visualize the results of \code{correlateAcross()}.
 }

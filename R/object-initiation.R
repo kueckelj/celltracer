@@ -1,6 +1,9 @@
-#' Title
+#' @title Object initiation: Step 1
+#' 
+#' @description Opens an interactive application in which the experiment can be set 
+#' up. This includes in particular the design of the well plates. 
 #'
-#' @return
+#' @return An empty celltracer object. 
 #' @export
 #'
 designExperiment <- function(){
@@ -104,11 +107,15 @@ designExperiment <- function(){
 }
 
 
-#' Title
+#' @title Object initiation: Step 2
+#' 
+#' @description Opens an interactive application in which the folders containing 
+#' the data files are assigned to the well plates and where the data files 
+#' are read in. 
 #'
-#' @param object 
+#' @inherit argument_dummy params 
 #'
-#' @return
+#' @return An updated celltracer object.
 #' @export
 #'
 loadData <- function(object){
@@ -214,11 +221,14 @@ loadData <- function(object){
 }
 
 
-#' Title
+#' @title Object initiation: Step 3
+#' 
+#' @description Opens an interactive application in which the quality of the data can be assessed and 
+#' where the data set can be filtered accordingly. 
 #'
-#' @param object 
+#' @inherit argument_dummy params 
 #'
-#' @return
+#' @return An updated celltracer object.
 #' @export
 #'
 checkDataQuality <- function(object){
@@ -328,11 +338,14 @@ checkDataQuality <- function(object){
 
 
 
-#' Title
+#' @title Object initiation: Step 4
+#' 
+#' @description Processes the data and constructs all needed slots. Afterwards the 
+#' celltracer object is set for all subsequent analysis and visualization steps. 
 #'
-#' @param object 
+#' @inherit argument_dummy params
 #'
-#' @return
+#' @return An updated celltracer object.
 #' @export
 #'
 processData <- function(object, verbose = TRUE){

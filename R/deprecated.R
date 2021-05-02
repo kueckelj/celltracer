@@ -2,6 +2,53 @@
 
 # EXPORTED ----------------------------------------------------------------
 
+
+#' @title Plot dimensional reduction 
+#' 
+#' @description Visualizes the dimensional reduction method of choice.
+#'
+#' @inherit check_object params
+#' @inherit dim_red_method params
+#' @inherit aes_to params
+#' @inherit pt_args 
+#'
+#' @inherit ggplot_return return
+#' @export
+#'
+
+plotDimRed <- function(object,
+                       dim_red = "umap",
+                       color_by = NULL,
+                       pt_size = 1,
+                       pt_alpha = 0.9){
+  
+  warning("plotDimRed() is deprecated in favor of plotPca(), plotTsne() and plotUmap()")
+  
+  dim_red_df <-
+    getDimRed(object = object, dim_red_method = dim_red_method)
+  
+  x_y <- stringr::str_c(dim_red, 1:2, sep = "")
+  
+  if(base::is.character(color_by)){
+    
+    mapping <- ggplot2::aes(color = !!rlang::sym(color_by))
+    
+  } else {
+    
+    mapping <- ggplot2::aes()
+    
+  }
+  
+  ggplot2::ggplot(data = dim_red_df,
+                  mapping = ggplot2::aes(x = .data[[x_y[1]]], y = .data[[x_y[2]]])
+  ) + 
+    ggplot2::geom_point(mapping = mapping, size = pt_size, alpha = pt_alpha) + 
+    ggplot2::theme_classic() 
+  
+  
+}
+
+
 #' @title Plot descriptive statistics
 #' 
 #' @description These functions are deprecated in favor of \code{plotDensityplot(),

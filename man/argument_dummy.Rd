@@ -9,7 +9,7 @@ argument_dummy(object, phase, pt_alpha, pt_clr, pt_clrp, pt_clrsp, pt_size)
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'} or \emph{'second'}).
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
@@ -25,6 +25,25 @@ color is categorical/discrete. Run \code{validColorPalettes()} to see valid inpu
 color is continuous. Run \code{validColorSpectra()} to see valid input.}
 
 \item{pt_size}{Numeric value. Specifies the size of all points.}
+
+\item{across}{Character value or NULL. Specifies the grouping variable of interest.
+
+Use \code{getGroupingOptions()} to obtain all variable names that group the
+cells of your experiment in a certain manner.}
+
+\item{across_subset}{Character vector or NULL. Specifies the particular groups
+of interest the grouping variable specified in argument \code{across} contains.
+
+If set to NULL all of them are chosen. You can prefix groups you are NOT interested in
+with a \emph{'-'}. (Saves writing if there are more groups you are interested in
+than groups you are not interested in.)
+
+Use \code{getGroupNames()} to obtain all valid input options.}
+
+\item{add_on_list}{A list of ggplot2-add-ons that are supposed to be integrated in
+the visualization process.}
+
+\item{cell_ids}{Character vector. Denotes the cell ids of interest.}
 
 \item{clrp}{Character value. Specifies the color palette to be used to represent
 groups of discrete variables. Run \code{validColorPalettes()} to obtain valid
@@ -42,13 +61,63 @@ valid input options.}
 \item{discrete_feature}{Character value. Specifies the name of the grouping variable
 of interest. Use \code{getGroupingOptions()} to obtain all valid input options.}
 
+\item{display_cols}{Logical value. If set to TRUE columns are used additionally
+to display the results.}
+
 \item{display_facets}{Logical value. If set to TRUE the plot is split via
 \code{ggplot2::facet_wrap()} such that each variable gets it's own subplot.}
+
+\item{display_legend}{Logical value. If set to TRUE a legend is displayed.}
+
+\item{display_line}{Logical value. If set to TRUE a line is used additionally
+to display the results.}
 
 \item{display_points}{Logical value. If set to TRUE points are used additionally
 to display the results.}
 
 \item{display_title}{Logical value. If set to TRUE an informative title is displayed.}
+
+\item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
+set up.}
+
+\item{image}{Numeric value. The well-image of interest.}
+
+\item{linesize}{Numeric value. Denotes the size of the lines drawn.}
+
+\item{linetype}{Character value. Valid options are \emph{'solid', 'twodash', 'longdash', 'dotted'}
+and \emph{'dotdash'}.}
+
+\item{method_aggl}{Character vector (or value see details for more.) Denotes the agglomeration
+method(s) of interest according to which the existing distance matrices are agglomerated to hierarchical
+trees.
+
+Use \code{validAgglomerationMethods()} to obtain all valid input options.}
+
+\item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
+or \code{'spearman'}.}
+
+\item{method_dist}{Character vector (or value see details for more.) Denotes the distance method(s)
+of interest (e.g. \emph{'euclidean'} or \emph{'manhattan'}).
+
+Use \code{validDistanceMethods()} to obtain all valid input options.}
+
+\item{method_kmeans}{Character vector (or value see details for more.) Denotes the algorithm of interest defaults
+to \emph{'Hartigan-Wong'}.
+
+Use \code{validKmeansMethods()} to obtain all valid input options.}
+
+\item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
+Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}
+
+\item{n_cells}{Numeric calue. Determines the number of cells that are randomly chosen from
+every group to be displayed. Useful to keep plots insightful and aesthetically pleasing.}
+
+\item{pretty_names}{Logical. If set to TRUE the function attempts to convert the concisely named
+variables into more aesthetically pleasing ones.}
+
+\item{relevel}{Logical value. If set to TRUE the input order of \code{across_subset}
+determines the order in which the groups of interest are displayed. Groups that
+are not included are dropped which affects the colors with which they are displayed.}
 
 \item{scales, ncol, nrow}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
 are displayed.}
@@ -56,13 +125,30 @@ are displayed.}
 \item{simplify}{Logical. If set to TRUE the output list is simplified to a vector if possible. If set
 to FALSE a list is returned.}
 
+\item{smooth}{Logical. If set to TRUE the values are smoothed.}
+
+\item{smooth_se}{Logical. If set to TRUE the standard error will be displayed.}
+
+\item{smooth_span}{NUmeric value. Denotes the smoothing span used.}
+
+\item{well}{Character value. The well of interest (e.g. \emph{'A1'}, \emph{'B12'})}
+
+\item{well_plate}{Character value. The name of the well plate of interest. Valid inputs can be obtained
+via \code{getWellPlateNames()}.}
+
+\item{with_cluster}{Logical. If set to TRUE the discrete variables of the meta data slot are added
+to the output data.frame.}
+
+\item{with_meta}{Logical. If set to TRUE the discrete variables of the meta data slot are added
+to the output data.frame.}
+
+\item{with_stats}{Logical. If set to TRUE the numeric variables of the stat data slots are added
+tot he output data.frame.}
+
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.
 
 (Warning messages will always be printed.)}
-
-\item{well_plate}{Character value. Denotes the well plate of interest. Use function \code{getWellPlateNames()}
-to obtain all valid input options.}
 }
 \description{
 argument_dummy

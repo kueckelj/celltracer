@@ -9,9 +9,9 @@ plotVelocityHeatmap(
   across = "cl_condition",
   across_subset = NULL,
   phase = "all",
-  phase_cluster = "first_tmt",
   n_cells = 100,
-  color = viridis::viridis(15),
+  color = NA,
+  colors = viridis::viridis(15),
   smooth = TRUE,
   smooth_span = 0.25,
   arrange_rows = "maxima",
@@ -22,39 +22,29 @@ plotVelocityHeatmap(
 \arguments{
 \item{object}{A valid cell tracer object.}
 
-\item{across}{Character value. Denotes the discrete variable in the data.frame
-across which the variables of interest are to be analyzed or displayed. Valid input
-options can be obtained via \code{getAcrossOptions()}.}
+\item{across}{Character value or NULL. Specifies the grouping variable of interest.
 
-\item{across_subset}{Character vector. The groups of interest that the \code{across}-
-variable contains. Valid input options can be obtained via \code{getVariableValues()}.}
+Use \code{getGroupingOptions()} to obtain all variable names that group the
+cells of your experiment in a certain manner.}
 
-\item{phase}{Character value. Refers to the phase of the experiment. Valid inputs are:
+\item{across_subset}{Character vector or NULL. Specifies the particular groups
+of interest the grouping variable specified in argument \code{across} contains.
 
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-\item{\emph{'entire'}}{Uses the complete data of the entire timespan.}
-}
+If set to NULL all of them are chosen. You can prefix groups you are NOT interested in
+with a \emph{'-'}. (Saves writing if there are more groups you are interested in
+than groups you are not interested in.)
 
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
+Use \code{getGroupNames()} to obtain all valid input options.}
 
-\item{phase_cluster}{Character value. Refers to the phase of the experiment from which to take
-the clustering variables. Valid inputs are:
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\describe{
-\item{\emph{'before_tmt'}}{Uses the data that refers to the time before the treatment.}
-\item{\emph{'first_tmt'}}{Uses the data that refers tot the time after the treatment.}
-}
-
-Note: This argument is ignored if the experiment set up did not include any treatment or the treatment
-started right from the beginning.}
+Ignored if the experiment design contains only one phase.}
 
 \item{n_cells}{Numeric calue. Determines the number of cells that are randomly chosen from
 every group to be displayed. Useful to keep plots insightful and aesthetically pleasing.}
 
-\item{color}{The colorspectrum to be used.}
+\item{colors}{A vector of colors that is used as the heatmap's color spectrum.}
 
 \item{smooth}{Logical. If set to TRUE the values are smoothed.}
 

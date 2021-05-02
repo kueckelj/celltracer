@@ -2,33 +2,44 @@
 % Please edit documentation in R/clustering-pam.R
 \name{plotPamMedoids}
 \alias{plotPamMedoids}
-\title{Title}
+\title{Plot medoid results}
 \usage{
 plotPamMedoids(
   object,
-  phase = NULL,
-  k = NULL,
+  k,
   method_pam = NULL,
+  phase = NULL,
   clrp = NULL,
   verbose = NULL
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid cell tracer object.}
 
-\item{phase}{}
+\item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
+Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}
 
-\item{k}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{method_pam}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{clrp}{}
+\item{clrp}{Character value. Specifies the color palette to be used to represent
+groups of discrete variables. Run \code{validColorPalettes()} to obtain valid
+input options.}
 
-\item{verbose}{}
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
 
+
+A ggplot.
 }
 \description{
-Title
+Visualizes the values of the observations that were identified
+as the medoids giving insight in the overall qualities that constitute the
+clusters.
 }
