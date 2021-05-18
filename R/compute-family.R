@@ -1,4 +1,83 @@
 
+#' @title Summarize tracking data
+#'
+#' @inherit check_track_df params
+#'
+#' @return A summarized data.frame. 
+
+compute_cell_stats <- function(df, phase, verbose, object){
+  
+  confuns::give_feedback(
+    msg = glue::glue("Computing cell statistics and summary for {phase} phase."), 
+    verbose = verbose
+  )
+  
+  # group data 
+  df <- dplyr::group_by(df, cell_id)
+  
+  if(isUsable(object, module = "migration")){
+    
+    # compute migration efficiency 
+    mgr_eff_df <- 
+      dplyr::summarise(.data = df, 
+                       total_dist = base::sum(dflp),
+                       mgr_eff = compute_migration_efficiency(x_coords, y_coords, actual_distance = total_dist)
+      )
+    
+    select_vars <- non_data_track_variables
+    
+  } else {
+    
+    # empty data.frame with only cell id variable 
+    mgr_eff_df <- dplyr::select(df, cell_id) %>% dplyr::distinct()
+    
+    select_vars <- non_data_track_variables[!non_data_track_variables %in% c("x_coords", "y_coords")]
+    
+  }
+  
+  selected_df <- dplyr::select(.data = df, -dplyr::all_of(x = select_vars))
+  
+  stat_vars <- stringr::str_subset(base::colnames(selected_df), pattern = "cell_id", negate = TRUE)
+  
+  # summarise statistics
+  stat_df <- 
+    dplyr::mutate(.data = selected_df,
+                  dplyr::across(
+                    .cols = where(fn = base::is.numeric), 
+                    .fns = stat_funs, 
+                    .names = "{.fn}_{.col}"
+                  )
+    ) %>% 
+    dplyr::select(-dplyr::all_of(x = stat_vars)) %>% 
+    dplyr::distinct() %>% 
+    dplyr::left_join(y = mgr_eff_df, by = "cell_id") %>% # join with migration efficiency
+    dplyr::mutate(phase = {{phase}}) %>% 
+    dplyr::ungroup()
+  
+  base::return(stat_df)
+  
+}
+
+#' @rdname compute_cell_stats
+compute_stat <- function(track_df){ # deprecated
+  
+  dplyr::group_by(.data = track_df,
+                  cell_id, condition, cell_line, cl_condition,
+                  well, well_plate_name, well_plate_index, well_image) %>% 
+    dplyr::summarise(
+      total_dist = base::sum(dflp),
+      max_dist_fo = base::max(dfo),
+      avg_dist_fo = base::mean(dfo),
+      max_dist_flp = base::max(dflp),
+      avg_dist_flp = base::mean(dflp),
+      max_speed = base::max(speed),
+      avg_speed = base::mean(speed),
+      mgr_eff = compute_migration_efficiency(x_coords, y_coords, total_dist)
+    ) %>% 
+    dplyr::ungroup()
+  
+}
+
 
 #' @title Compute the distance between to points
 #'
@@ -117,80 +196,57 @@ compute_migration_efficiency <- function(x_coords, y_coords, actual_distance){
 }
 
 
-#' @title Summarize tracking data
+#' @title Computes variable summaries
+#' 
+#' @inherit argument_dummy  
 #'
-#' @inherit check_track_df params
+#' @inherit updated_object return
+#' @export
 #'
-#' @return A summarized data.frame. 
-
-compute_cell_stats <- function(df, phase, verbose, software){
+compute_variable_statistics <- function(object){
   
-  confuns::give_feedback(
-    msg = glue::glue("Computing cell statistics and summary for {phase} phase."), 
-    verbose = verbose
-  )
+  variable_statistics <- list()
   
-  # group data 
-  df <- dplyr::group_by(df, cell_id)
+  # over all phases
+  stats_mtr <- 
+    purrr::map_df(.x = object@data$stats, .f = ~ .x) %>% 
+    dplyr::select_if(.predicate = base::is.numeric) %>% 
+    base::as.matrix() 
   
-  if(software$name == "cell_tracker" | base::isTRUE(software$tracking)){
+  var_summary_total <- 
+    psych::describe(stats_mtr, IQR = TRUE) %>% 
+    base::as.data.frame() %>% 
+    tibble::rownames_to_column(var = "variable") %>% 
+    tibble::as_tibble() 
+  
+  variable_statistics$total <- var_summary_total 
+  
+  all_phases <- getPhases(object)
+  
+  if(base::length(all_phases) > 1){
     
-    # compute migration efficiency 
-    mgr_eff_df <- 
-      dplyr::summarise(.data = df, 
-                       total_dist = base::sum(dflp),
-                       mgr_eff = compute_migration_efficiency(x_coords, y_coords, actual_distance = total_dist)
-      )
-    
-    select_vars <- non_data_track_variables
-      
-  } else {
-    
-    mgr_eff_df <- dplyr::select(df, cell_id) %>% dplyr::distinct()
-    
-    select_vars <- non_data_track_variables[!non_data_track_variables %in% c("x_coords", "y_coords")]
+    variable_statistics$by_phase <- 
+      purrr::map(.x = all_phases, 
+                 .f = function(phase){
+                   
+                   getStatsDf(object, phase = phas) %>% 
+                     dplyr::select_if(base::is.numeric) %>% 
+                     base::as.matrix() %>% 
+                     psych::describe(IQR = TRUE) %>% 
+                     base::as.data.frame() %>% 
+                     tibble::rownames_to_column(var = "variable") %>% 
+                     tibble::as_tibble() 
+                   
+                   
+                 }) %>% 
+      purrr::set_names(nm = all_phases)
     
   }
   
-  selected_df <- dplyr::select(.data = df, -dplyr::all_of(x = select_vars))
+  object@variable_statistics <- variable_statistics
   
-  stat_vars <- stringr::str_subset(base::colnames(selected_df), pattern = "cell_id", negate = TRUE)
-  
-  # summarise statistics
-  stat_df <- 
-    dplyr::mutate(.data = selected_df,
-                  dplyr::across(
-                    .cols = where(fn = base::is.numeric), 
-                    .fns = stat_funs, 
-                    .names = "{.fn}_{.col}"
-                  )
-    ) %>% 
-    dplyr::select(-dplyr::all_of(x = stat_vars)) %>% 
-    dplyr::distinct() %>% 
-    dplyr::left_join(y = mgr_eff_df, by = "cell_id") %>% # join with migration efficiency
-    dplyr::mutate(phase = {{phase}}) %>% 
-    dplyr::ungroup()
-  
-  base::return(stat_df)
+  base::return(object)
   
 }
 
-#' @rdname compute_cell_stats
-compute_stat <- function(track_df){ # deprecated
-  
-  dplyr::group_by(.data = track_df,
-                  cell_id, condition, cell_line, cl_condition,
-                  well, well_plate_name, well_plate_index, well_image) %>% 
-    dplyr::summarise(
-      total_dist = base::sum(dflp),
-      max_dist_fo = base::max(dfo),
-      avg_dist_fo = base::mean(dfo),
-      max_dist_flp = base::max(dflp),
-      avg_dist_flp = base::mean(dflp),
-      max_speed = base::max(speed),
-      avg_speed = base::mean(speed),
-      mgr_eff = compute_migration_efficiency(x_coords, y_coords, total_dist)
-    ) %>% 
-    dplyr::ungroup()
-  
-}
+

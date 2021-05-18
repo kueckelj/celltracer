@@ -15,20 +15,20 @@ run_dim_red(
 )
 }
 \arguments{
-\item{object}{}
+\item{object}{A valid celltracer object.}
 
-\item{phase}{}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
-\item{variables_subset}{}
+Ignored if the experiment design contains only one phase.}
 
-\item{force}{}
+\item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
+set up or already existing results.}
 
-\item{verbose}{}
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
 
-\item{...}{}
-}
-\value{
-
+(Warning messages will always be printed.)}
 }
 \description{
 Title

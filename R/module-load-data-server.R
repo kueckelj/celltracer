@@ -147,7 +147,7 @@ moduleLoadDataServer <- function(id, object){
                             shiny::column(width = 12, align = "center",
                                           shiny::splitLayout(
                                             cellWidths = c("50%", "50%"),
-                                            shiny::actionButton(inputId = ns("ld_proceed"), label = "Save & Proceed")
+                                            shiny::actionButton(inputId = ns("ld_save_and_proceed"), label = "Save & Proceed")
                                           )
                             )
         )  %>% add_helper(content = helper_content$load_files_and_proceed)
@@ -212,7 +212,7 @@ moduleLoadDataServer <- function(id, object){
         data_list <- 
           purrr::map2(.x = well_plate_list(),
                       .y = well_plate_names(),
-                      .f = load_track_files_shiny, 
+                      .f = load_data_files_shiny, 
                       object = object, 
                       session = session)
         
@@ -226,7 +226,7 @@ moduleLoadDataServer <- function(id, object){
       })
       
       # save and proceed 
-      oe <- shiny::observeEvent(input$ld_proceed, {
+      oe <- shiny::observeEvent(input$ld_save_and_proceed, {
         
         checkpoint(evaluate = base::is.list(read_in_data()) & base::length(read_in_data()) != 0,
                    case_false = "no_data_read_in")
@@ -235,9 +235,11 @@ moduleLoadDataServer <- function(id, object){
         ld_output$track_list <- track_list()
         
         object@well_plates <- well_plate_list()
+        
+        object@data$stats <- stat_list()
         object@data$tracks <- track_list()
         
-        ld_output$proceed <- input$ld_proceed
+        ld_output$proceed <- input$ld_save_and_proceed
         ld_output$object <- object
         
         shiny_fdb(in_shiny = TRUE, ui = "Results have been saved. Click on 'Return Celltracer Object' and proceed with checkDataQuality().")
@@ -409,13 +411,42 @@ moduleLoadDataServer <- function(id, object){
       
       # ---
       
-      # assemble track data.frame
+      # assemble results lists depending on data input type
+      
+      stat_list <- shiny::reactive({
+        
+        if(object@set_up$experiment_type != "time_lapse"){
+          
+          stat_list <- assemble_stat_list_shiny(stat_data_list = read_in_data(), 
+                                                well_plate_list = well_plate_list(), 
+                                                object = object)
+          
+        } else {
+          
+          stat_list <- list()
+          
+        }
+        
+        base::return(stat_list)
+        
+        
+      })
       
       track_list <- shiny::reactive({
         
-        assemble_track_list_shiny(track_data_list = read_in_data(),
-                                well_plate_list = well_plate_list(), 
-                                object = object)
+        if(object@set_up$experiment_type == "time_lapse"){
+          
+          track_list <- assemble_track_list_shiny(track_data_list = read_in_data(),
+                                                  well_plate_list = well_plate_list(), 
+                                                  object = object)
+          
+        } else {
+          
+          track_list <- list()
+          
+        }
+        
+        base::return(track_list)
         
       })
       
@@ -502,7 +533,7 @@ moduleLoadDataServer <- function(id, object){
         
         loading_status()
         
-      })
+      }, options = list(scrollX = TRUE))
       
       # Module return value -----------------------------------------------------
       

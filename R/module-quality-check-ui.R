@@ -67,7 +67,7 @@ moduleQualityCheckUI <- function(id){
                                                                  shiny::fluidRow(
                                                                    shiny::column(width = 12, align = "center", 
                                                                                  shiny::actionButton(inputId = ns("apply_filter"), label = "Apply Filter"), 
-                                                                                 shiny::actionButton(inputId = ns("qc_proceed"), label = "Save & Proceed")
+                                                                                 shiny::actionButton(inputId = ns("qc_save_and_proceed"), label = "Save & Proceed")
                                                                    )
                                                                  )
                                              )

@@ -1,3 +1,53 @@
+#' @title Adds data to cluster object 
+#'
+#' @inherit argument_dummy params
+#'
+#' @export
+#'
+hlpr_add_data_to_cluster_object <- function(object, cluster_object, with_data, phase){
+  
+  if(base::isFALSE(with_data)){
+    
+    base::return(cluster_object)
+    
+  } else {
+    
+    variables <- cluster_object@variables
+    
+    data_mtr <-
+      getStatsDf(object, phase = phase) %>% 
+      dplyr::select(cell_id, dplyr::all_of(x = variables)) %>% 
+      tibble::column_to_rownames(var = "cell_id") %>% 
+      base::as.matrix()
+    
+    if(base::isTRUE(cluster_object@scale)){
+      
+      data_mtr <- base::scale(data_mtr)
+      
+    }
+    
+    cluster_object@data <- data_mtr
+    
+  }
+  
+  base::return(cluster_object)
+  
+}
+
+#' @title Add variable set suffix
+#' 
+#' @description Adds variable set suffix to cluster names. 
+#' 
+hlpr_add_vset_suffix <- function(cluster_df, variable_set){
+  
+  tibble::column_to_rownames(cluster_df, var = "cell_id") %>% 
+  dplyr::rename_with(.fn = ~ stringr::str_c(.x, "_(", variable_set, ")", sep = "")) %>% 
+  tibble::rownames_to_column(var = "cell_id")
+  
+}
+
+
+
 #' @title Assemble a directory
 #' 
 #' @description Assembles a single character string direction from the 
@@ -24,15 +74,15 @@ hlpr_assemble_directory <- function(input_list){
 }
 
 
-#' @title Assemble a cell id 
+#' @title Joins cell data with well plate meta data 
 #' 
 #' @description Assembles a complete unique cell id including well plate, 
-#' well image heritage.
+#' well image heritage and joins cell information with well plate meta data. 
 #'
 #' @inherit check_track_df params
 
 
-hlpr_assemble_track_df <- function(track_df, wp_data, wp_index, wp_name){
+hlpr_assemble_df <- function(track_df, wp_data, wp_index, wp_name){
   
   well_info_df <- wp_data$wp_df[,c("well", "cell_line", "condition", "cl_condition")]
   
@@ -44,7 +94,6 @@ hlpr_assemble_track_df <- function(track_df, wp_data, wp_index, wp_name){
         well_plate_name = {{wp_name}}
     ) %>% 
     dplyr::left_join(x = ., y = well_info_df, by = "well")
-  
   
   base::return(result_df)
   
@@ -125,7 +174,6 @@ hlpr_create_track_list <- function(phase, track_df){
 hlpr_create_meta_data <- function(df, phase, verbose){
   
   dplyr::select(df, dplyr::all_of(x = meta_variables)) %>% 
-    dplyr::mutate(phase = {{phase}}) %>% 
     dplyr::distinct()
   
 }
@@ -259,34 +307,14 @@ hlpr_pretty_vec <- function(vec){
 #'
 #' @return A renamed data.frame. 
 
-hlpr_rename_track_df_cols <- function(track_df,
-                                        software = "cell_tracker",
-                                        denoted_columns = NULL,
-                                        additional_columns = NULL){
+hlpr_rename_df_cols <- function(df,
+                                denoted_columns = NULL,
+                                additional_columns = NULL){
   
-  if(software == "cell_tracker"){
-    
-    df <- 
-      dplyr::select(.data = track_df, 
-                    cell_id = `Cell ID`, 
-                    x_coords = `x-coordinate [pixel]`,
-                    y_coords = `y-coordinate [pixel]`, 
-                    frame = `Frame number`,
-                    dfo = tidyselect::starts_with("Distance from origin "), 
-                    dflp = tidyselect::starts_with("Distance from last point "),
-                    speed = tidyselect::starts_with("Instantaneous speed "), 
-                    afo = tidyselect::starts_with("Angle from origin "), 
-                    aflp = tidyselect::starts_with("Angle from last point ")
-      )
-    
-  } else if(software == "cell_profiler"){
-    
-    df <- 
-      dplyr::select(track_df, dplyr::all_of(x = c(base::unname(denoted_columns), additional_columns))) %>% 
+  df <- 
+      dplyr::select(df, dplyr::all_of(x = c(base::unname(denoted_columns), additional_columns))) %>% 
       dplyr::rename(!!denoted_columns)
     
-  }
-  
   base::return(df)
 
   

@@ -21,9 +21,10 @@
 #' @export
 #'
 computePamCluster <- function(object,
+                              variable_set,
+                              k,
                               phase = NULL, 
                               method_pam = NULL, 
-                              k = NULL, 
                               verbose = NULL, 
                               ...){
   
@@ -34,18 +35,11 @@ computePamCluster <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  cluster_obj <- object@analysis$clustering$pam[[phase]]
+  cluster_object <- getPamConv(object, variable_set = variable_set, phase = phase)
   
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "pam_conv",
-    phase = phase, 
-    ref_input = "partitioning around medoids (PAM) clustering object", 
-    ref_fun = "initiatePamClustering()"
-  )
-  
-  cluster_obj <- 
+  cluster_object <- 
     confuns::perform_pam_clustering(
-      pam.obj = cluster_obj, 
+      pam.obj = cluster_object, 
       k = k, 
       metric.pam = method_pam, 
       verbose = verbose, 
@@ -53,7 +47,11 @@ computePamCluster <- function(object,
       ...
     )
   
-  object@analysis$clustering$pam[[phase]] <- cluster_obj
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "pam", 
+                           phase = phase, 
+                           variable_set = variable_set)
   
   base::return(object)
   
@@ -89,6 +87,7 @@ computePamCluster <- function(object,
 #' @export
 #'
 plotAvgSilhouetteWidths <- function(object,
+                                    variable_set,
                                     k, 
                                     method_pam = NULL, 
                                     phase = NULL, 
@@ -104,10 +103,10 @@ plotAvgSilhouetteWidths <- function(object,
   
   confuns::is_vec(k, mode = "numeric", min.length = 2)
   
-  cluster_obj <- getPamConv(object, phase = phase)
+  cluster_object <- getPamConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
   
   confuns::plot_avg_silhouette_widths(
-    pam.obj = cluster_obj, 
+    pam.obj = cluster_object, 
     metric.pam = method_pam, 
     k = k, 
     display.cols = display_cols, 
@@ -120,6 +119,7 @@ plotAvgSilhouetteWidths <- function(object,
 #' @rdname plotAvgSilhouetteWidths
 #' @export
 plotSilhouetteWidths <- function(object, 
+                                 variable_set, 
                                  k, 
                                  method_pam = NULL, 
                                  phase = NULL, 
@@ -135,10 +135,10 @@ plotSilhouetteWidths <- function(object,
   
   confuns::is_vec(k, mode = "numeric", min.length = 2)
   
-  cluster_obj <- getPamConv(object, phase = phase)
+  cluster_object <- getPamConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
   
   confuns::plot_silhouette_widths(
-    pam.obj = cluster_obj, 
+    pam.obj = cluster_object, 
     metric.pam = method_pam, 
     k = k, 
     clrp = clrp, 
@@ -165,6 +165,7 @@ plotSilhouetteWidths <- function(object,
 #' @export
 #'
 plotPamMedoids <- function(object, 
+                           variable_set,
                            k, 
                            method_pam = NULL, 
                            phase = NULL, 
@@ -178,10 +179,10 @@ plotPamMedoids <- function(object,
   
   confuns::is_value(k, mode = "numeric")
   
-  cluster_obj <- getPamConv(object, phase = phase)
+  cluster_object <- getPamConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
   
   confuns::plot_medoid_barchart(
-    pam.obj = cluster_obj, 
+    pam.obj = cluster_object, 
     metric.pam = method_pam,
     k = k, 
     verbose = verbose

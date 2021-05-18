@@ -7,7 +7,7 @@
 check_object(object, experiment = NULL, set_up_req = "process_data")
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \description{
 Makes sure that object input is of class celltracer and

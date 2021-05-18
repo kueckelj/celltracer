@@ -5,12 +5,40 @@
 \alias{getStats}
 \title{Obtain stat data.frame}
 \usage{
-getStatsDf(object, phase = NULL, with_cluster = NULL, with_meta = NULL)
+getStatsDf(
+  object,
+  phase = NULL,
+  with_cluster = NULL,
+  with_meta = NULL,
+  verbose = NULL
+)
 
-getStats(object, phase = NULL, with_cluster = NULL, with_meta = NULL)
+getStats(
+  object,
+  phase = NULL,
+  with_cluster = NULL,
+  with_meta = NULL,
+  verbose = NULL
+)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
+
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
+
+\item{with_cluster}{Logical. If set to TRUE the discrete variables of the meta data slot are added
+to the output data.frame.}
+
+\item{with_meta}{Logical. If set to TRUE the discrete variables of the meta data slot are added
+to the output data.frame.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
 A data.frame with all numeric variables summarizing the measurements of

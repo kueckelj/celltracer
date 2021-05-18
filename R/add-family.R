@@ -10,65 +10,169 @@ add_family <- function(){}
 
 # Functions ---------------------------------------------------------------
 
-#' @title Add discrete/categorical variables
+
+#' @title Add predefined set of variables 
+#' 
+#' @description Allows to store predefined set of variable names in the object that 
+#' can be easily accessed via \code{getVariableSet()}.
+#'
+#' @inherit argument_dummy params
+#' @param variable_names Character vector. Denotes the variable names that are part 
+#' of the variable set. 
+#' @param set_name Character value. The name of the set of variable names. 
+#'
+#' @return An updated celltracer object.
+#' @export
+#'
+addVariableSet <- function(object, variable_names, set_name, overwrite = FALSE, phase = NULL){
+  
+  check_object(object)
+  
+  assign_default(object)
+  
+  set_names <- getVariableSetNames(object)
+  
+  if(!base::is.null(set_names)){
+    
+    confuns::check_none_of(
+      input = set_name, 
+      against = set_names, 
+      ref.against = "names defined variable sets", 
+      overwrite = overwrite
+    )
+    
+  }
+  
+  confuns::check_one_of(
+    input = variable_names, 
+    against = getStatVariableNames(object, phase = phase)
+  )
+  
+  object@variable_sets[[set_name]] <- variable_names
+  
+  base::return(object)
+  
+}
+
+
+
+
+#' @title Add discrete/categorical variables that group the cells
 #' 
 #' @description Allows to join new discrete/categorical variables that can be referred 
 #' to via the \code{across}-argument of many functions.
 #' 
 #' @inherit argument_dummy params
 #' @inherit check_object params 
-#' @inherit cluster_df params
-#' @inherit input_df params
-#' @param cluster_name,variable_name Character value. The name of the variable that is to be joined.
+#' @param input_df A data.frame that contains the variables denoted in argument \code{variable_names}
+#' as well as a character variable named \emph{cell_id} matching the cell ids of the input object. 
+#' @param variable_names Character vector. The name of the variables that are to be joined.
 #' 
 #' @inherit add_family return
 #'
 #' @export
 
-addClusterVariable <- function(object,
-                               cluster_df,
-                               cluster_name,
-                               phase = NULL, 
-                               overwrite = FALSE, 
-                               verbose = TRUE){
+addGroupingVariables <- function(object,
+                                 input_df,
+                                 variable_names,
+                                 phase = NULL, 
+                                 overwrite = FALSE, 
+                                 verbose = TRUE){
   
   check_object(object)
   assign_default(object)
   
   phase <- check_phase(object, phase, max_phases = 1)
   
-  new_cluster_df <- 
-    dplyr::select(cluster_df, dplyr::all_of(x = c("cell_id", cluster_name))) %>% 
-    dplyr::select(-phase)
-                  
-  old_cluster_df <- getClusterData(object, phase = phase)
+  new_input_df <- 
+    dplyr::select(input_df, dplyr::all_of(x = c("cell_id", variable_names)))
   
-  if(cluster_name %in% base::colnames(old_cluster_df)){
+  if(phase %in% base::colnames(new_input_df)){
     
-    if(base::isTRUE(overwrite)){
-      
-      base::message(glue::glue("Overwriting already existing cluster variable {cluster_name}."))
-      
-      old_cluster_df[[cluster_name]] <- NULL
-      
-    } else {
-      
-      base::stop(glue::glue("Cluster variable {cluster_name} already exists. Set argument 'overwrite' to TRUE in order to continue."))
-      
-    }
+    new_input_df$phase <- NULL
+    
+    msg <- "Discarding variable 'phase'. (invalid)"
+    
+    confuns::give_feedback(msg = msg, fdb.fn = "warning")
+    
+  }
+                  
+  old_group_df <- getGroupingDf(object, phase = phase)
+  
+  updated_group_df <- 
+    confuns::join_safely(
+      old.df = old_group_df, 
+      new.df = new_input_df, 
+      ref.new.df = "input_df", 
+      variable.names = variable_names, 
+      valid.classes = "factor", 
+      by = "cell_id",
+      overwrite = overwrite, 
+      verbose = verbose
+    )
+  
+  object@data$grouping[[phase]] <- updated_group_df
+  
+  base::return(object)
+  
+}
+
+
+#' @title Add numeric variables
+#' 
+#' @description Allows to join numeric variables that can be referred 
+#' to via the \code{variables}-argument of many functions.
+#' 
+#' @inherit addGroupingVariables params
+#' @inherit argument_dummy params
+#' @inherit check_object params 
+#' @param stat_df A data.frame that contains the variables denoted in argument \code{variable_names}
+#' as well as a character variable named \emph{cell_id} matching the cell ids of the input object. 
+#' @param variable_names Character vector. The name of the variables that are to be joined.
+#' 
+#' @inherit add_family return
+#'
+#' @export
+addStatVariables <- function(object,
+                             input_df,
+                             variable_names,
+                             phase = NULL,
+                             overwrite = FALSE,
+                             verbose = TRUE){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase, max_phases = 1)
+  
+  new_input_df <- 
+    dplyr::select(input_df, dplyr::all_of(x = c("cell_id", variable_names)))
+  
+  if(phase %in% base::colnames(new_input_df)){
+    
+    new_input_df$phase <- NULL
+    
+    msg <- "Discarding variable 'phase'. (invalid)"
+    
+    confuns::give_feedback(msg = msg, fdb.fn = "warning")
     
   }
   
-  updated_cluster_df <- 
-    dplyr::left_join(
-      x = old_cluster_df, 
-      y = new_cluster_df, 
-      by = "cell_id"
+  old_stat_df <- getGroupingDf(object, phase = phase)
+  
+  updated_stat_df <- 
+    confuns::join_safely(
+      old.df = old_stat_df, 
+      new.df = new_input_df, 
+      ref.new.df = "input_df", 
+      variable.names = variable_names, 
+      valid.classes = "numeric", 
+      by = "cell_id",
+      overwrite = overwrite, 
+      verbose = verbose
     )
   
-  #!!! add dplyr::rename() to equip the added variable with a
-  
-  object@data$cluster[[phase]] <- updated_cluster_df
+  object@data$stats[[phase]] <- updated_stat_df
   
   base::return(object)
   
@@ -99,33 +203,36 @@ addClusterVariable <- function(object,
 #' @return
 #' @export
 #'
-addHierarchicalCluster <- function(object,
-                                   phase = NULL,
-                                   method_dist = NULL,
-                                   method_aggl = NULL,
-                                   k = NULL,
-                                   h = NULL, 
-                                   verbose = NULL){
+addHierarchicalClusterVariables <- function(object,
+                                            variable_set,
+                                            phase = NULL,
+                                            method_dist = NULL,
+                                            method_aggl = NULL,
+                                            k = NULL,
+                                            h = NULL, 
+                                            verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
-  cluster_obj <- getHclustConv(object, phase = phase)
+  cluster_object <- 
+    getHclustConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
   
   new_cluster_df <- 
     confuns::get_hclust_df(
-      hcl.obj = cluster_obj, 
+      hcl.obj = cluster_object, 
       methods.dist = method_dist, 
       methods.aggl = method_aggl, 
       k = k, 
       h = h
-    )
+    ) %>% hlpr_add_vset_suffix(., variable_set = variable_set)
+    
   
   new_cluster_names <- 
     dplyr::select(new_cluster_df, -cell_id) %>% 
     base::colnames()
   
-  cluster_df <- object@data$cluster[[phase]]
+  cluster_df <- getGroupingDf(object, phase = phase)
   
   existing_cluster_names <- 
     dplyr::select(cluster_df, -cell_id, -phase) %>% 
@@ -146,12 +253,12 @@ addHierarchicalCluster <- function(object,
     
   }
   
-  cluster_df <-
-    dplyr::left_join(x = cluster_df, y = new_cluster_df[, c("cell_id", new_cluster_names)], by = "cell_id")
-  
-  object@data$cluster[[phase]] <- cluster_df
-  
   if(!base::is.null(new_cluster_names)){
+    
+    cluster_df <-
+      dplyr::left_join(x = cluster_df, y = new_cluster_df[, c("cell_id", new_cluster_names)], by = "cell_id")
+    
+    object <- setGroupingDf(object, grouping_df = cluster_df, phase = phase)
     
     msg <- glue::glue("Successfully added {n} cluster {ref_variables} to data of {phase} phase: '{ref_new_cluster_names}'.", 
                       n = base::length(new_cluster_names), 
@@ -167,7 +274,7 @@ addHierarchicalCluster <- function(object,
 }
 
 
-#' @title Add Kmeans clustering results to overall data
+#' @title Add kmeans clustering results to overall data
 #' 
 #' @description Adds the clustering results of \code{computeKmeansCluster()} in form
 #' of grouping variables to the object's overall data - making them available for the \code{across}-
@@ -186,30 +293,38 @@ addHierarchicalCluster <- function(object,
 #' @return An updated celltracer object.
 #' @export
 #'
-addKmeansCluster <- function(object,
-                             phase = NULL,
-                             method_kmeans = NULL, 
-                             k = NULL, 
-                             verbose = NULL){
+addKmeansClusterVariables <- function(object,
+                                      variable_set,
+                                      k,
+                                      phase = NULL,
+                                      method_kmeans = NULL, 
+                                      verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
-  cluster_obj <- getKmeansConv(object, phase = phase)
+  cluster_object <-
+    getKmeansConv(
+      object = object,
+      phase = phase,
+      variable_set = variable_set, 
+      with_data = FALSE
+      )
   
   new_cluster_df <- 
     confuns::get_kmeans_df(
-      kmeans.obj = cluster_obj, 
+      kmeans.obj = cluster_object, 
       centers = k, 
       methods.kmeans = method_kmeans, 
       centers.string = "k"
-    )
+    ) %>% 
+    hlpr_add_vset_suffix(variable_set = variable_set)
   
   new_cluster_names <- 
     dplyr::select(new_cluster_df, -cell_id) %>% 
     base::colnames()
   
-  cluster_df <- object@data$cluster[[phase]]
+  cluster_df <- getGroupingDf(object, phase = phase)
   
   existing_cluster_names <- 
     dplyr::select(cluster_df, -cell_id, -phase) %>% 
@@ -230,12 +345,12 @@ addKmeansCluster <- function(object,
     
   }
   
-  cluster_df <-
-    dplyr::left_join(x = cluster_df, y = new_cluster_df[, c("cell_id", new_cluster_names)], by = "cell_id")
-  
-  object@data$cluster[[phase]] <- cluster_df
-  
   if(!base::is.null(new_cluster_names)){
+    
+    cluster_df <-
+      dplyr::left_join(x = cluster_df, y = new_cluster_df[, c("cell_id", new_cluster_names)], by = "cell_id")
+    
+    object <- setGroupingDf(object, grouping_df = cluster_df, phase = phase)
     
     msg <- glue::glue("Successfully added {n} cluster {ref_variables} to data of {phase} phase: '{ref_new_cluster_names}'.", 
                       n = base::length(new_cluster_names), 
@@ -271,29 +386,31 @@ addKmeansCluster <- function(object,
 #' 
 #' @export
 #'
-addPamCluster <- function(object, 
-                          phase = NULL, 
-                          method_pam = NULL,
-                          k = NULL, 
-                          verbose = NULL){
+addPamClusterVariables <- function(object, 
+                                   variable_set,
+                                   k,
+                                   phase = NULL, 
+                                   method_pam = NULL,
+                                   verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
-  cluster_obj <- getPamConv(object, phase = phase)
+  cluster_object <- getPamConv(object, phase = phase, variable_set = variable_set)
   
   new_cluster_df <-
     confuns::get_pam_df(
-      pam.obj = cluster_obj, 
+      pam.obj = cluster_object, 
       metric.pam = method_pam, 
       k = k
-    )
+    ) %>% 
+    hlpr_add_vset_suffix(variable_set = variable_set)
   
   new_cluster_names <- 
     dplyr::select(new_cluster_df, -cell_id) %>% 
     base::colnames()
   
-  cluster_df <- object@data$cluster[[phase]]
+  cluster_df <- getGroupingDf(object, phase = phase)
   
   existing_cluster_names <- 
     dplyr::select(cluster_df, -cell_id, -phase) %>% 
@@ -314,13 +431,13 @@ addPamCluster <- function(object,
     
   }
   
-  cluster_df <-
-    dplyr::left_join(x = cluster_df, y = new_cluster_df[, c("cell_id", new_cluster_names)], by = "cell_id")
-  
-  object@data$cluster[[phase]] <- cluster_df
-  
   if(!base::is.null(new_cluster_names)){
+
+    cluster_df <-
+      dplyr::left_join(x = cluster_df, y = new_cluster_df[, c("cell_id", new_cluster_names)], by = "cell_id")
     
+    object <- setGroupingDf(object, grouping_df = cluster_df, phase = phase)
+        
     msg <- glue::glue("Successfully added {n} cluster {ref_variables} to data of {phase} phase: '{ref_new_cluster_names}'.", 
                       n = base::length(new_cluster_names), 
                       ref_variables = confuns::adapt_reference(new_cluster_names, sg = "variable", pl = "variables"),

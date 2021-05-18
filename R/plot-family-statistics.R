@@ -32,7 +32,7 @@
 
 plotBoxplot <- function(object,
                         variables,
-                        phase = "all",
+                        phase = NULL,
                         across = NULL,
                         across_subset = NULL,
                         relevel = TRUE,
@@ -89,7 +89,7 @@ plotBoxplot <- function(object,
 #' @export
 plotDensityplot <- function(object,
                             variables,
-                            phase = "all",
+                            phase = NULL,
                             across = NULL,
                             across_subset = NULL,
                             relevel = NULL,
@@ -124,7 +124,7 @@ plotDensityplot <- function(object,
 #' @export
 plotHistogram <- function(object,
                           variables,
-                          phase = "all",
+                          phase = NULL,
                           across = NULL,
                           across_subset = NULL,
                           relevel = TRUE,
@@ -157,7 +157,7 @@ plotHistogram <- function(object,
 #' @export
 plotRidgeplot <- function(object,
                           variables,
-                          phase = "all",
+                          phase = NULL,
                           across = NULL,
                           across_subset = NULL,
                           relevel = TRUE,
@@ -191,7 +191,7 @@ plotRidgeplot <- function(object,
 #' @export
 plotViolinplot <- function(object,
                            variables,
-                           phase = "all",
+                           phase = NULL,
                            across = NULL,
                            across_subset = NULL,
                            relevel = TRUE,
@@ -259,7 +259,7 @@ plotViolinplot <- function(object,
 
 plotBarchart <- function(object,
                          variables,
-                         phase = "all",
+                         phase = NULL,
                          across = NULL,
                          across_subset = NULL,
                          relevel = TRUE,
@@ -282,7 +282,9 @@ plotBarchart <- function(object,
                         nrow = nrow,
                         ncol = ncol,
                         clrp = clrp,
-                        clrp.adjust = clrp_adjust)
+                        clrp.adjust = clrp_adjust, 
+                        position = position, 
+                        ...)
   
 }
 
@@ -290,10 +292,32 @@ plotBarchart <- function(object,
 
 
 
+#' @title Plot statistics related plots interactively
+#' 
+#' @description Opens an interactive application in which statistc related 
+#' plots like violinplots, boxplots as well as statistical tests across 
+#' groups can be conducted conveniently.
+#'
+#' @inherit argument_dummy params
+#'
+#' @export
+#'
 
-
-
-
-
-
+plotStatisticsInteractive <- function(object, phase = NULL){
+  
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  stats_df <-
+    getStatsDf(object, phase = phase) %>% 
+    dplyr::select(-phase, -cell_id)
+  
+  
+  confuns::plot_statistics_interactive(df = stats_df, n.across.subset = 25)
+  
+  
+}
 

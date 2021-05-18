@@ -14,7 +14,7 @@ computeDistanceMatrices(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -27,7 +27,7 @@ of interest (e.g. \emph{'euclidean'} or \emph{'manhattan'}).
 Use \code{validDistanceMethods()} to obtain all valid input options.}
 
 \item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
-set up.}
+set up or already existing results.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.

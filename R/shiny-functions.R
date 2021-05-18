@@ -81,13 +81,13 @@ loading_status_table_shiny <- function(well_plate_list){
 #' @return The read in data.frame with three additional informative columns: \emph{well_image, condition}
 #' and \emph{cell_line}.
 
-read_track_data_shiny <- function(directory, progress_n, progress, object){
+read_data_files_shiny <- function(directory, progress_n, progress, object){
   
   progress$set(value = progress_n)
   
   if(stringr::str_detect(string = directory, pattern = "csv$")){
     
-    track_df <- 
+    df <- 
       
       base::suppressMessages({
         
@@ -102,54 +102,44 @@ read_track_data_shiny <- function(directory, progress_n, progress, object){
     
   } else if(stringr::str_detect(string = directory, pattern = "xls$")){
     
-    track_df <- readxl::read_xls(path = directory)
+    df <- readxl::read_xls(path = directory)
     
   } else if(stringr::str_detect(string = directory, pattern = "xlsx$")){
     
-    track_df <- readxl::read_xlsx(path = directory)
+    df <- readxl::read_xlsx(path = directory)
     
   }
   
-  track_df[base::is.na(track_df)] <- 0
+  df[base::is.na(df)] <- 0
   
   well_image <-
     stringr::str_extract(string = directory, pattern = file_regex) %>% 
     stringr::str_extract(pattern = well_image_regex)
   
-  software <- object@set_up$software$name
+  denoted_columns_list <- object@set_up$example$denoted_columns
+    
+  denoted_columns <- 
+    c(x_coords = denoted_columns_list$x_coords, 
+      y_coords = denoted_columns_list$y_coords, 
+      frame = denoted_columns_list$frame, # NULL (ignored) if non time lapse experiment
+      cell_id = denoted_columns_list$cell_id) %>% 
+    purrr::discard(.p = base::is.null)
+    
+  additional_columns <- denoted_columns_list$additional
+    
+  variable_names <- c(base::unname(denoted_columns), additional_columns)
   
-  if(software == "cell_tracker"){
-    
-    variable_names <- original_ct_variables
-    
-    denoted_columns <- NULL
-    additional_columns <- NULL
-    
-  } else if(software == "cell_profiler") {
-    
-    denoted_columns_list <- object@set_up$software$denoted_columns
-    
-    denoted_columns <- 
-      c(x_coords = denoted_columns_list$x_coords, 
-        y_coords = denoted_columns_list$y_coords, 
-        frame = denoted_columns_list$frame, 
-        cell_id = denoted_columns_list$cell_id)
-    
-    additional_columns <- denoted_columns_list$additional
-    
-    variable_names <- c(base::unname(denoted_columns), additional_columns)
-    
-  }
-  
+  # do the columns of the read in data.frame deviate from the denoted ones?
   missing_columns <- 
     purrr::map(.x = variable_names, 
-               .f = check_track_df_variables,
-               df = track_df) %>%
+               .f = check_df_variables,
+               df = df) %>%
     purrr::discard(.p = base::is.null) %>% 
     purrr::flatten_chr()
   
   n_missing_cols <- base::length(missing_columns)
   
+  # if so give feedback 
   if(n_missing_cols > 0){
     
     ref <- base::ifelse(n_missing_cols > 1, "columns", "column")
@@ -160,14 +150,15 @@ read_track_data_shiny <- function(directory, progress_n, progress, object){
   }
   
   df_return <-
-    hlpr_rename_track_df_cols(track_df = track_df, 
-                              software = software, 
-                              denoted_columns = denoted_columns, 
-                              additional_columns = additional_columns) %>% 
+    hlpr_rename_df_cols(
+      df = df,
+      denoted_columns = denoted_columns,
+      additional_columns = additional_columns
+      ) %>% 
     dplyr::mutate(well_image = {{well_image}}) 
   
   list_return <- 
-    list("track_df" = df_return, 
+    list("df" = df_return, 
          "well_image" = well_image, 
          "directory" = directory)
   
@@ -189,7 +180,7 @@ read_track_data_shiny <- function(directory, progress_n, progress, object){
 #' 
 #' @export
 
-load_track_files_shiny <- function(wp_list, wp_name, session, object){
+load_data_files_shiny <- function(wp_list, wp_name, session, object){
   
   directories <- wp_list$valid_directories
   
@@ -204,14 +195,10 @@ load_track_files_shiny <- function(wp_list, wp_name, session, object){
   progress$set(message = glue::glue("Reading data for well plate '{wp_name}' :"), 
                detail = glue::glue("Total of {num_files} files."))
   
-  
-  software_name <- object@set_up$software$name
-  
-  
   data_list <- 
     purrr::map2(.x = directories, 
-                .y = base::seq_along(directories), 
-                .f = purrr::safely(read_track_data_shiny),
+                .y = base::seq_along(directories), # input for progress_n
+                .f = purrr::safely(read_data_files_shiny),
                 object = object, 
                 progress = progress) %>% 
     purrr::set_names(nm = well_image_files)
@@ -228,48 +215,92 @@ load_track_files_shiny <- function(wp_list, wp_name, session, object){
 }
 
 
+
+#' @title Integrate cell stat tables
+#' 
+#' @description Subsets the successfully loaded files 
+#'
+#' @param track_data_list The output of \code{load_track_files_shiny()}.
+#'
+#' @return A list of one slot 'first' with the stat data.frame
+#
+assemble_stat_list_shiny <- function(stat_data_list, well_plate_list, object){
+  
+  df_list <- 
+    purrr::map(.x = stat_data_list, ~.x[["successful"]]) %>% 
+    purrr::map(.x = ., .f = ~ purrr::map(.x = .x, "result")) %>% 
+    purrr::map(.x = ., .f = ~ purrr::map_df(.x = .x, "df"))
+  
+  all_data_list <- 
+    list(df_list,
+         well_plate_list,
+         base::seq_along(df_list), 
+         base::names(df_list)
+    )
+  
+  # join well plate information and create final cell id
+  df <- 
+    purrr::pmap_dfr(.l = all_data_list, .f = hlpr_assemble_df)
+  
+  cell_lines <- df$cell_line %>% base::unique() %>% base::sort()
+  conditions <- df$condition %>% base::unique() %>% base::sort()
+  cl_conditions <- df$cl_condition %>% base::unique() %>% base::sort()
+  
+  final_df <-
+    dplyr::mutate(.data = df, 
+                  cell_line = base::factor(x = cell_line, levels = cell_lines), 
+                  condition = base::factor(x = condition, levels = conditions), 
+                  cl_condition = base::factor(x = cl_condition, levels = cl_conditions)
+    )
+  
+  stat_list <- base::list("first" = dplyr::mutate(final_df, phase = "first"))
+  
+  base::return(stat_list)
+  
+}
+
 #' @title Integrate cell track tables
 #' 
 #' @description Subsets the successfully loaded files 
 #'
-#' @param track_data_list The output of \code{load_cell_track_files_shiny}.
+#' @param track_data_list The output of \code{load_track_files_shiny()}.
 #'
 #' @return A track data.frame
 
 assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
   
-  track_df_list <- 
+  df_list <- 
     purrr::map(.x = track_data_list, ~.x[["successful"]]) %>% 
     purrr::map(.x = ., .f = ~ purrr::map(.x = .x, "result")) %>% 
-    purrr::map(.x = ., .f = ~ purrr::map_df(.x = .x, "track_df"))
+    purrr::map(.x = ., .f = ~ purrr::map_df(.x = .x, "df"))
   
   all_data_list <- 
-    list(track_df_list,
+    list(df_list,
          well_plate_list,
-         base::seq_along(track_df_list), 
-         base::names(track_df_list)
+         base::seq_along(df_list), 
+         base::names(df_list)
          )
   
-  track_df <- 
-    purrr::pmap_dfr(.l = all_data_list, .f = hlpr_assemble_track_df)
+  df <- 
+    purrr::pmap_dfr(.l = all_data_list, .f = hlpr_assemble_df)
   
-  cell_lines <- track_df$cell_line %>% base::unique() %>% base::sort()
-  conditions <- track_df$condition %>% base::unique() %>% base::sort()
-  cl_conditions <- track_df$cl_condition %>% base::unique() %>% base::sort()
+  cell_lines <- df$cell_line %>% base::unique() %>% base::sort()
+  conditions <- df$condition %>% base::unique() %>% base::sort()
+  cl_conditions <- df$cl_condition %>% base::unique() %>% base::sort()
   
-  final_track_df <-
-    dplyr::mutate(.data = track_df, 
+  final_df <-
+    dplyr::mutate(.data = df, 
                   cell_line = base::factor(x = cell_line, levels = cell_lines), 
                   condition = base::factor(x = condition, levels = conditions), 
                   cl_condition = base::factor(x = cl_condition, levels = cl_conditions)
                   )
   
-  
   phases <- object@set_up$phases
   
   measurements <- object@set_up$measurement_string
+  
   conditions <- 
-    stringi::stri_split(str = base::unique(final_track_df$condition), regex = "->")
+    stringi::stri_split(str = base::unique(final_df$condition), regex = "->")
   
   phase_starts <-
     purrr::map_dbl(.x = phases, .f = ~ base::which(x = measurements == .x))
@@ -278,7 +309,7 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
     
     phase_endings <- 
       phase_starts[2:base::length(phase_starts)] %>% 
-      base::append(x = ., values = base::max(final_track_df$frame)) %>% 
+      base::append(x = ., values = base::max(final_df$frame)) %>% 
       purrr::set_names(nm = base::names(phases))
     
     phase_info <-
@@ -299,7 +330,7 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
                    phase_pattern <- stringr::str_c("^", phase_index, "\\.",sep = "")
                    
                    df <-
-                     dplyr::filter(final_track_df, frame >= {{phase_start}} & frame < {{phase_end}})
+                     dplyr::filter(final_df, frame >= {{phase_start}} & frame < {{phase_end}})
                    
                    condition_split <- 
                      stringr::str_split_fixed(df$condition, pattern = " -> ", n = base::length(phase_endings)) 
@@ -318,7 +349,7 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
     
   } else {
     
-    track_list <- base::list("first" = dplyr::mutate(final_track_df, phase = "first"))
+    track_list <- base::list("first" = dplyr::mutate(final_df, phase = "first"))
     
   }
   
@@ -326,6 +357,8 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
   base::return(track_list)
   
 }
+
+
 
 
 #' @title Show shiny - notifications

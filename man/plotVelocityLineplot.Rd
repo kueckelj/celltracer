@@ -21,7 +21,7 @@ plotVelocityLineplot(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{across}{Character value or NULL. Specifies the grouping variable of interest.
 

@@ -13,7 +13,7 @@ computeKmeansCluster(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{k}{Numeric vector. For every value the kmeans cluster assignment is calculated via
 \code{stats::kmeans()}.}

@@ -11,13 +11,13 @@ plotPca(
   phase = NULL,
   color_by = NULL,
   color_aes = "fill",
-  clrp = NULL,
-  clrp_adjust = NULL,
-  clrsp = NULL,
+  pt_clrp = NULL,
+  pt_clrsp = NULL,
   pt_alpha = NULL,
   pt_clr = NULL,
   pt_fill = NULL,
-  pt_size = NULL
+  pt_size = NULL,
+  clrp_adjust = NULL
 )
 
 plotTsne(
@@ -25,13 +25,13 @@ plotTsne(
   phase = NULL,
   color_by = NULL,
   color_aes = "fill",
-  clrp = NULL,
-  clrp_adjust = NULL,
-  clrsp = NULL,
+  pt_clrp = NULL,
+  pt_clrsp = NULL,
   pt_alpha = NULL,
   pt_clr = NULL,
   pt_fill = NULL,
-  pt_size = NULL
+  pt_size = NULL,
+  clrp_adjust = NULL
 )
 
 plotUmap(
@@ -39,17 +39,17 @@ plotUmap(
   phase = NULL,
   color_by = NULL,
   color_aes = "fill",
-  clrp = NULL,
-  clrp_adjust = NULL,
-  clrsp = NULL,
+  pt_clrp = NULL,
+  pt_clrsp = NULL,
   pt_alpha = NULL,
   pt_clr = NULL,
   pt_fill = NULL,
-  pt_size = NULL
+  pt_size = NULL,
+  clrp_adjust = NULL
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -64,24 +64,22 @@ Denotes the aesthetic with which colors are displayed. Either \emph{'color'} or 
 \code{pt_shape} the design of the geometric objects (points) varies according to the rules
 of the ggplot2-framework.}
 
-\item{clrp}{Character value. Specifies the color palette to be used to represent
-groups of discrete variables. Run \code{validColorPalettes()} to obtain valid
-input options.}
+\item{pt_clrp}{The color palette to be used if the specified variable displayed by
+color is categorical/discrete. Run \code{validColorPalettes()} to see valid input.}
 
-\item{clrp_adjust}{Named character vector or NULL. If character, it adjusts the
-color palette that is used to represent the groups. Names of the input vector must refer
-to the group and the respective named element denotes the color with which to
-represent the group.}
-
-\item{clrsp}{Character value. Specifies the color spectrum to be used to represent
-continuous values of numeric variables. Run \code{validColorSpectra()} to obtain
-valid input options.}
+\item{pt_clrsp}{The color spectrum to be used if the specified variable displayed by
+color is continuous. Run \code{validColorSpectra()} to see valid input.}
 
 \item{pt_alpha}{Numeric value. Specifies the degree of transparency of all points.}
 
 \item{pt_clr}{Character value. Specifies the color of all points.}
 
 \item{pt_size}{Numeric value. Specifies the size of all points.}
+
+\item{clrp_adjust}{Named character vector or NULL. If character, it adjusts the
+color palette that is used to represent the groups. Names of the input vector must refer
+to the group and the respective named element denotes the color with which to
+represent the group.}
 }
 \value{
 

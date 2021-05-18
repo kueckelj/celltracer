@@ -12,12 +12,6 @@ plotDimRed(
   pt_alpha = 0.9
 )
 }
-\arguments{
-\item{object}{A valid cell tracer object.}
-}
-\value{
-A ggplot.
-}
 \description{
 Visualizes the dimensional reduction method of choice.
 }

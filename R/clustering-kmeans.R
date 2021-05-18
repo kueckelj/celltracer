@@ -22,7 +22,9 @@
 #' 
 #' @export
 #'
+
 computeKmeansCluster <- function(object,
+                                 variable_set,
                                  k,
                                  phase = NULL, 
                                  method_kmeans = NULL, 
@@ -35,25 +37,26 @@ computeKmeansCluster <- function(object,
   
   phase <- check_phase(object, phase, max_phases = 1)
   
-  cluster_obj <- getKmeansConv(object, phase = phase)
+  cluster_object <- getKmeansConv(object, variable_set = variable_set, phase = phase)
   
-  cluster_obj <- 
+  cluster_object <- 
     confuns::perform_kmeans_clustering(
-      kmeans.obj = cluster_obj, 
+      kmeans.obj = cluster_object, 
       centers = k, 
       methods.kmeans = method_kmeans, 
       verbose = verbose, 
       verbose.pb = verbose
     )
   
-  object@analysis$clustering$kmeans[[phase]] <- cluster_obj
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "kmeans", 
+                           phase = phase, 
+                           variable_set = variable_set)
   
   base::return(object)
   
 }
-
-
-
 
 
 
@@ -75,6 +78,7 @@ computeKmeansCluster <- function(object,
 #' @export
 #'
 plotScreeplot <- function(object, 
+                          variable_set, 
                           phase = NULL, 
                           method_kmeans = NULL,
                           k = 2:10, 
@@ -88,10 +92,11 @@ plotScreeplot <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  cluster_obj <- getKmeansConv(object, phase = phase)
+  cluster_object <- 
+    getKmeansConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
   
   confuns::plot_screeplot(
-    kmeans.obj = cluster_obj, 
+    kmeans.obj = cluster_object, 
     methods.kmeans = method_kmeans, 
     clr = clr, 
     display.cols = display_cols, 

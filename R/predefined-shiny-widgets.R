@@ -15,6 +15,20 @@ plot_and_save <- function(ns){
   
 }
 
+act_button <- function(...,
+                       color = "primary",
+                       style = "simple",
+                       size = "sm"){
+  
+  shinyWidgets::actionBttn(
+    ..., 
+    color = color,
+    style = style, 
+    size = size
+  )
+  
+}
+
 
 
 # Layout ------------------------------------------------------------------

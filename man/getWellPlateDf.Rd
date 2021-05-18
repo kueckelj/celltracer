@@ -7,7 +7,7 @@
 getWellPlateDf(object, well_plate = NULL)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{well_plate}{Character value. The name of the well plate of interest. Valid inputs can be obtained
 via \code{getWellPlateNames()}.}

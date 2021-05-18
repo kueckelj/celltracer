@@ -11,7 +11,7 @@
 plotBoxplot(
   object,
   variables,
-  phase = "all",
+  phase = NULL,
   across = NULL,
   across_subset = NULL,
   relevel = TRUE,
@@ -39,7 +39,7 @@ plotBoxplot(
 plotDensityplot(
   object,
   variables,
-  phase = "all",
+  phase = NULL,
   across = NULL,
   across_subset = NULL,
   relevel = NULL,
@@ -56,7 +56,7 @@ plotDensityplot(
 plotHistogram(
   object,
   variables,
-  phase = "all",
+  phase = NULL,
   across = NULL,
   across_subset = NULL,
   relevel = TRUE,
@@ -72,7 +72,7 @@ plotHistogram(
 plotRidgeplot(
   object,
   variables,
-  phase = "all",
+  phase = NULL,
   across = NULL,
   across_subset = NULL,
   relevel = TRUE,
@@ -89,7 +89,7 @@ plotRidgeplot(
 plotViolinplot(
   object,
   variables,
-  phase = "all",
+  phase = NULL,
   across = NULL,
   across_subset = NULL,
   relevel = TRUE,
@@ -115,7 +115,7 @@ plotViolinplot(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.

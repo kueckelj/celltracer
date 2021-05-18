@@ -28,7 +28,7 @@ plotSilhouetteWidths(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{k}{Numeric vector. The k-values of interest.}
 

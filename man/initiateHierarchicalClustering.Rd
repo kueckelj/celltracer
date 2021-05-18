@@ -9,6 +9,7 @@
 initiateHierarchicalClustering(
   object,
   phase = NULL,
+  scale = TRUE,
   variables_subset = NULL,
   force = FALSE,
   verbose = NULL
@@ -18,6 +19,7 @@ initiateKmeansClustering(
   object,
   phase = NULL,
   variables_subset = NULL,
+  scale = TRUE,
   force = FALSE,
   verbose = NULL
 )
@@ -26,17 +28,21 @@ initiatePamClustering(
   object,
   phase = NULL,
   variables_subset = NULL,
+  scale = TRUE,
   force = FALSE,
   verbose = NULL
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
+
+\item{scale}{Logical value. If set to TRUE (the default) all variables will be scaled before clustering is
+performed to ensure that all variables are weighted equally.}
 
 \item{variables_subset}{Character vector or NULL. Denotes the numeric variables the subsequent clustering
 steps will include which influences the clustering results.
@@ -48,7 +54,7 @@ than variables you are not interested in.)
 Use \code{getNumericVariableNames()} to obtain all valid input options.}
 
 \item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
-set up.}
+set up or already existing results.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.
@@ -60,5 +66,16 @@ An updated celltracer object.
 }
 \description{
 These functions set up the necessary objects to perform clustering with the
-respective algorithm.
+respective algorithm. See details for more.
+}
+\details{
+The clustering initiation functions set up the S4 object that is used by celltracer to do the clustering.
+Every downstream analysis function depends on the input you specify here. This means in particular the input for
+argument \code{scale} and the input for argument \code{variables_subset}. The latter denotes the variables on which
+the clustering will base on. Changing these might influence the clustering results. If you realize later on that
+you want to change the set up use the respective \code{initiate*Clustering()} function again and set argument \code{force}
+to TRUE in order to overwrite the current set up.
+}
+\seealso{
+getHclustConv(), getKmeansConv(), getPamConv()
 }

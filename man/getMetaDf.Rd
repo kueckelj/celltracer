@@ -7,10 +7,11 @@
 getMetaDf(object, phase = NULL)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \value{
-The data.frame of interest.
+A data.frame with all variables providing meta information about cells of
+the track data.frame. (such as condition, cell line, well plate belonging etc.)
 }
 \description{
 Obtain meta data

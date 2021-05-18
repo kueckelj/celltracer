@@ -7,7 +7,7 @@
 hlpr_caption_add_on(object, phase)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \value{
 

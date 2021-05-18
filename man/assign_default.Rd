@@ -7,7 +7,7 @@
 assign_default(object)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \description{
 Assigns default to parent function

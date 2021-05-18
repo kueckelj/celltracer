@@ -41,19 +41,32 @@ moduleExperimentDesignUI <- function(id){
                                                                                                                              shiny::textOutput(outputId = ns("ed_experiment_path")))
                                                                                                              ),
                                                                                                              shiny::fluidRow(width = 12, 
+                                                                                                                             shiny::column(width = 12, 
+                                                                                                                                           shinyWidgets::radioGroupButtons(
+                                                                                                                                             inputId = ns("ed_exp_type"),
+                                                                                                                                             label = "Experiment Type:",
+                                                                                                                                             choices = c("One Time Imaging" = "one_time_imaging", "Time lapse (summarized)" = "time_lapse_smrd",  "Time lapse" = "time_lapse"),
+                                                                                                                                             checkIcon = list(
+                                                                                                                                               yes = tags$i(class = "fa fa-check-square", style = "color: steelblue"),
+                                                                                                                                               no = tags$i(class = "fa fa-square-o", style = "color: steelblue"))
+                                                                                                                                           )
+                                                                                                                                           )
+                                                                                                                             ),
+                                                                                                             shiny::fluidRow(width = 12, 
                                                                                                                              shiny::column(width = 4, 
                                                                                                                                            shiny::h5(shiny::strong("Software:")),
                                                                                                                                            shiny::selectInput(inputId = ns("ed_software"),
                                                                                                                                                               label = NULL,
-                                                                                                                                                              choices = c("     ", "Cell Tracker" = "cell_tracker", 
-                                                                                                                                                                          "Cell Profiler & Others" = "cell_profiler")), 
-                                                                                                                                           shiny::actionButton(inputId = ns("ed_software_save"), label = "Save & Proceed")
+                                                                                                                                                              choices = c("     ",
+                                                                                                                                                                          "Cell Tracker" = "cell_tracker", 
+                                                                                                                                                                          "Cell Profiler" = "cell_profiler", 
+                                                                                                                                                                          "ImageJ" = "imagej")
+                                                                                                                                                              ), 
+                                                                                                                                           shiny::actionButton(inputId = ns("ed_overall_info_save"), label = "Save & Proceed")
                                                                                                                              ),
-                                                                                                                             shiny::conditionalPanel(condition = "input.ed_software == 'cell_profiler'", ns = ns, 
-                                                                                                                                                     shiny::column(width = 8, 
-                                                                                                                                                                   shiny::uiOutput(outputId = ns("ed_software_example")) 
-                                                                                                                                                                   )
-                                                                                                                                                     )
+                                                                                                                             shiny::column(width = 8, 
+                                                                                                                                           shiny::uiOutput(outputId = ns("ed_example")) 
+                                                                                                                             )
                                                                                                              )
                                                                                                )
                                                                                )
@@ -73,27 +86,7 @@ moduleExperimentDesignUI <- function(id){
                                                                                                                                                              add_helper(content = helper_content$imaging_set_up)
                                                                                                                                                            )
                                                                                                                                            ), 
-                                                                                                                                           shiny::fluidRow(
-                                                                                                                                             shiny::column(width = 6, 
-                                                                                                                                                           shiny::numericInput(inputId = ns("ed_meas_num"), 
-                                                                                                                                                                               label = "Total Number of Images:",
-                                                                                                                                                                               min = 0, step = 1, value = 0)
-                                                                                                                                             )
-                                                                                                                                           ),
-                                                                                                                                           shiny::fluidRow(
-                                                                                                                                             hs(6,
-                                                                                                                                                shiny::h5(shiny::strong("Interval:")), 
-                                                                                                                                                shiny::numericInput(inputId = ns("ed_meas_interval"), 
-                                                                                                                                                                    label = NULL, 
-                                                                                                                                                                    min = 1, step = 0.5, value = 1)), 
-                                                                                                                                             hs(6,
-                                                                                                                                                shiny::h5(shiny::strong("Interval Unit:")),
-                                                                                                                                                shiny::selectInput(inputId = ns("ed_interval_unit"), 
-                                                                                                                                                                   label = NULL, 
-                                                                                                                                                                   choices = interval_options, 
-                                                                                                                                                                   selected = "hours"))
-                                                                                                                                           ),
-                                                                                                                                           shiny::uiOutput(outputId = ns("ed_imaging_set_up_save"))
+                                                                                                                                           shiny::uiOutput(outputId = ns("ed_imaging_set_up"))
                                                                                                                              )
                                                                                                              ) 
                                                                                                )

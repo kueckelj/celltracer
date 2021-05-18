@@ -14,7 +14,7 @@ updated_object <- function(){}
 #'   \item{\code{cluster_name}}{Character or factor. The cluster variable that is to be joined.}
 #'  }
 #'  
-cluster_df <- function(cluster_df){}
+cluster_df_descr <- function(cluster_df){}
 
 #' input_df
 #' @param input_df A data.frame that contains at least two variables:
@@ -91,9 +91,12 @@ dim_red_df <- function(dim_red_df){}
 #' to display the results.
 #' @param display_points Logical value. If set to TRUE points are used additionally
 #' to display the results.
+#' @param display_smooth Logical value. If set to TRUE a smoothed line is displayed to emphasize 
+#' the overall trend of the data. Use the \code{smooth_*} arguments to additionally adjust they way
+#' the trend is plotted. 
 #' @param display_title Logical value. If set to TRUE an informative title is displayed.
 #' @param force Logical value. Needs to be set to TRUE if you want to overwrite an already existing 
-#' set up. 
+#' set up or already existing results. 
 #' @param image Numeric value. The well-image of interest. 
 #' @param linesize Numeric value. Denotes the size of the lines drawn. 
 #' @param linetype Character value. Valid options are \emph{'solid', 'twodash', 'longdash', 'dotted'}
@@ -115,7 +118,11 @@ dim_red_df <- function(dim_red_df){}
 #' @param method_kmeans Character vector (or value see details for more.) Denotes the algorithm of interest defaults 
 #' to \emph{'Hartigan-Wong'}. 
 #' 
-#' Use \code{validKmeansMethods()} to obtain all valid input options. 
+#' Use \code{validKmeansMethods()} to obtain all valid input options.
+#' 
+#' @param method_outlier Character vector. Specifies the method/algorithm of interest. 
+#' 
+#' Use \code{validOutlierDetectionMethods()} to obtain all valid input options. 
 #' 
 #' @param method_pam Character vector (or value see details for more.) Denotes the algorithm of interest. 
 #' Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.
@@ -136,13 +143,16 @@ dim_red_df <- function(dim_red_df){}
 #' determines the order in which the groups of interest are displayed. Groups that
 #' are not included are dropped which affects the colors with which they are displayed.
 #' 
-#' @param scales,ncol,nrow Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+#' @param scales,space,ncol,nrow Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
 #' are displayed.
 #'
 #' @param simplify Logical. If set to TRUE the output list is simplified to a vector if possible. If set
 #' to FALSE a list is returned.
 #' 
 #' @param smooth Logical. If set to TRUE the values are smoothed. 
+#' @param smooth_clr Character value. Denotes the color of the smoothed line. 
+#' @param smooth_method Character value. Denotes the model type used to display the line. Defaults to 
+#' \emph{'lm'} (linear model). Given to argument \code{method} of function \code{ggplot2::geom_smooth()}.
 #' @param smooth_se Logical. If set to TRUE the standard error will be displayed. 
 #' @param smooth_span NUmeric value. Denotes the smoothing span used. 
 #'

@@ -7,7 +7,7 @@
 getWellPlateNames(object)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \value{
 A character vector.

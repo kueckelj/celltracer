@@ -2,17 +2,150 @@
 
 # EXPORTED ----------------------------------------------------------------
 
+getClusterDf <- function(object, phase = NULL){
+  
+  warning("getClusterDf() deprecated in favor of getGroupingDf()")
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_df <- object@data$grouping[[phase]]
+  
+  base::return(cluster_df)
+  
+}
+
+
+#' @rdname getClusterDf
+#' @export
+getClusterData <- function(object, phase = NULL){
+  
+  warning("getClusterData() is deprecatd in favor of getClusterDf()")
+  
+  check_object(object)
+  
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_df <- object@data$grouping[[phase]]
+  
+  return(cluster_df)
+  
+}
+
+
+#' @title Obtain data slots
+#' 
+#' @description A wrapper around \code{purr::map_df()} and the respective 
+#' list of the data slot of interest. 
+#'
+#' @inherit argument_dummy params
+#' @param data_slot Character value. One of \emph{'stats', 'tracks', 'meta'} or \emph{'cluster'}.
+#'
+#' @return The data.frame of interest. 
+#' @export
+#'
+getData <- function(object, data_slot, phase){
+  
+  warning("This function is deprecated and might be deleted in the future.")
+  
+  if(!time_displaced_tmt(object)){
+    
+    slot_df <- 
+      purrr::map_df(.x = object@data[[data_slot]], .f = ~ .x)
+    
+  } else if(base::all(phase == "all")){
+    
+    slot_df <- 
+      purrr::map_df(.x = object@data[[data_slot]], .f = ~ .x)
+    
+  } else {
+    
+    slot_df <- 
+      purrr::map_df(.x = object@data[[data_slot]][phase], 
+                    .f = ~ .x)
+    
+  }
+  
+  base::return(slot_df)
+  
+}
+
+
+#' @title Obtain names of variables that group the cells 
+#' 
+#' @description This function returns the names of the variables that 
+#' group cell ids and can therefore be used as input for the \code{across}
+#' argument. 
+#'
+#' @inherit argument_dummy params
+#'
+#' @return An informative list. 
+#' @export
+
+getGroupingOptions <- function(object, phase = NULL){
+  
+  warning("deprecated in favor of getGroupingVariableNames()")
+  
+  check_object(object)
+  
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  getVariableNames(object = object, 
+                   phase = phase, 
+                   variable_classes = c("meta", "cluster")
+  )
+  
+}
+
+#' @rdname getGroupingOptions
+#' @export
+getAcrossOptions <- function(object, phase = NULL){
+  
+  warning("getAcrossOptions() is deprecated. Use getGroupingOptions()")
+  
+  getVariableNames(object = object, 
+                   phase = phase, 
+                   variable_classes = c("input", "cluster"))
+  
+}
+
+#' @rdname getGroupNames
+#' @export
+getGroups <- function(object, option){
+  
+  warning("getGroups() is deprecated. Use getGroupNames()")
+  
+  group_vec <- 
+    getMeta(object) %>% 
+    dplyr::pull(var = {{option}}) 
+  
+  if(base::is.factor(group_vec)){
+    
+    base::levels(x = group_vec)
+    
+  } else if(base::is.character(group_vec)){
+    
+    base::unique(group_vec)
+    
+  } else {
+    
+    base::stop(glue::glue("The result of grouping option '{option}' must be a character vector or a factor."))
+    
+  }
+  
+}
+
 
 #' @title Plot dimensional reduction 
 #' 
 #' @description Visualizes the dimensional reduction method of choice.
 #'
-#' @inherit check_object params
-#' @inherit dim_red_method params
-#' @inherit aes_to params
-#' @inherit pt_args 
-#'
-#' @inherit ggplot_return return
 #' @export
 #'
 
@@ -54,34 +187,6 @@ plotDimRed <- function(object,
 #' @description These functions are deprecated in favor of \code{plotDensityplot(),
 #' plotHistogram(), plotRidgplot(), plotBoxplot() and plotViolinplot()}.
 #'
-#' @inherit check_object params
-#' @param variables 
-#' @inherit hlpr_subset_across params
-#' @inherit phase_single params
-#' @param plot_type Character value. One of \emph{'histogram', 'ridgeplot', 'boxplot', 
-#' 'violinplot'} or \emph{'density'} to visualize the value distribution of those 
-#' variables specified via the \code{variables} argument. 
-#'  
-#' If set to \emph{'boxplot'} or \emph{'violinplot'} and only one variable is 
-#' specified statistical test can be performed. 
-#'  
-#'  
-#' @param binwidth Numeric value. Only relevant if \code{plot_type} is set to \emph{'histogram'}.
-#' @param display_points Logical. If set to TRUE the value distribution of \code{n_cells} is additionally
-#' displayed by points. 
-#' @inherit pt_args params
-#' @inherit n_cells params
-#' @inherit aes_to 
-#' @param test_pairwise Character value. One of \emph{'none', 't.test', 'wilcox.test'}. 
-#' @param test_groupwise Character value. One of \emph{'none', 'anova', 'kruskal.test'}.
-#' @param ref_group Character value. Denotes the reference group for the statistical tests. Must 
-#' be one value of the variable specified in \code{across}. 
-#' @inherit colors params 
-#' @param ... Additional arguments given to \code{ggplot2::facet_wrap()}.
-#' @inherit pretty_names params 
-#' @inherit verbose params
-#'
-#' @inherit ggplot_return return
 #' @export
 #'
 
@@ -441,19 +546,6 @@ plotDistribution <- function(object,
 #'
 #' @description This function is deprecated in favor of \code{plotBarchart()}.
 #' 
-#' @inherit check_object params
-#' @param features Character vector. Denotes the discrete variables whoose distribution 
-#' is to be visualized.  
-#' @param feature_compare Character vector or NULL. The discrete feature you want to compare the
-#' features of \code{features} to.
-#' @inherit colors params
-#' @param position Character value. Given to \code{position} of \code{ggplot2::geom_bar()}. One of
-#' \emph{'stack', 'dodge'} or \emph{'fill'}.
-#' @param ... Additional parameters given to \code{ggplot2::facet_wrap()}.
-#' @inherit ggplot_return return
-#' 
-#' @inherit plotDistribution params
-#'
 #' @export
 
 plotDistributionDiscrete <- function(object,
@@ -531,15 +623,6 @@ plotDistributionDiscrete <- function(object,
     ggplot2::labs(y = NULL, x = "Groups / Clusters")
   
 }
-
-
-
-
-
-
-
-
-
 
 
 # NOT EXPORTED ------------------------------------------------------------

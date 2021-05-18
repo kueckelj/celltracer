@@ -16,7 +16,33 @@ plotCorrelationSD(
 )
 }
 \arguments{
+\item{object}{A valid celltracer object.}
+
+\item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
+or \code{'spearman'}.}
+
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
+
 \item{across}{Character vector (!). Denotes all grouping variables of interest.}
+
+\item{relevel}{Logical value. If set to TRUE the input order of \code{across_subset}
+determines the order in which the groups of interest are displayed. Groups that
+are not included are dropped which affects the colors with which they are displayed.}
+
+\item{variables_subset}{Character vector or NULL. Specifies the numeric variables you
+want to be included in the correlation plot.
+
+If set to NULL all of them are chosen. You can prefix variables you do NOT want to influence the clustering
+with a \emph{'-'}. (Saves writing if there are more variables you are interested in
+than variables you are not interested in.)
+
+Use \code{getNumericVariableNames()} to obtain all valid input options.}
+
+\item{signif_level}{Numeric value or NULL. If numeric, specifies the minimum significance level a correlation pair
+must feature in order to be displayed. Insignificant correlation values are crossed out.}
 }
 \value{
 

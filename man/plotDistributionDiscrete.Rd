@@ -14,23 +14,6 @@ plotDistributionDiscrete(
   ...
 )
 }
-\arguments{
-\item{object}{A valid cell tracer object.}
-
-\item{features}{Character vector. Denotes the discrete variables whoose distribution
-is to be visualized.}
-
-\item{feature_compare}{Character vector or NULL. The discrete feature you want to compare the
-features of \code{features} to.}
-
-\item{position}{Character value. Given to \code{position} of \code{ggplot2::geom_bar()}. One of
-\emph{'stack', 'dodge'} or \emph{'fill'}.}
-
-\item{...}{Additional parameters given to \code{ggplot2::facet_wrap()}.}
-}
-\value{
-A ggplot.
-}
 \description{
 This function is deprecated in favor of \code{plotBarchart()}.
 }

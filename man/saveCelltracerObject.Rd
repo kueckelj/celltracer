@@ -7,7 +7,7 @@
 saveCelltracerObject(object, verbose = TRUE)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \description{
 Save Celltracer Object

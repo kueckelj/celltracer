@@ -10,13 +10,15 @@ getCellLines(object)
 getConditions(object, phase = NULL)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \value{
 Character vector.
 }
 \description{
-Obtain cell line and condition names
+Quick wrapper around the functionality of getGroupingVariableNames(). As
+the cell line does not change from experiment phase to experiment phase there is no
+need to specify it.
 }
 \details{
 Useful helper function when it comes to specify conditions and cell lines

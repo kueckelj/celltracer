@@ -6,14 +6,7 @@
 
 #' Title
 #'
-#' @param object 
-#' @param phase 
-#' @param variables_subset 
-#' @param force 
-#' @param verbose 
-#' @param ... 
-#'
-#' @return
+#' @inherit argument_dummy params
 run_dim_red <- function(object,
                         phase = NULL,
                         variables_subset = NULL, 
@@ -108,7 +101,7 @@ get_dim_red_obj <- function(object, phase = NULL, method_dim_red){
   
   numeric_vars <- dim_red_obj@variables_num
   
-  stat_df <- getStatsDf(object, phase = phase)
+  stat_df <- getStatsDf(object, phase = phase, verbose = FALSE)
   
   dim_red_obj@data <- 
     dplyr::select(stat_df, cell_id, dplyr::all_of(numeric_vars)) %>% 
@@ -117,8 +110,7 @@ get_dim_red_obj <- function(object, phase = NULL, method_dim_red){
   
   
   dim_red_obj@meta <- 
-    dplyr::select(stat_df, where(base::is.character), where(base::is.factor)) %>% 
-    dplyr::select(-phase, -dplyr::all_of(well_plate_vars))
+    dplyr::select(stat_df, where(base::is.character), where(base::is.factor))
   
   
   base::return(dim_red_obj)
@@ -146,11 +138,11 @@ plot_dim_red <- function(object,
                          method_dim_red = "pca", 
                          color_by = NULL, 
                          color_aes = "fill",
-                         clrp = NULL, 
+                         pt_clrp = NULL, 
                          clrp_adjust = NULL, 
-                         clrsp = NULL,
                          pt_alpha = NULL, 
                          pt_clr = NULL,
+                         pt_clrsp = NULL,
                          pt_fill = NULL,
                          pt_size = NULL){
   
@@ -164,8 +156,8 @@ plot_dim_red <- function(object,
     dimred.obj = dim_red_obj, 
     clr.by = color_by,
     clr.aes = color_aes, 
-    clrp = clrp, 
-    clrsp = clrsp, 
+    pt.clrp = pt_clrp, 
+    pt.clrsp = pt_clrsp, 
     pt.alpha = pt_alpha, 
     pt.fill = pt_fill, 
     pt.shape = base::ifelse(color_aes == "fill", 21, 19), 
@@ -343,13 +335,13 @@ plotPca <- function(object,
                      phase = NULL, 
                      color_by = NULL, 
                      color_aes = "fill",
-                     clrp = NULL, 
-                     clrp_adjust = NULL, 
-                     clrsp = NULL,
+                     pt_clrp = NULL, 
+                     pt_clrsp = NULL,
                      pt_alpha = NULL, 
                      pt_clr = NULL,
                      pt_fill = NULL,
-                     pt_size = NULL){
+                     pt_size = NULL, 
+                     clrp_adjust = NULL){
   
   plot_dim_red(
     object = object, 
@@ -357,12 +349,13 @@ plotPca <- function(object,
     method_dim_red = "pca",
     color_by = color_by, 
     color_aes = color_aes, 
-    clrp = clrp, 
-    clrsp = clrsp, 
+    pt_clrp = pt_clrp, 
+    pt_clrsp = pt_clrsp, 
     pt_alpha = pt_alpha, 
     pt_clr = pt_clr, 
     pt_fill = pt_fill, 
-    pt_size = pt_size
+    pt_size = pt_size, 
+    clrp_adjust = clrp_adjust
   )
   
 }
@@ -372,16 +365,16 @@ plotPca <- function(object,
 #' @export
 
 plotTsne <- function(object,
-                     phase = NULL, 
-                     color_by = NULL, 
-                     color_aes = "fill",
-                     clrp = NULL, 
-                     clrp_adjust = NULL, 
-                     clrsp = NULL,
-                     pt_alpha = NULL, 
-                     pt_clr = NULL,
-                     pt_fill = NULL,
-                     pt_size = NULL){
+                    phase = NULL, 
+                    color_by = NULL, 
+                    color_aes = "fill",
+                    pt_clrp = NULL, 
+                    pt_clrsp = NULL,
+                    pt_alpha = NULL, 
+                    pt_clr = NULL,
+                    pt_fill = NULL,
+                    pt_size = NULL, 
+                    clrp_adjust = NULL){
   
   plot_dim_red(
     object = object, 
@@ -389,12 +382,13 @@ plotTsne <- function(object,
     method_dim_red = "tsne",
     color_by = color_by, 
     color_aes = color_aes, 
-    clrp = clrp, 
-    clrsp = clrsp, 
+    pt_clrp = pt_clrp, 
+    pt_clrsp = pt_clrsp, 
     pt_alpha = pt_alpha, 
     pt_clr = pt_clr, 
     pt_fill = pt_fill, 
-    pt_size = pt_size
+    pt_size = pt_size, 
+    clrp_adjust = clrp_adjust
   )
   
 }
@@ -403,16 +397,16 @@ plotTsne <- function(object,
 #' @rdname plotPca
 #' @export
 plotUmap <- function(object,
-                     phase = NULL, 
-                     color_by = NULL, 
-                     color_aes = "fill",
-                     clrp = NULL, 
-                     clrp_adjust = NULL, 
-                     clrsp = NULL,
-                     pt_alpha = NULL, 
-                     pt_clr = NULL,
-                     pt_fill = NULL,
-                     pt_size = NULL){
+                    phase = NULL, 
+                    color_by = NULL, 
+                    color_aes = "fill",
+                    pt_clrp = NULL, 
+                    pt_clrsp = NULL,
+                    pt_alpha = NULL, 
+                    pt_clr = NULL,
+                    pt_fill = NULL,
+                    pt_size = NULL, 
+                    clrp_adjust = NULL){
   
   plot_dim_red(
     object = object, 
@@ -420,12 +414,13 @@ plotUmap <- function(object,
     method_dim_red = "umap",
     color_by = color_by, 
     color_aes = color_aes, 
-    clrp = clrp, 
-    clrsp = clrsp, 
+    pt_clrp = pt_clrp, 
+    pt_clrsp = pt_clrsp, 
     pt_alpha = pt_alpha, 
     pt_clr = pt_clr, 
     pt_fill = pt_fill, 
-    pt_size = pt_size
+    pt_size = pt_size, 
+    clrp_adjust = clrp_adjust
   )
   
 }

@@ -4,7 +4,7 @@
 \alias{example_selected}
 \title{Title}
 \usage{
-example_selected(lst, slot = "denoted_columns", col, nth)
+example_selected(lst, slot = "denoted_columns", col, nth, choices = NULL)
 }
 \description{
 Helps to generate the rendered UIs with which to denote the

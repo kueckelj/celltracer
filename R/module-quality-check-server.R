@@ -131,7 +131,7 @@ moduleQualityCheckServer <- function(id, object){
 
 # Observe events ----------------------------------------------------------
       
-      oe <- shiny::observeEvent(input$qc_proceed, {
+      oe <- shiny::observeEvent(input$qc_save_and_proceed, {
         
         checkpoint(
           evaluate = base::is.data.frame(track_df()) && base::nrow(track_df()) > 0, 
@@ -148,6 +148,8 @@ moduleQualityCheckServer <- function(id, object){
           purrr::set_names(nm = base::names(object@set_up$phases))
         
         qc_list$object <- object
+        
+        qc_list$proceed <- input$qc_save_and_proceed
         
         shiny_fdb(in_shiny = TRUE, ui = glue::glue("Results have been saved.  Click on 'Return Celltracer Object' and proceed with processData()."))
         

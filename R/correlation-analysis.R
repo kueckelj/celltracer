@@ -311,7 +311,7 @@ plotCorrplot <- function(object,
 #' a grouping variable - indicating which grouping is responsible for changes
 #' in correlation. 
 #'
-#' @inherit plotCorrelation params 
+#' @inherit plotCorrplot params 
 #' 
 #' @param across Character vector (!). Denotes all grouping variables of interest. 
 #'

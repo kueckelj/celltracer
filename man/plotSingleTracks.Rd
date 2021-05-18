@@ -7,7 +7,7 @@
 plotSingleTracks(object, cell_ids, color_by = NULL, scales = "free")
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{cell_ids}{Character vector. Denotes the cell ids of interest.}
 

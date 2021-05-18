@@ -27,42 +27,6 @@ plotDistribution(
   verbose = TRUE
 )
 }
-\arguments{
-\item{object}{A valid cell tracer object.}
-
-\item{variables}{}
-
-\item{across}{Character value. Denotes the discrete variable in the data.frame
-across which the variables of interest are to be analyzed or displayed. Valid input
-options can be obtained via \code{getAcrossOptions()}.}
-
-\item{across_subset}{Character vector. The groups of interest that the \code{across}-
-variable contains. Valid input options can be obtained via \code{getVariableValues()}.}
-
-\item{plot_type}{Character value. One of \emph{'histogram', 'ridgeplot', 'boxplot',
-'violinplot'} or \emph{'density'} to visualize the value distribution of those
-variables specified via the \code{variables} argument.
-
-If set to \emph{'boxplot'} or \emph{'violinplot'} and only one variable is
-specified statistical test can be performed.}
-
-\item{binwidth}{Numeric value. Only relevant if \code{plot_type} is set to \emph{'histogram'}.}
-
-\item{display_points}{Logical. If set to TRUE the value distribution of \code{n_cells} is additionally
-displayed by points.}
-
-\item{test_pairwise}{Character value. One of \emph{'none', 't.test', 'wilcox.test'}.}
-
-\item{test_groupwise}{Character value. One of \emph{'none', 'anova', 'kruskal.test'}.}
-
-\item{ref_group}{Character value. Denotes the reference group for the statistical tests. Must
-be one value of the variable specified in \code{across}.}
-
-\item{...}{Additional arguments given to \code{ggplot2::facet_wrap()}.}
-}
-\value{
-A ggplot.
-}
 \description{
 These functions are deprecated in favor of \code{plotDensityplot(),
 plotHistogram(), plotRidgplot(), plotBoxplot() and plotViolinplot()}.

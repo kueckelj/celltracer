@@ -7,9 +7,11 @@
 #' @title Set up clustering objects with celltracer
 #' 
 #' @description These functions set up the necessary objects to perform clustering with the 
-#' respective algorithm. 
+#' respective algorithm. See details for more. 
 #'
 #' @inherit argument_dummy
+#' @param scale Logical value. If set to TRUE (the default) all variables will be scaled before clustering is 
+#' performed to ensure that all variables are weighted equally.
 #' @param variables_subset Character vector or NULL. Denotes the numeric variables the subsequent clustering 
 #' steps will include which influences the clustering results. 
 #' 
@@ -18,13 +20,23 @@
 #' than variables you are not interested in.)
 #' 
 #' Use \code{getNumericVariableNames()} to obtain all valid input options.
+#' 
+#' @details The clustering initiation functions set up the S4 object that is used by celltracer to do the clustering. 
+#' Every downstream analysis function depends on the input you specify here. This means in particular the input for 
+#' argument \code{scale} and the input for argument \code{variables_subset}. The latter denotes the variables on which 
+#' the clustering will base on. Changing these might influence the clustering results. If you realize later on that 
+#' you want to change the set up use the respective \code{initiate*Clustering()} function again and set argument \code{force}
+#' to TRUE in order to overwrite the current set up. 
+#' 
+#' @seealso getHclustConv(), getKmeansConv(), getPamConv()
 #'
 #' @return An updated celltracer object. 
 #' @export
 #'
 initiateHierarchicalClustering <- function(object,
+                                           variable_set,
                                            phase = NULL, 
-                                           variables_subset = NULL, 
+                                           scale = TRUE,
                                            force = FALSE, 
                                            verbose = NULL){
   
@@ -33,48 +45,53 @@ initiateHierarchicalClustering <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  cluster_obj <- object@analysis$clustering$hclust[[phase]]
+  cluster_object <- object@analysis$clustering$hclust[[phase]][[variable_set]]
   
-  if(base::class(cluster_obj) != "hclust_conv" | base::isTRUE(force)){
+  variables <- getVariableSet(object, variable_set)
+  
+  if(base::class(cluster_object) != "hclust_conv" | base::isTRUE(force)){
     
     stat_df <- getStatsDf(object = object, 
                           phase = phase,
                           with_cluster = FALSE, 
                           with_meta = FALSE) %>% 
-      dplyr::select(-phase)
+      dplyr::select(cell_id, dplyr::all_of(variables))
     
     cell_ids <- stat_df$cell_id
     stat_df$cell_id <- NULL
     
-    stat_df <- hlpr_select(stat_df, variables_subset = variables_subset)
-    
     stat_df <- base::as.data.frame(stat_df)
     base::rownames(stat_df) <- cell_ids
     
-    cluster_obj <- 
+    cluster_object <- 
       confuns::initiate_hclust_object(
         hclust.data = stat_df, 
         key.name = "cell_id",
+        scale = scale,
         default.aggl = object@default$method_aggl, 
         default.dist = object@default$method_dist, 
         verbose = FALSE
       )
     
-    msg <- glue::glue("Successfully initiated hierarchical clustering for {phase} phase with variables: '{remaining_vars}'", 
-                      remaining_vars = glue::glue_collapse(x = base::colnames(stat_df), sep = "', '", last = "' and '"))
+    msg <- glue::glue("Successfully initiated hierarchical clustering for {phase} phase with '{variable_set}'-variables: '{variables}'", 
+                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '"))
     
     confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
     
   } else {
     
-    msg <- glue::glue("Hierarchical clustering for {phase} phase already exists. Set argument 'force' to TRUE in order to overwrite it.")
+    msg <- glue::glue("Hierarchical clustering for {phase} phase with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.")
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
   }
   
-  object@analysis$clustering$hclust[[phase]] <- cluster_obj
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "hclust", 
+                           phase = phase, 
+                           variable_set = variable_set)
   
   base::return(object)
   
@@ -83,9 +100,10 @@ initiateHierarchicalClustering <- function(object,
 #' @rdname initiateHierarchicalClustering
 #' @export
 initiateKmeansClustering <- function(object,
+                                     variable_set,
                                      phase = NULL, 
-                                     variables_subset = NULL, 
-                                     force = FALSE, 
+                                     scale = TRUE, 
+                                     force = FALSE,
                                      verbose = NULL){
   
   check_object(object)
@@ -93,50 +111,54 @@ initiateKmeansClustering <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  cluster_obj <- object@analysis$clustering$kmeans[[phase]]
+  cluster_object <- object@analysis$clustering$kmeans[[phase]][[variable_set]]
   
-  if(base::class(cluster_obj) != "kmeans_conv" | base::isTRUE(force)){
+  variables <- getVariableSet(object, variable_set = variable_set)
+  
+  if(base::class(cluster_object) != "kmeans_conv" | base::isTRUE(force)){
     
     stat_df <- getStatsDf(object = object, 
                           phase = phase,
                           with_cluster = FALSE, 
                           with_meta = FALSE) %>% 
-      dplyr::select(-phase)
+      dplyr::select(cell_id, dplyr::all_of(x = variables))
     
     cell_ids <- stat_df$cell_id
     stat_df$cell_id <- NULL
     
-    stat_df <- hlpr_select(stat_df, variables_subset = variables_subset)
-    
     stat_df <- base::as.data.frame(stat_df)
     base::rownames(stat_df) <- cell_ids
     
-    cluster_obj <- 
+    cluster_object <- 
       confuns::initiate_kmeans_object(
         kmeans.data = stat_df, 
         key.name = "cell_id",
+        scale = scale, 
         default.method.kmeans = object@default$method_kmeans, 
-        default.centers = object@default$k, 
+        default.centers = 2, 
         verbose = FALSE
-        
       )
     
-    msg <- glue::glue("Successfully initiated kmeans clustering for {phase} phase with variables: '{remaining_vars}'", 
-                      remaining_vars = glue::glue_collapse(x = base::colnames(stat_df), sep = "', '", last = "' and '"))
+    msg <- glue::glue("Successfully initiated kmeans clustering for {phase} phase with '{variable_set}'-variables: '{variables}'", 
+                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '"))
     
     confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
     
   } else {
     
-    msg <- glue::glue("Kmeans clustering for {phase} phase already exists. Set argument 'force' to TRUE in order to overwrite it.")
+    msg <-
+      glue::glue("Kmeans clustering for {phase} phase with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.")
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
   }
   
-  object@analysis$clustering$kmeans[[phase]] <- cluster_obj
-  
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "kmeans", 
+                           phase = phase, 
+                           variable_set = variable_set)  
   base::return(object)
   
 }
@@ -144,8 +166,9 @@ initiateKmeansClustering <- function(object,
 #' @rdname initiateHierarchicalClustering
 #' @export
 initiatePamClustering <- function(object,
+                                  variable_set,
                                   phase = NULL, 
-                                  variables_subset = NULL, 
+                                  scale = TRUE, 
                                   force = FALSE, 
                                   verbose = NULL){
   
@@ -154,46 +177,50 @@ initiatePamClustering <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  cluster_obj <- object@analysis$clustering$pam[[phase]]
+  cluster_object <- object@analysis$clustering$pam[[phase]][[variable_set]]
   
-  if(base::class(cluster_obj) != "pam_conv" | base::isTRUE(force)){
+  variables <- getVariableSet(object, variable_set)
+  
+  if(base::class(cluster_object) != "pam_conv" | base::isTRUE(force)){
     
     stat_df <- getStatsDf(object = object, 
                           phase = phase,
                           with_cluster = FALSE, 
                           with_meta = FALSE) %>% 
-      dplyr::select(-phase)
+      dplyr::select(cell_id, dplyr::all_of(variables))
     
     cell_ids <- stat_df$cell_id
     stat_df$cell_id <- NULL
     
-    stat_df <- hlpr_select(stat_df, variables_subset = variables_subset)
-    
     stat_df <- base::as.data.frame(stat_df)
     base::rownames(stat_df) <- cell_ids
     
-    cluster_obj <- 
+    cluster_object <- 
       confuns::initiate_pam_object(
         pam.data = stat_df, 
+        scale = scale, 
         key.name = "cell_id",
         verbose = FALSE
       )
     
-    msg <- glue::glue("Successfully initiated partitioning around medoids (PAM) clustering for {phase} phase with variables: '{remaining_vars}'", 
-                      remaining_vars = glue::glue_collapse(x = base::colnames(stat_df), sep = "', '", last = "' and '"))
+    msg <- glue::glue("Successfully initiated partitioning around medoids (PAM) clustering for {phase} phase with '{variable_set}'-variables: '{variables}'", 
+                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '"))
     
     confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
-    
   } else {
     
-    msg <- glue::glue("Partitioning around medoids (PAM) clustering clustering for {phase} phase already exists. Set argument 'force' to TRUE in order to overwrite it.")
+    msg <- glue::glue("Partitioning around medoids (PAM) clustering clustering for {phase} phase with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.")
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
   }
   
-  object@analysis$clustering$pam[[phase]] <- cluster_obj
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "pam", 
+                           phase = phase, 
+                           variable_set = variable_set)
   
   base::return(object)
   

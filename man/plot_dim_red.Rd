@@ -10,11 +10,11 @@ plot_dim_red(
   method_dim_red = "pca",
   color_by = NULL,
   color_aes = "fill",
-  clrp = NULL,
+  pt_clrp = NULL,
   clrp_adjust = NULL,
-  clrsp = NULL,
   pt_alpha = NULL,
   pt_clr = NULL,
+  pt_clrsp = NULL,
   pt_fill = NULL,
   pt_size = NULL
 )
@@ -30,11 +30,7 @@ plot_dim_red(
 
 \item{color_aes}{}
 
-\item{clrp}{}
-
 \item{clrp_adjust}{}
-
-\item{clrsp}{}
 
 \item{pt_alpha}{}
 
@@ -43,6 +39,10 @@ plot_dim_red(
 \item{pt_fill}{}
 
 \item{pt_size}{}
+
+\item{clrp}{}
+
+\item{clrsp}{}
 }
 \description{
 Title

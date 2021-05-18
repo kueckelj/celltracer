@@ -22,6 +22,7 @@
 #' @export
 
 computeDistanceMatrices <- function(object,
+                                    variable_set,
                                     phase = NULL,
                                     method_dist = NULL,
                                     force = FALSE,
@@ -33,26 +34,22 @@ computeDistanceMatrices <- function(object,
   
   phase <- check_phase(object, phase, max_phase = 1)
   
-  cluster_obj <- object@analysis$clustering$hclust[[phase]]
+  cluster_object <- getHclustConv(object, variable_set = variable_set, phase = phase)
   
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "hclust_conv",
-    phase = phase, 
-    ref_input = "hierarchical clustering object", 
-    ref_fun = "initiateHierarchicalClustering()"
-  )
-  
-  cluster_obj <- 
+  cluster_object <- 
     confuns::compute_distance_matrices(
-      hcl.obj = cluster_obj, 
+      hcl.obj = cluster_object, 
       methods.dist = method_dist, 
       p = p, 
       force = force, 
       verbose = verbose
     )
   
-  object@analysis$clustering$hclust[[phase]] <- cluster_obj
-  
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "hclust", 
+                           phase = phase, 
+                           variable_set = variable_set)  
   base::return(object)
   
 }
@@ -77,32 +74,34 @@ computeDistanceMatrices <- function(object,
 #' @return An updated celltracer object. 
 #' @export
 #'
-agglomerateHierarchicalCluster <- function(object, phase = NULL, method_dist = NULL, method_aggl = NULL, force = FALSE, verbose = NULL){
+agglomerateHierarchicalCluster <- function(object,
+                                           variable_set,
+                                           phase = NULL,
+                                           method_dist = NULL,
+                                           method_aggl = NULL,
+                                           force = FALSE,
+                                           verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
   phase <- check_phase(object, phase, max_phase = 1)
   
-  cluster_obj <- object@analysis$clustering$hclust[[phase]]
+  cluster_object <- getHclustConv(object, variable_set = variable_set, phase = phase)
   
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "hclust_conv",
-    phase = phase, 
-    ref_input = "hierarchical clustering object", 
-    ref_fun = "initiateHierarchicalClustering()"
-  )
-  
-  cluster_obj <-
+  cluster_object <-
     confuns::compute_hierarchical_cluster(
-      hcl.obj = cluster_obj, 
+      hcl.obj = cluster_object, 
       methods.aggl = method_aggl, 
       methods.dist = method_dist, 
       verbose = verbose
     )
   
-  object@analysis$clustering$hclust[[phase]] <- cluster_obj
-  
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "hclust", 
+                           phase = phase, 
+                           variable_set = variable_set)  
   base::return(object)
   
 }
@@ -110,13 +109,7 @@ agglomerateHierarchicalCluster <- function(object, phase = NULL, method_dist = N
 
 
 
-
-
-
-
 # get-functions -----------------------------------------------------------
-
-
 
 
 #' @title Obtain the original clustering objects 
@@ -133,7 +126,11 @@ agglomerateHierarchicalCluster <- function(object, phase = NULL, method_dist = N
 #' @return The respective clustering results as their original objects. 
 #' @export
 #'
-getHclustObj <- function(object, phase = NULL, method_dist = NULL, method_aggl = NULL){
+getHclustObj <- function(object,
+                         variable_set, 
+                         phase = NULL,
+                         method_dist = NULL,
+                         method_aggl = NULL){
   
   check_object(object)
   assign_default(object)
@@ -142,12 +139,12 @@ getHclustObj <- function(object, phase = NULL, method_dist = NULL, method_aggl =
   
   phase <- check_phase(object, phase, max_phase = 1)
   
-  cluster_obj <- getHclustConv(object, phase = phase)
+  cluster_object <- getHclustConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
   
-  hclust_obj <- cluster_obj@hclust_results[[method_dist]][[method_aggl]]
+  hclust_obj <- cluster_object@hclust_results[[method_dist]][[method_aggl]]
   
   check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "hclust_conv",
+    evaluate = !base::is.null(cluster_object) & base::class(cluster_object) == "hclust_conv",
     phase = phase, 
     ref_input = glue::glue("object hclust of distance method '{method_dist}' and agglomerative method '{method_aggl}'"), 
     ref_fun = "agglomerateHierarchicalCluster()"
@@ -178,7 +175,11 @@ getHclustObj <- function(object, phase = NULL, method_dist = NULL, method_aggl =
 #' @return An updated celltracer object. 
 #' @export
 #'
-discardDistanceMatrix <- function(object, phase = NULL, method_dist = NULL, verbose = NULL){
+discardDistanceMatrix <- function(object,
+                                  variable_set,
+                                  phase = NULL,
+                                  method_dist = NULL,
+                                  verbose = NULL){
   
   check_object(object)
   assign_default(object)
@@ -187,18 +188,22 @@ discardDistanceMatrix <- function(object, phase = NULL, method_dist = NULL, verb
   
   confuns::is_value(method_dist, mode = "character")
   
-  cluster_obj <- getHclustConv(object, phase = phase)
+  cluster_object <- getHclustConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
 
   check_availability(
-    evaluate = !base::is.null(cluster_obj@dist_matrices[[method_dist]]), 
+    evaluate = !base::is.null(cluster_object@dist_matrices[[method_dist]]), 
     phase = phase, 
     ref_input = glue::glue("distance matrix (method = {method_dist})"), 
     ref_fun = "computeDistanceMatrices()"
   )
   
-  cluster_obj@dist_matrices[[method_dist]] <- NULL
+  cluster_object@dist_matrices[[method_dist]] <- NULL
   
-  object@analysis$clustering$hclust[[phase]] <- cluster_obj
+  object <- setClusterConv(object = object, 
+                           cluster_object = cluster_object, 
+                           method = "hclust", 
+                           phase = phase, 
+                           variable_set = variable_set)
   
   confuns::give_feedback(msg = "Discarded.", verbose = verbose)
 
@@ -232,6 +237,7 @@ discardDistanceMatrix <- function(object, phase = NULL, method_dist = NULL, verb
 #' @export
 #'
 plotDendrogram <- function(object, 
+                           variable_set,
                            phase = NULL, 
                            method_dist = NULL, 
                            method_aggl = NULL, 
@@ -253,7 +259,7 @@ plotDendrogram <- function(object,
   
   phase <- check_phase(object, phase, max_phase = 1)
   
-  cluster_obj <- getHclustConv(object, phase = phase)  
+  cluster_object <- getHclustConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)  
   
   if(base::length(method_dist) == 1 & base::length(method_aggl) == 1){
     
@@ -263,7 +269,7 @@ plotDendrogram <- function(object,
     
     p <- 
     confuns::plot_dendrogram(
-      hcl.obj = cluster_obj, 
+      hcl.obj = cluster_object, 
       method.dist = method_dist, 
       method.aggl = method_aggl, 
       k = k, 
@@ -281,7 +287,7 @@ plotDendrogram <- function(object,
     
     p <- 
     confuns::plot_dendrograms(
-      hcl.obj = cluster_obj, 
+      hcl.obj = cluster_object, 
       methods.dist = method_dist, 
       methods.aggl = method_aggl, 
       k = k, 

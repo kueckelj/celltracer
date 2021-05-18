@@ -20,6 +20,123 @@ join_with_meta <- function(object, df, phase){
   
 }
 
+# -----
+
+
+# Analysis extraction ------------------------------------------------------
+
+#' @title Obtain celltracers clustering objects
+#'
+#' @inherit argument_dummy params 
+#'
+#' @return An S4 object of \emph{'hclust_conv'}, \emph{'kmeans_conv'} or \emph{'pam_conv'}.
+#' @export
+#'
+getHclustConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase, max_phase = 1)
+  
+  cluster_object <- object@analysis$clustering$hclust[[phase]][[variable_set]]
+  
+  check_availability(
+    evaluate = !base::is.null(cluster_object) & base::class(cluster_object) == "hclust_conv",
+    phase = phase, 
+    ref_input = glue::glue("hierarchical clustering object with variable set '{variable_set}'"), 
+    ref_fun = "initiateHierarchicalClustering()"
+  )
+  
+  cluster_object <- 
+    hlpr_add_data_to_cluster_object(object, cluster_object, with_data = with_data, phase = phase)
+  
+  base::return(cluster_object)
+  
+}
+
+#' @rdname getHclustConv
+#' @export
+getKmeansConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_object <- object@analysis$clustering$kmeans[[phase]][[variable_set]]
+  
+  check_availability(
+    evaluate = !base::is.null(cluster_object) & base::class(cluster_object) == "kmeans_conv",
+    phase = phase, 
+    ref_input = glue::glue("kmeans clustering object with variable set '{variable_set}'"), 
+    ref_fun = "initiateKmeansClustering()"
+  )
+  
+  cluster_object <- 
+    hlpr_add_data_to_cluster_object(object, cluster_object, with_data = with_data, phase = phase)
+  
+  base::return(cluster_object)
+  
+}
+
+#' @rdname getHclustConv
+#' @export
+getPamConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  cluster_object <- object@analysis$clustering$pam[[phase]][[variable_set]]
+  
+  check_availability(
+    evaluate = !base::is.null(cluster_object) & base::class(cluster_object) == "pam_conv",
+    phase = phase, 
+    ref_input = glue::glue("PAM clustering object with variable set '{variable_set}'"), 
+    ref_fun = "initiatePamClustering()"
+  )
+  
+  cluster_object <- 
+    hlpr_add_data_to_cluster_object(object, cluster_object, with_data = with_data, phase = phase)
+  
+  base::return(cluster_object)
+  
+}
+
+
+#' @title Obtain celltracers correlation objects
+#'
+#' @inherit argument_dummy params
+#'
+#' @return An S4 object of class \emph{'corr_conv'}
+#' @export
+#'
+getCorrConv <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  corr_object <- object@analysis$correlation[[phase]]
+  
+  check_availability(
+    evaluate = !base::is.null(corr_object) & base::class(corr_object) == "corr_conv",
+    phase = phase, 
+    ref_input = "correlation object", 
+    ref_fun = "initiateCorrelation()"
+  )
+  
+  base::return(corr_object)
+  
+}
+
+
+# -----
+
+
 
 # Data extraction ---------------------------------------------------------
 
@@ -31,96 +148,44 @@ join_with_meta <- function(object, df, phase){
 #' @export
 #'
 
-getClusterDf <- function(object, phase = NULL){
+getGroupingDf <- function(object, phase = NULL){
   
   check_object(object)
   assign_default(object)
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  cluster_df <- object@data$cluster[[phase]]
+  group_df <- object@data$grouping[[phase]]
   
-  base::return(cluster_df)
+  base::return(group_df)
   
-}
-
-
-#' @rdname getClusterDf
-#' @export
-getClusterData <- function(object, phase = NULL){
-  
-  warning("deprecatd in favor of getClusterDf()")
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  object@data$cluster[[phase]]
   
 }
-
-#' @title Obtain data slots
-#' 
-#' @description A wrapper around \code{purr::map_df()} and the respective 
-#' list of the data slot of interest. 
-#'
-#' @inherit argument_dummy params
-#' @param data_slot Character value. One of \emph{'stats', 'tracks', 'meta'} or \emph{'cluster'}.
-#'
-#' @return The data.frame of interest. 
-#' @export
-#'
-getData <- function(object, data_slot, phase){
-  
-  warning("This function is deprecated and might be deleted in the future.")
-  
-  if(!time_displaced_tmt(object)){
-    
-    slot_df <- 
-      purrr::map_df(.x = object@data[[data_slot]], .f = ~ .x)
-    
-  } else if(base::all(phase == "all")){
-    
-    slot_df <- 
-      purrr::map_df(.x = object@data[[data_slot]], .f = ~ .x)
-    
-  } else {
-    
-    slot_df <- 
-      purrr::map_df(.x = object@data[[data_slot]][phase], 
-                    .f = ~ .x)
-    
-  }
-  
-  base::return(slot_df)
-  
-}
-
 
 
 #' @title Obtain meta data
 #'
 #' @inherit check_object params
 #'
-#' @return The data.frame of interest. 
+#' @return A data.frame with all variables providing meta information about cells of 
+#' the track data.frame. (such as condition, cell line, well plate belonging etc.)
 #' @export
 #'
 
-getMetaDf <- function(object, phase = NULL){
+getMetaDf <- function(object){
   
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase, max_phases = 1)
+  meta_df <- object@data$meta
   
-  object@data$meta[[phase]]
+  base::return(meta_df)
   
 }
 
 #' @title Obtain stat data.frame 
 #'
-#' @inherit check_object params
-#' @inherit with_meta params
-#' @inherit with_cluster params
-#' @inherit phase_all params
+#' @inherit argument_dummy params
 #'
 #' @return A data.frame with all numeric variables summarizing the measurements of 
 #' the track data.frame. 
@@ -128,7 +193,7 @@ getMetaDf <- function(object, phase = NULL){
 #' @export
 #'
 
-getStatsDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL){
+getStatsDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL, verbose = NULL){
   
   check_object(object)
   assign_default(object)
@@ -140,7 +205,7 @@ getStatsDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NU
   # add cluster
   if(base::isTRUE(with_cluster)){
     
-    cluster_df <- dplyr::select(object@data$cluster[[phase]], -phase)  
+    cluster_df <- dplyr::select(object@data$grouping[[phase]], -phase)  
     
     if(base::ncol(cluster_df) == 1){
       
@@ -154,7 +219,9 @@ getStatsDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NU
         
       }
       
-      base::warning(glue::glue("You set 'with_cluster' to TRUE but no cluster variables have been calculated yet{add}"))
+      msg <- glue::glue("You set 'with_cluster' to TRUE but no cluster variables have been calculated yet{add}")
+      
+      confuns::give_feedback(msg = msg, verbose = verbose)
       
     } else {
       
@@ -167,7 +234,7 @@ getStatsDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NU
   # add meta
   if(base::isTRUE(with_meta)){
     
-    meta_df <- dplyr::select(object@data$meta[[phase]], -phase)
+    meta_df <- getMetaDf(object)
     
     stat_df <- dplyr::left_join(x = stat_df, y = meta_df, by = "cell_id")
     
@@ -185,12 +252,7 @@ getStats <- getStatsDf
 
 #' @title Obtain track data.frame. 
 #'
-#' @inherit check_object params
-#' @inherit with_meta params
-#' @inherit with_cluster params
-#' @inherit phase_all params
-#' @inherit phase_cluster params
-#' @inherit verbose params
+#' @inherit argument_dummy params
 #'
 #' @return A data.frame in which each observation refers to a cell at a given frame.
 #' 
@@ -212,7 +274,7 @@ getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = N
       
       if(base::isTRUE(with_meta)){
         
-        meta_df <- dplyr::select(object@data$meta[[p]], -phase)
+        meta_df <- getMetaDf(object)
         
         track_df <- dplyr::left_join(x = track_df, y = meta_df, by = "cell_id")
         
@@ -225,7 +287,7 @@ getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = N
   
   if(base::isTRUE(with_cluster) & base::length(phase) == 1){
     
-    cluster_df <- dplyr::select(object@data$cluster[[phase]], - phase)
+    cluster_df <- dplyr::select(object@data$grouping[[phase]], - phase)
     
     if(base::ncol(cluster_df) == 1){
       
@@ -251,115 +313,124 @@ getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = N
 getTracks <- getTracksDf
 
 
-
-# -----
-
-
-
-
-# Cluster extraction ------------------------------------------------------
-
-#' @title Obtain celltracers clustering objects
-#'
-#' @inherit argument_dummy params 
-#'
-#' @return An S4 object of \emph{'hclust_conv'}, \emph{'kmeans_conv'} or \emph{'pam_conv'}.
-#' @export
-#'
-getHclustConv <- function(object, phase = NULL){
-  
-  check_object(object)
-  assign_default(object)
-  
-  phase <- check_phase(object, phase, max_phase = 1)
-  
-  cluster_obj <- object@analysis$clustering$hclust[[phase]]
-  
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "hclust_conv",
-    phase = phase, 
-    ref_input = "hierarchical clustering object", 
-    ref_fun = "initiateHierarchicalClustering()"
-  )
-  
-  base::return(cluster_obj)
-  
-}
-
-#' @rdname getHclustConv
-#' @export
-getKmeansConv <- function(object, phase = NULL){
-  
-  check_object(object)
-  assign_default(object)
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_obj <- object@analysis$clustering$kmeans[[phase]]
-  
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "kmeans_conv",
-    phase = phase, 
-    ref_input = "kmeans clustering object", 
-    ref_fun = "initiateKmeansClustering()"
-  )
-  
-  base::return(cluster_obj)
-  
-}
-
-#' @rdname getHclustConv
-#' @export
-getPamConv <- function(object, phase = NULL){
-  
-  check_object(object)
-  assign_default(object)
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_obj <- object@analysis$clustering$pam[[phase]]
-  
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "pam_conv",
-    phase = phase, 
-    ref_input = "partitioning around medoids (PAM) clustering object", 
-    ref_fun = "initiatePamClustering()"
-  )
-  
-  base::return(cluster_obj)
-  
-}
-
-
-#' @title Obtain celltracers correlation objects
+#' @title Obtain defined sets of variables
+#' 
+#' @description Convenient access to defined sets of variables or names 
+#' mentioned sets. 
 #'
 #' @inherit argument_dummy params
+#' @param variable_set Character value. The name of the variable set of interest.
 #'
-#' @return An S4 object of class \emph{'corr_conv'}
+#' @return A list of character vectors or a character vector of names. 
 #' @export
 #'
-getCorrConv <- function(object, phase = NULL){
+
+getVariableSet <- function(object, variable_set){
   
-  check_object(object)
-  assign_default(object)
+  var_set <- object@variable_sets[[variable_set]]
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_obj <- object@analysis$correlation[[phase]]
-  
-  check_availability(
-    evaluate = !base::is.null(cluster_obj) & base::class(cluster_obj) == "corr_conv",
-    phase = phase, 
-    ref_input = "correlation object", 
-    ref_fun = "initiateCorrelation()"
+  confuns::check_one_of(
+    input = variable_set, 
+    against = base::names(object@variable_sets), 
+    fdb.opt = 2, 
+    ref.opt.2 = "defined variable sets"
   )
   
-  base::return(cluster_obj)
+  base::return(var_set)
+  
+}
+
+#' @rdname getVariableSet
+#' @export
+getVariableSets <- function(object){
+  
+  object@variable_sets
+  
+}
+
+#' @rdname getVariableSet
+#' @export
+getVariableSetNames <- function(object){
+  
+  base::names(object@variable_sets)
   
 }
 
 
 # -----
+
+
+
+
+
+# Outlier detection -------------------------------------------------------
+
+#' @title Obtain outlier detection results 
+#' 
+#' @description These functions can be used to extract the results of the outlier 
+#' detection algorithms. 
+#'
+#' @inherit argument_dummy params
+#' 
+#' @return \code{getOutlierResults()} returns a list in which each slot contains 
+#' the results for a specific method. \code{getOutlierIds()} returns a character 
+#' vector of cell ids containing all cell ids that have been detected as outliers
+#' by at least one method.
+#' @export
+#'
+getOutlierResults <- function(object, method_outlier = NULL, check = TRUE){
+  
+  check_object(object)
+  assign_default(object)
+  
+  if(base::isTRUE(check)){
+    
+    if(!existOutlierResults(object)){
+      
+      base::stop("Did not find any outlier detection results.")
+      
+    }
+    
+  }
+  
+  outlier_list <- object@analysis$outlier_detection
+  
+  if(base::is.character(method_outlier)){
+    
+    confuns::check_vector(
+      input = method_outlier,
+      against = base::names(outlier_list), 
+      ref.input = "input for argument 'method_outlier'", 
+      ref.against = "methods with which outliers have been detected", 
+      fdb.fn = "stop")
+    
+    outlier_list <- outlier_list[method_outlier]
+    
+  }
+  
+  base::return(outlier_list)
+  
+}
+
+#' @rdname getOutlierResults
+#' @export
+getOutlierIds <- function(object, method_outlier = NULL, check = FALSE){
+  
+  outlier_list <- getOutlierResults(object, check = check)
+  
+  outlier_ids <-  
+    purrr::map(outlier_list, .f = ~ purrr::flatten(.x = .x)) %>% 
+    purrr::flatten() %>% 
+    purrr::flatten_chr() %>% 
+    base::unique()
+  
+  base::return(outlier_ids)
+  
+}
+
+
+# -----
+
 
 # Other Info extraction ----------------------------------------------------
 
@@ -367,20 +438,31 @@ getCorrConv <- function(object, phase = NULL){
 
 
 #' @title Obtain group names a grouping variable contains
+#' 
+#' @description This function returns the names of the groups in which a specific grouping
+#' variable groups the cells. Useful to obtain input options for arguments like \code{across_subset}. 
 #'
-#' @inherit check_object params
-#' @param option Character value. Denotes the discrete variable - the grouping of cells - 
-#' of interest. Use \code{getGroupingOptions()} to obtain all valid input options. 
+#' @inherit argument_dummy params
+#' @param grouping_variable Character value. Denotes the discrete variable - the grouping of cells - 
+#' of interest. Use \code{getGroupingVariableNames()} to obtain all valid input options. 
 #'
 #' @return Character vector of group names. 
 #' 
+#' @examples 
+#' 
+#'  all_conditions <- getGroupNames(object, grouping_variable = "condition")
+#'  
+#'  all_cell_lines <- getGroupNames(object, grouping_variable = "cell_line")
+#'  
+#'  pam_k4_cluster <- getGroupNames(object, grouping_variable = "pam_euclidean_k_4")
+#' 
 #' @export
 
-getGroupNames <- function(object, option, phase = "all"){
+getGroupNames <- function(object, grouping_variable, phase = "all"){
   
   group_vec <- 
     getStats(object = object, phase = phase) %>% 
-    dplyr::pull(var = {{option}}) 
+    dplyr::pull(var = {{grouping_variable}}) 
   
   if(base::is.factor(group_vec)){
     
@@ -392,7 +474,7 @@ getGroupNames <- function(object, option, phase = "all"){
     
   } else {
     
-    msg <- glue::glue("The result of grouping option '{option}' must be a character vector or a factor.")
+    msg <- glue::glue("The result of grouping variable '{option}' must be a character vector or a factor.")
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop")
     
@@ -400,89 +482,135 @@ getGroupNames <- function(object, option, phase = "all"){
   
 }
 
-#' @rdname getGroupNames
-#' @export
-getGroups <- function(object, option){
-  
-  warning("getGroups() is deprecated. Use getGroupNames()")
-  
-  group_vec <- 
-    getMeta(object) %>% 
-    dplyr::pull(var = {{option}}) 
-  
-  if(base::is.factor(group_vec)){
-    
-    base::levels(x = group_vec)
-    
-  } else if(base::is.character(group_vec)){
-    
-    base::unique(group_vec)
-    
-  } else {
-    
-    base::stop(glue::glue("The result of grouping option '{option}' must be a character vector or a factor."))
-    
-  }
-  
-}
 
-
-#' @title Obtain variable names that group the cells 
+#' @title Obtain variable names of your data
 #' 
-#' @description This function returns the names of the variables that 
-#' group cell ids and can therefore be used as input for the \code{across}
-#' argument. 
+#' @description Convenient access to the names of your objects data variables. Useful to 
+#' obtain vectors of variable names as input for recurring arguments like \code{variables}.
 #'
-#' @inherit check_object params
-#' @inherit phase_single params
-#'
-#' @return An informative list. 
+#' @inherit argument_dummy params
+#' @param ... Additional selection helpers from the \code{tidyselect} package that match 
+#' variable names according to a given pattern. 
+#' 
+#' @return A character vector. 
+#' 
+#' @seealso starts_with(), ends_with(), contains(), matches()
+#' 
 #' @export
+#' 
+#' @examples 
+#' 
+#'  # returns all stat variable names starting with 'mean'
+#'  mean_vars <- getStatVariableNames(object, starts_with("mean"))
+#'  
+#'  plotBoxplot(object, variables = mean_vars)
 
-getGroupingOptions <- function(object, phase = NULL){
+getGroupingVariableNames <- function(object, ..., phase = NULL){
+  
+  check_object(object)
+  
+  assign_default(object)
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  getVariableNames(object = object, 
-                   phase = phase, 
-                   variable_classes = c("meta", "cluster")
-                   )
+  group_df <- 
+    getGroupingDf(object, phase = phase) %>% 
+    dplyr::select(-phase, -cell_id)
+  
+  selected_df <- dplyr::select(group_df, ...)
+  
+  if(base::ncol(selected_df) == 0){
+    
+    # if TRUE then ncol == 0 because selection resulted in no vars
+    selection_helpers_provided <- 
+      base::tryCatch({
+        
+        # leads to error if tidyselection specified
+        list(...)
+        
+      }, error = function(error){
+        
+         TRUE
+        
+      })
+    
+    if(base::isTRUE(selection_helpers_provided)){
+      
+      base::stop("Tidyselect input resulted in no variables.")
+      
+      # if FALSE then ncol == 0 because no tidyselection specified: return all variable names
+    } else {
+      
+      selected_df <- group_df
+      
+    }
+    
+  }
+  
+  grouping_vars <- 
+    base::colnames(selected_df)
+  
+  base::return(grouping_vars)
   
 }
 
-#' @rdname getGroupingOptions
-#' @export
-getAcrossOptions <- function(object, phase = NULL){
+
+#' @rdname getClusterVariableNames
+#' @export 
+getStatVariableNames <- function(object, ..., phase = NULL){
   
-  warning("getAcrossOptions() is deprecated. Use getGroupingOptions()")
+  check_object(object)
+  assign_default(object)
   
-  getVariableNames(object = object, 
-                   phase = phase, 
-                   variable_classes = c("input", "cluster"))
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  stat_df <-
+    getStatsDf(object, with_meta = FALSE, with_cluster = FALSE) %>% 
+    dplyr::select(-cell_id, -phase)
+  
+  selected_df <- dplyr::select(stat_df, ...)
+  
+  if(base::ncol(selected_df) == 0){
+    
+    # if TRUE then ncol == 0 because selection resulted in no vars
+    selection_helpers_provided <- 
+      base::tryCatch({
+        
+        # leads to error if tidyselection specified
+        list(...)
+        
+      }, error = function(error){
+        
+        TRUE
+        
+      })
+    
+    if(base::isTRUE(selection_helpers_provided)){
+      
+      base::stop("Tidyselect input resulted in no variables.")
+      
+      # if FALSE then ncol == 0 because no tidyselection specified: return all variable names
+    } else {
+      
+      selected_df <- stat_df
+      
+    }
+    
+  }
+  
+  
+  stat_variable_names <- 
+    base::colnames(selected_df)
+  
+  base::return(stat_variable_names)
   
 }
 
 
-#' @title Obtain all numeric stat-variables
-#'
-#' @inherit check_object params
-#'
-#' @return A character vector. 
-#' @export
-#'
-
-getStatVariableNames <- function(object){
-  
-  getStatsDf(object, with_meta = FALSE, with_cluster = FALSE) %>% 
-    dplyr::select(-cell_id, -phase) %>% 
-    base::colnames()
-  
-}
 
 
 #' @title Obtain well plate information 
 #'
-#' @inherit check_object params
 #' @inherit argument_dummy params
 #'
 #' @return A data.frame in which each row contains information about a well. 
@@ -504,7 +632,6 @@ getWellPlateDf <- function(object, well_plate = NULL){
 
 #' @title Obtain well plate names
 #'
-#' @inherit check_object params
 #' @inherit argument_dummy params
 #'
 #' @return A character vector. 
@@ -523,8 +650,7 @@ getWellPlateNames <- function(object){
 #' all unique values/levels are returned. If the variable is numeric it is given to 
 #' \code{psych::describe()} which returns a statistical summary. 
 #'
-#' @inherit check_object params
-#' @inherit phase_single params  
+#' @inherit argument_dummy params 
 #' @param variable_name Character value. Denotes the variable of interest. Valid inputs can be 
 #' obtained via the function \code{getVariableNames()}.
 #'
@@ -566,6 +692,10 @@ getVariableValues <- function(object, phase = NULL, variable_name){
 
 
 #' @title Obtain cell line and condition names 
+#' 
+#' @description Quick wrapper around the functionality of getGroupingVariableNames(). As 
+#' the cell line does not change from experiment phase to experiment phase there is no 
+#' need to specify it.
 #'
 #' @inherit check_object params 
 #'
@@ -578,8 +708,11 @@ getVariableValues <- function(object, phase = NULL, variable_name){
 
 getCellLines <- function(object){
   
-  getMetaDf(object, phase = "first") %>% 
-    dplyr::pull(var = "cell_line") %>% 
+  check_object(object)
+  assign_default(object)
+  
+  getMetaDf(object) %>%
+    dplyr::pull(cell_line) %>%
     base::levels()
   
 }
@@ -594,9 +727,10 @@ getConditions <- function(object, phase = NULL){
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  getMeta(object, phase = phase) %>% 
-    dplyr::pull(var = "condition") %>% 
+  getGroupingDf(object, phase = phase) %>% 
+    dplyr::pull(condition) %>% 
     base::levels()
+  
   
 }
 
@@ -627,7 +761,7 @@ getCategoricalVariablesNames <- function(object, phase = NULL){
 #' @rdname getCategoricalVariablesNames
 getNumericVariableNames <- function(object){
   
-  getStats(object = object) %>% 
+  getStatsDf(object = object) %>% 
     dplyr::select_if(.predicate = base::is.numeric) %>% 
     base::colnames()
   
@@ -681,7 +815,7 @@ getIntervalUnit <- function(object){
 #' @rdname getCategoricalVariablesNames
 getPhases <- function(object){
   
-  object@data$tracks %>% base::names()
+  object@set_up$phases %>% base::names()
   
 }
 

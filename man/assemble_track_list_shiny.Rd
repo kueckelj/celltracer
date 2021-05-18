@@ -7,7 +7,7 @@
 assemble_track_list_shiny(track_data_list, well_plate_list, object)
 }
 \arguments{
-\item{track_data_list}{The output of \code{load_cell_track_files_shiny}.}
+\item{track_data_list}{The output of \code{load_track_files_shiny()}.}
 }
 \value{
 A track data.frame

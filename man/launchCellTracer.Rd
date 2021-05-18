@@ -7,7 +7,7 @@
 launchCellTracer(object = NULL)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 }
 \description{
 Opens an interactive application in which most of the

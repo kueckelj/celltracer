@@ -172,7 +172,7 @@ loadData <- function(object){
           
           ld_list <- shiny::reactiveValuesToList(ld_results)
           
-          if(base::isTRUE(ld_list$proceed)){
+          if(shiny::isTruthy(ld_list$proceed)){
             
             color <- "success"
             
@@ -210,6 +210,12 @@ loadData <- function(object){
           
           ct_object@set_up$progress$load_data <- TRUE
           
+          if(!isTimeLapseExp(ct_object)){
+            
+            ct_object@set_up$progress$quality_check <- TRUE
+            
+          }
+          
           shiny::stopApp(returnValue = ct_object)
           
         })
@@ -234,6 +240,12 @@ loadData <- function(object){
 checkDataQuality <- function(object){
   
   check_object(object, set_up_req = "load_data")
+  
+  if(!isTimeLapseExp(object)){
+    
+    base::stop("Provided object does not contain time lapse information. Proceed with function 'processData()'.")
+    
+  }
   
   shiny::runApp(
     shiny::shinyApp(
@@ -285,7 +297,7 @@ checkDataQuality <- function(object){
           
           qc_list <- shiny::reactiveValuesToList(qc_results)
           
-          if(base::isTRUE(qc_list$proceed)){
+          if(shiny::isTruthy(qc_list$proceed)){
             
             color <- "success"
             
@@ -350,92 +362,154 @@ checkDataQuality <- function(object){
 #'
 processData <- function(object, verbose = TRUE){
   
-  check_object(object, set_up_req = "check_quality")
+  check_object(object, set_up_req = "quality_check")
   
   # post process track list
-  confuns::give_feedback(msg = "Processing tracking data.", verbose = verbose)
-  
-  object@data$tracks <- 
-    purrr::map2(.x = object@data$tracks,
-                .y = getPhases(object),
-                itvl = object@set_up$itvl,
-                itvl_u = object@set_up$itvl_u,
-                software = object@set_up$software,
-                verbose = verbose,
-                .f = function(df, phase, itvl, itvl_u, software, verbose){
-                 
-                 mutated_df <- 
-                   dplyr::mutate(
-                     .data = df, 
-                     frame_num = frame,
-                     frame_time = frame * itvl,
-                     frame_itvl = stringr::str_c(frame_time, itvl_u, sep = " "),
-                     frame = NULL) %>% 
-                   dplyr::filter(frame_num <= object@set_up$nom)
-                 
-                 if(software$name == "cell_profiler" && base::isTRUE(software$tracking)){
-                   
-                   confuns::give_feedback(msg = glue::glue("Computing migration data from {phase} phase."), verbose = verbose)
-                   
-                   mutated_df <- 
-                     dplyr::group_by(.data = mutated_df, cell_id) %>% 
-                     dplyr::mutate(
-                       dfo = compute_distances_from_origin(x_coords, y_coords),
-                       dflp = compute_distances_from_last_point(x_coords, y_coords), 
-                       speed = dflp / object@set_up$itvl
-                     )
-                   
-                   final_df <-
-                     dplyr::select(.data = mutated_df,
-                                   cell_id, x_coords, y_coords, speed, dfo, dflp,
-                                   dplyr::starts_with(match = "frame"), 
-                                   dplyr::everything() 
-                     ) %>% 
-                     dplyr::select(-dplyr::all_of(meta_variables))
-                   
-                 } else {
-                   
-                   final_df <- mutated_df
-                   
-                 }
-                 
-                 base::return(final_df)
-                 
-    }) %>% 
-    purrr::set_names(nm = getPhases(object))
-  
-  # compute statistics 
-  object@data$stats <- 
-    purrr::map2(.x = object@data$tracks,
-                .y = getPhases(object),
-                software = object@set_up$software,
-                .f = compute_cell_stats,
-                verbose = verbose
-                ) %>% 
-    purrr::set_names(nm = getPhases(object))
-  
+  confuns::give_feedback(msg = "Processing data.", verbose = verbose)
   
   # create meta data 
   confuns::give_feedback(msg = "Creating cell meta data.", verbose = verbose)
   
-  object@data$meta <- 
-    purrr::map2(.x = object@data$tracks, 
-                .y = getPhases(object), 
-                .f = hlpr_create_meta_data, 
-                verbose = verbose) %>% 
-    purrr::set_names(nm = getPhases(object))
+  data_slot <- base::ifelse(test = isTimeLapseExp(object), yes = "tracks", no = "stats")
   
-  # create cluster data
-  object@data$cluster <- 
-    purrr::map2(.x = object@data$meta, 
+  object@data$meta <-
+    purrr::map_df(object@data[[data_slot]], .f = ~ .x) %>% 
+    dplyr::select(dplyr::all_of(x = meta_variables)) %>% 
+    dplyr::distinct()
+  
+  # create grouping data
+  confuns::give_feedback(msg = "Creating cell grouping data.", verbose = verbose)
+  
+  object@data$grouping <- 
+    purrr::map2(.x = object@data[[data_slot]], 
                 .y = getPhases(object), 
                 .f = function(df, phase){
                   
-                  dplyr::select(df, cell_id) %>% 
-                    dplyr::mutate(phase = {{phase}})
+                  dplyr::mutate(df, phase = {{phase}}) %>% 
+                    dplyr::select(cell_id, phase, cell_line, condition) %>% 
+                    dplyr::distinct()
                   
                 }) %>% 
     purrr::set_names(nm = getPhases(object))
+  
+  # declare module usability
+  if(isTimeLapseExp(object)){
+    
+    # module: migration (TRUE if coordinates vars are available )
+    coords_available <- base::all(c("x_coords", "y_coords") %in% base::names(set_up$example$denoted_columns))
+    object@information$modules$migration <- coords_available
+    
+    
+  } else {
+    
+    # module: migration 
+    object@information$modules$migration <- FALSE
+    
+  }
+  
+  
+  # process time lapse data if available 
+  if(isTimeLapseExp(object)){
+    
+    object@data$tracks <- 
+      purrr::map2(.x = object@data$tracks,
+                  .y = getPhases(object),
+                  set_up = object@set_up,
+                  verbose = verbose,
+                  .f = function(df, phase, set_up, verbose){
+                    
+                    itvl <- set_up$itvl
+                    itvl_u <- set_up$itvl_u
+                    exp_type <- set_up$experiment_type
+                    
+                    mutated_df <- 
+                      dplyr::mutate(
+                        .data = df, 
+                        frame_num = frame,
+                        frame_time = frame * itvl,
+                        frame_itvl = stringr::str_c(frame_time, itvl_u, sep = " "),
+                        frame = NULL) %>% 
+                      dplyr::filter(frame_num <= object@set_up$nom)
+                    
+                    if(isTimeLapseExp(object)){
+                      
+                      confuns::give_feedback(msg = glue::glue("Computing migration data from {phase} phase."), verbose = verbose)
+                      
+                      mutated_df <- 
+                        dplyr::group_by(.data = mutated_df, cell_id) %>% 
+                        dplyr::mutate(
+                          dfo = compute_distances_from_origin(x_coords, y_coords),
+                          dflp = compute_distances_from_last_point(x_coords, y_coords), 
+                          speed = dflp / object@set_up$itvl
+                        )
+                      
+                      final_df <-
+                        dplyr::select(.data = mutated_df,
+                                      cell_id, x_coords, y_coords, speed, dfo, dflp,
+                                      dplyr::starts_with(match = "frame"), 
+                                      dplyr::everything() 
+                        ) %>% 
+                        dplyr::select(-dplyr::starts_with(match = "well"))
+                      
+                    } else {
+                      
+                      final_df <- mutated_df
+                      
+                    }
+                    
+                    base::return(final_df)
+                    
+                  }) %>% 
+      purrr::set_names(nm = getPhases(object))
+    
+    # compute statistics 
+    object@data$stats <- 
+      purrr::map2(.x = object@data$tracks,
+                  .y = getPhases(object),
+                  object = object,
+                  .f = compute_cell_stats,
+                  verbose = verbose
+      ) %>% 
+      purrr::set_names(nm = getPhases(object))
+    
+  } else {
+    
+    cnames <- base::colnames(object@data$stats$first)
+    
+    # shift cell location info to track data if available 
+    if(base::all(c("x_coords", "y_coords") %in% cnames)){
+      
+      object@data$tracks$first <- 
+        dplyr::select(object@data$stats$first, cell_id, phase, x_coords, y_coords) %>% 
+        dplyr::mutate(frame_num = 1)
+      
+    }
+    
+    if("x_coords" %in% cnames){
+      
+      object@data$stats$first$x_coords <- NULL
+      
+    }
+    
+    if("y_coords" %in% cnames){
+      
+      object@data$stats$first$y_coords <- NULL
+      
+    }
+    
+    # process statistics
+    object@data$stats$first <-
+      dplyr::select(object@data$stats$first, -dplyr::starts_with("well"), -cell_line, -condition, -cl_condition)
+    
+  }
+  
+  # compute variable summary 
+  confuns::give_feedback(msg = "Computing variable statistics.", verbose = verbose)
+  
+  object <- compute_variable_statistics(object)
+  
+  
+  object@default <- c(object@default, default_list)
   
   object@set_up$progress$process_data <- TRUE
   

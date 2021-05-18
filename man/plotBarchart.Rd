@@ -7,7 +7,7 @@
 plotBarchart(
   object,
   variables,
-  phase = "all",
+  phase = NULL,
   across = NULL,
   across_subset = NULL,
   relevel = TRUE,
@@ -21,7 +21,7 @@ plotBarchart(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{variables}{Character vector. The grouping variables whose group count or
 proportion you want to display. Must not contain the feature specified in

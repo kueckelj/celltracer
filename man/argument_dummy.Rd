@@ -7,7 +7,7 @@
 argument_dummy(object, phase, pt_alpha, pt_clr, pt_clrp, pt_clrsp, pt_size)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -75,10 +75,14 @@ to display the results.}
 \item{display_points}{Logical value. If set to TRUE points are used additionally
 to display the results.}
 
+\item{display_smooth}{Logical value. If set to TRUE a smoothed line is displayed to emphasize
+the overall trend of the data. Use the \code{smooth_*} arguments to additionally adjust they way
+the trend is plotted.}
+
 \item{display_title}{Logical value. If set to TRUE an informative title is displayed.}
 
 \item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
-set up.}
+set up or already existing results.}
 
 \item{image}{Numeric value. The well-image of interest.}
 
@@ -106,6 +110,10 @@ to \emph{'Hartigan-Wong'}.
 
 Use \code{validKmeansMethods()} to obtain all valid input options.}
 
+\item{method_outlier}{Character vector. Specifies the method/algorithm of interest.
+
+Use \code{validOutlierDetectionMethods()} to obtain all valid input options.}
+
 \item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
 Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}
 
@@ -119,13 +127,18 @@ variables into more aesthetically pleasing ones.}
 determines the order in which the groups of interest are displayed. Groups that
 are not included are dropped which affects the colors with which they are displayed.}
 
-\item{scales, ncol, nrow}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
+\item{scales, space, ncol, nrow}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
 are displayed.}
 
 \item{simplify}{Logical. If set to TRUE the output list is simplified to a vector if possible. If set
 to FALSE a list is returned.}
 
 \item{smooth}{Logical. If set to TRUE the values are smoothed.}
+
+\item{smooth_clr}{Character value. Denotes the color of the smoothed line.}
+
+\item{smooth_method}{Character value. Denotes the model type used to display the line. Defaults to
+\emph{'lm'} (linear model). Given to argument \code{method} of function \code{ggplot2::geom_smooth()}.}
 
 \item{smooth_se}{Logical. If set to TRUE the standard error will be displayed.}
 

@@ -4,15 +4,24 @@
 \alias{plotCellCount}
 \title{Plot cell count}
 \usage{
-plotCellCount(object, across, color_by)
+plotCellCount(object, across, color_by = across, phase = NULL)
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{across}{Character value or NULL. Specifies the grouping variable of interest.
 
 Use \code{getGroupingOptions()} to obtain all variable names that group the
 cells of your experiment in a certain manner.}
+
+\item{color_by}{Character value. Denotes the discrete variable with
+which to color the columns of the plot. Defaults to input for
+argument \code{across}.}
+
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
 }
 \value{
 A ggplot.

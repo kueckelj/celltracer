@@ -27,8 +27,7 @@ file_regex <- "[A-Z]{1}\\d{1,2}_\\d{1}\\.(csv|xls|xlsx)$"
 
 # Column names ------------------------------------------------------------
 
-non_data_track_variables <- c("well", "well_image", "well_plate_index", "well_plate_name",
-                             "frame_itvl", "frame_num", "frame_time", "cell_line",
+non_data_track_variables <- c("frame_itvl", "frame_num", "frame_time", "cell_line",
                              "cl_condition", "condition", "phase", 
                              "x_coords", "y_coords") # keeps cell_id!!
 
@@ -43,7 +42,7 @@ short_ct_variables <- c("well_image", "condition", "cell_line", "cell_id", "x_co
 
 # Miscellaneuos -----------------------------------------------------------
 
-app_title <- "Cell Tracer"
+app_title <- "celltracer"
 
 ambiguity_colors <- c("Clear" = "#1CE35B", "Ambiguous" = "#E02424", "Dismissed" = "lightgrey")
 
@@ -55,6 +54,12 @@ colors_unnamed <- c("#D4E8CF", "#EBAAAA", "#EBBCD6", "#A0E8CB", "#DEDEAB", "#B6A
                     "#EBD1B0", "#BBC1F0", "#F2C2C2", "#AD9A9A", "#F2A9F5", "#E5CCF0", "#FFFC96",
                     "#CCFFFC", "#A0E8FA", "#C7B6FC", "#C5FCCC", "#EDFCB0", "#C8FAF0")
 
+colors_information_status = c("Complete" = "forestgreen", 
+                              "Incomplete" = "yellow", 
+                              "Missing" = "red", 
+                              "Discarded" = "lightgrey")
+
+current_version <- list(major = 1, minor = 0, patch = 0)
 
 debug_ct <- FALSE
 
@@ -73,6 +78,8 @@ default_list <-
     phase = "first", 
     pt_alpha = 0.9, 
     pt_clr = "black",
+    pt_clrp = "milo", 
+    pt_clrsp = "viridis",
     pt_fill = "black",
     pt_size = 3, 
     verbose = TRUE, 
@@ -86,7 +93,7 @@ filetypes <- c("csv$", "xls$", "xlsx$")
 helper_content <- list(
   
   # designExperiment()
-  overall_information = "Provide basic information such as the software the files derived from as well as the kind of files Cell Tracer is supposed to load.
+  overall_information = "Provide basic information such as the software the files derived from as well as the kind of files celltracer is supposed to load.
   The combination of experiment name and storage directory will result in the default directory under which the celltracer object is going to be stored. (You
   can change the directory afterwards at any time.)", 
   
@@ -111,13 +118,34 @@ helper_content <- list(
   Before continuing with the next well plate make sure to add the well plate via 'Add Well Plate'. Not doing that before continuing with 'New Well Plate' results in all specifications beeing lost. Info boxes
   as well as the table in the box 'Save Experiment Design & Proceed' will tell you whether your well plate set up has been saved successfully.",
   
+  example = c(
+  "Choose an example file from those that you want to read in with celltracer later on. As Cell Profiler & Co let you name the columns yourself celltracer needs to know which 
+  columns refer to what exactly which is why it needs an example file. The modal you open by clicking on 'Example Data: Browse' lets you assign the columns of the example file you have loaded.",
+  
+  "   ",
+  
+  "Track files (as part of the celltracer terminology) refer to tables in which each row/observation represents a cell at a given moment (image taken) and in which each column/variable provides information about these cells (such 
+  as current x- and y-coordinate, shape diameter, illuminance intensitry etc.). Each row must be uniquely identified by a column providing the cell's ID and a column providing the image number the row bases on.
+  These two columns have to be specified. If you want celltracer to analyze migration data you have to denote the columns refering to the cell's x- and y-coordinates as well. If your files do not contain these columns you can
+  leave them out which will result in a celltracer object that is incompatible with celltracer functions dealing with migration data.",
+  
+  "   ",
+  
+  "On top of the columns mentioned previously you can choose the columns that you want to be part of downstream analysis steps. If denoted in Step 2 celltracer will take the x- and y-coordinates and will calculate migration data.
+  This includes the 'Distance from last point (dflp)', 'Distance from origin (dfo)' and the 'Speed (speed)'. As celltracer automatically calculates these three variables there is no need to make celltracer keep them additionally if your 
+  example file already contains them. If your example files  contains columns referring to the cells morphology at a given image like 'Cell Diameter', 'Number of Connections' etc. you can denote them here. Eventually,
+  while loading all files your experiment contains via loadData() celltracer will read in all files and keep the columns you've denoted in Step 2 and 3. The function processData() will summarize the tracking data columns via statistical
+  measures like minimum, maximum, mean, median which you can compare later on across cell lines, conditions, clustering results etc. (e.g. 'Cell Diameter' of the track files will be summarized to 'mean_cell_diameter', 'min_cell_diamter' etc. 
+  of the stat files.") ,
+  
+  
   # loadData()
   assign_folder = "In the left lower corner you see a select option that contains the names of the well plates you have set up in the module opened via 'designExperiment()'. 
-  In order for Cell Tracer to read in the data every well plate needs to be assigned to a directory in which Cell Tracer finds the files to read in. Clicking on 'Assign Folder: Browse'
+  In order for celltracer to read in the data every well plate needs to be assigned to a directory in which celltracer finds the files to read in. Clicking on 'Assign Folder: Browse'
   opens a window that gives you access to the folders of your device. Select the one that contains the files of the respective well plate or that again contains (sub-)folders in which the files are stored.
-  (If you want Cell Tracer to look in subfolders, too, make sure that 'Include Subfolders' is enabled.) After you have assigned the folder by closing the window you will see a well plate plot appear right above the 
+  (If you want celltracer to look in subfolders, too, make sure that 'Include Subfolders' is enabled.) After you have assigned the folder by closing the window you will see a well plate plot appear right above the 
   button 'Assign Folder: Browse'. The wells will be colored according to the number of files that have been found in the folder you specified. Green/Complete means that all files have been found. 
-  Yellow/Incomplete means that some files of the well have been found. (e.g. you set 'Covered Areas per Well' to 3 which made Cell Tracer expect files 'A1_1.csv', 'A1_2.csv' and 'A1_3.csv'.
+  Yellow/Incomplete means that some files of the well have been found. (e.g. you set 'Covered Areas per Well' to 3 which made celltracer expect files 'A1_1.csv', 'A1_2.csv' and 'A1_3.csv'.
   However only 'A1_1.csv' and 'A1_3.csv' have been found). Missing/Red means that no files of that well have been found at all. Blue/Ambiguous might appear if you stored the files in 
   subfolders of the assigned folder and some folders contain files with equal names due to typos while naming the files. (e.g. ~/Ctrl/A1_1.csv, ~/Treatment/A1_1.csv) If you realized that you assigned the wrong folder 
   or that some files have been named incorrect you can fix what needs to be fixed and assign the directory again by clicking on 'Assign Folder: Browse'.", 
@@ -129,7 +157,7 @@ helper_content <- list(
   
   load_files_and_proceed = "After clicking on 'Load Data' you should see a progress bar for every well plate giving information about the reading progress. Once all files are read in you obtain information about any errors that occured while 
   reading the files. In case of no errors you can simply click on 'Save & Proceed' and afterwards on 'Return Celltracer Object'. If the box hints at errors occured you can try and fix the cause for these errors and then click on 'Load Data' again
-  which will repeat the reading process. On the other hand you can ignore the errors and click on 'Save & Proceed' anyway which makes Cell Tracer ignore the files that were not suffessfully read in and continue with the rest."
+  which will repeat the reading process. On the other hand you can ignore the errors and click on 'Save & Proceed' anyway which makes celltracer ignore the files that were not suffessfully read in and continue with the rest."
   
   
   
@@ -146,8 +174,9 @@ legend_titles <- c("ambiguity_status" = "Ambiguity Status",
                    "condition" = "Condition", 
                    "cell_line" = "Cell Line")
 
-meta_variables <- c("cell_id", "cell_line", "condition", "cl_condition",
-                    "well_plate_name", "well_plate_index", "well", "well_image")
+meta_variables <- c("cell_id", "well_plate_name", "well_plate_index", "well", "well_image")
+
+new_slots <- c("analysis", "compatibility", "default", "information", "name", "well_plates", "version")
 
 numeric_stat_vars <- c("total_dist", "max_dist_fo", "avg_dist_fo", "max_dist_flp",
                        "avg_dist_flp", "max_speed", "avg_speed", "mgr_eff")

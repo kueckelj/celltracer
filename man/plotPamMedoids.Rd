@@ -14,7 +14,7 @@ plotPamMedoids(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
 Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}

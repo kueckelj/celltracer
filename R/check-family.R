@@ -24,7 +24,7 @@ check_availability <- function(evaluate, phase, ref_input, ref_fun){
 #' 
 #' @description Makes sure that object input is of class celltracer and 
 #' that it contains the relevant information needed for the function.
-#' @param object A valid cell tracer object. 
+#' @param object A valid celltracer object. 
 check_object <- function(object, experiment = NULL, set_up_req = "process_data"){
   
   input_class <- base::class(object)
@@ -34,7 +34,7 @@ check_object <- function(object, experiment = NULL, set_up_req = "process_data")
     
     msg <- "Input for argument 'object' must be of class 'cto' from package 'celltracer'."
     
-    give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
   }
   
@@ -44,7 +44,7 @@ check_object <- function(object, experiment = NULL, set_up_req = "process_data")
     
     msg <- glue::glue("Seems like you've missed some object processing steps. Make sure to run '{missing_fun}' first and then try again.")
     
-    give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
   }
   
@@ -73,7 +73,7 @@ check_phase <- function(object, phase, max_phases = NULL){
     
     if(base::max(phase) > lp){
       
-      base::stop(glue::glue("Input for argument phase must not exceed the number of phases of the experiment which is {lp}."))
+      base::stop(glue::glue("Input for argument 'phase' must not exceed the number of phases of the experiment which is {lp}."))
       
     }
     
@@ -134,7 +134,7 @@ check_phase <- function(object, phase, max_phases = NULL){
 #' @param df A read in cell track data.frame.
 #'
 
-check_track_df_variables <- function(variable, df){
+check_df_variables <- function(variable, df){
   
   cnames <- base::colnames(df)
   

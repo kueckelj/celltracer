@@ -6,15 +6,18 @@
 \usage{
 computePamCluster(
   object,
+  k,
   phase = NULL,
   method_pam = NULL,
-  k = NULL,
   verbose = NULL,
   ...
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
+
+\item{k}{Numeric vector. Denotes the numbers of clusters the pam-algorithm
+is supposed to assign return. Values must be bigger than 2.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -23,9 +26,6 @@ Ignored if the experiment design contains only one phase.}
 
 \item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
 Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}
-
-\item{k}{Numeric vector. Denotes the numbers of clusters the pam-algorithm
-is supposed to assign return. Values must be bigger than 2.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.

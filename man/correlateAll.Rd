@@ -22,7 +22,7 @@ correlateAcross(
 )
 }
 \arguments{
-\item{object}{A valid cell tracer object.}
+\item{object}{A valid celltracer object.}
 
 \item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
 or \code{'spearman'}.}
