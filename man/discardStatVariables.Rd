@@ -9,6 +9,8 @@ discardStatVariables(object, stat_variables, phase = NULL)
 \arguments{
 \item{object}{A valid celltracer object.}
 
+\item{stat_variables}{Character vector. The variables from the cell statistics data you want to discard.}
+
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 

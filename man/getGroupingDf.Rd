@@ -2,9 +2,18 @@
 % Please edit documentation in R/get-family.R
 \name{getGroupingDf}
 \alias{getGroupingDf}
-\title{Obtain cluster data}
+\alias{getClusterDf}
+\alias{getMetaDf}
+\alias{getWellPlateDf}
+\title{Obtain grouping information}
 \usage{
 getGroupingDf(object, phase = NULL)
+
+getClusterDf(object, phase = NULL, verbose = TRUE)
+
+getMetaDf(object, phase = NULL)
+
+getWellPlateDf(object)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
@@ -13,10 +22,16 @@ getGroupingDf(object, phase = NULL)
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
-A data.frame that contains the cell ids and their cluster belonging.
+A data.frame that contains the cell ids and their group belonging.
 }
 \description{
-Obtain cluster data
+These functions let you extract a data.frame that contain variables
+with which cells are grouped.
 }

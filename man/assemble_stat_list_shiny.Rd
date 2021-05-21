@@ -10,7 +10,7 @@ assemble_stat_list_shiny(stat_data_list, well_plate_list, object)
 \item{track_data_list}{The output of \code{load_track_files_shiny()}.}
 }
 \value{
-A list of one slot 'first' with the stat data.frame
+A list of one slot 'only' with the stat data.frame
 }
 \description{
 Subsets the successfully loaded files

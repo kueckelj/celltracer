@@ -222,7 +222,7 @@ load_data_files_shiny <- function(wp_list, wp_name, session, object){
 #'
 #' @param track_data_list The output of \code{load_track_files_shiny()}.
 #'
-#' @return A list of one slot 'first' with the stat data.frame
+#' @return A list of one slot 'only' with the stat data.frame
 #
 assemble_stat_list_shiny <- function(stat_data_list, well_plate_list, object){
   
@@ -253,7 +253,7 @@ assemble_stat_list_shiny <- function(stat_data_list, well_plate_list, object){
                   cl_condition = base::factor(x = cl_condition, levels = cl_conditions)
     )
   
-  stat_list <- base::list("first" = dplyr::mutate(final_df, phase = "first"))
+  stat_list <- base::list("only" = dplyr::mutate(final_df, phase = "first"))
   
   base::return(stat_list)
   

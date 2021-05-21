@@ -85,7 +85,8 @@ default_list <-
     verbose = TRUE, 
     well_plate = NULL, 
     with_cluster = TRUE, 
-    with_meta = TRUE
+    with_meta = TRUE, 
+    with_well_plate = TRUE
   )
 
 filetypes <- c("csv$", "xls$", "xlsx$")

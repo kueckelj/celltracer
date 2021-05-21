@@ -8,7 +8,8 @@
 compute_cell_stats <- function(df, phase, verbose, object){
   
   confuns::give_feedback(
-    msg = glue::glue("Computing cell statistics and summary for {phase} phase."), 
+    msg = glue::glue("Computing cell statistics and summary{ref_phase}.",
+                     ref_phase = hlpr_glue_phase(object, phase, FALSE)), 
     verbose = verbose
   )
   
@@ -196,57 +197,5 @@ compute_migration_efficiency <- function(x_coords, y_coords, actual_distance){
 }
 
 
-#' @title Computes variable summaries
-#' 
-#' @inherit argument_dummy  
-#'
-#' @inherit updated_object return
-#' @export
-#'
-compute_variable_statistics <- function(object){
-  
-  variable_statistics <- list()
-  
-  # over all phases
-  stats_mtr <- 
-    purrr::map_df(.x = object@data$stats, .f = ~ .x) %>% 
-    dplyr::select_if(.predicate = base::is.numeric) %>% 
-    base::as.matrix() 
-  
-  var_summary_total <- 
-    psych::describe(stats_mtr, IQR = TRUE) %>% 
-    base::as.data.frame() %>% 
-    tibble::rownames_to_column(var = "variable") %>% 
-    tibble::as_tibble() 
-  
-  variable_statistics$total <- var_summary_total 
-  
-  all_phases <- getPhases(object)
-  
-  if(base::length(all_phases) > 1){
-    
-    variable_statistics$by_phase <- 
-      purrr::map(.x = all_phases, 
-                 .f = function(phase){
-                   
-                   getStatsDf(object, phase = phas) %>% 
-                     dplyr::select_if(base::is.numeric) %>% 
-                     base::as.matrix() %>% 
-                     psych::describe(IQR = TRUE) %>% 
-                     base::as.data.frame() %>% 
-                     tibble::rownames_to_column(var = "variable") %>% 
-                     tibble::as_tibble() 
-                   
-                   
-                 }) %>% 
-      purrr::set_names(nm = all_phases)
-    
-  }
-  
-  object@variable_statistics <- variable_statistics
-  
-  base::return(object)
-  
-}
 
 

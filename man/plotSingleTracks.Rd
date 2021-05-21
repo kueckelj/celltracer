@@ -4,12 +4,23 @@
 \alias{plotSingleTracks}
 \title{Plot single cell migration}
 \usage{
-plotSingleTracks(object, cell_ids, color_by = NULL, scales = "free")
+plotSingleTracks(
+  object,
+  cell_ids,
+  phase = "all",
+  color_by = NULL,
+  scales = "free"
+)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
 
 \item{cell_ids}{Character vector. Denotes the cell ids of interest.}
+
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
 
 \item{scales}{Given to \code{ggplot2::facet_wrap()}. Affects the way the subplots
 are displayed.}

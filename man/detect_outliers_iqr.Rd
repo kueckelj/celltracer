@@ -4,7 +4,7 @@
 \alias{detect_outliers_iqr}
 \title{Outlier detection functions}
 \usage{
-detect_outliers_iqr(object, verbose = NULL, starts_with = "max")
+detect_outliers_iqr(object, verbose = NULL, variable_names = NULL)
 }
 \description{
 Outlier detection functions

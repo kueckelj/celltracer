@@ -17,7 +17,8 @@ addStatVariables(
 \item{object}{A valid celltracer object.}
 
 \item{input_df}{A data.frame that contains the variables denoted in argument \code{variable_names}
-as well as a character variable named \emph{cell_id} matching the cell ids of the input object.}
+as well as a character variable named according to input of argument \code{by} that is used to match
+and join both data.frames.}
 
 \item{variable_names}{Character vector. The name of the variables that are to be joined.}
 

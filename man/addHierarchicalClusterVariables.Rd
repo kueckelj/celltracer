@@ -6,6 +6,7 @@
 \usage{
 addHierarchicalClusterVariables(
   object,
+  variable_set,
   phase = NULL,
   method_dist = NULL,
   method_aggl = NULL,
@@ -16,6 +17,9 @@ addHierarchicalClusterVariables(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -55,8 +59,10 @@ grouping variables to the object's overall data - making them available for the
 \details{
 The last step of the hierarchical clustering pipeline. This function iterates
 over all combinations of \code{method_dist}, \code{method_aggl}, \code{k} and \code{h} and
-adds the respective clustering variable to the object's overall data named according to
-the following syntax: \emph{hcl_\code{method_dist}_\code{method_aggl}_k/h_\code{k}/\code{h}}.
+adds the respective clustering variables to the object's overall data named according to
+the following syntax: \emph{hcl_\code{method_dist}_\code{method_aggl}_k/h_\code{k}/\code{h}_\code{(variable_set)}}.
+This naming concept results in somewhat bulky but unambiguous clustering names. You can always
+rename grouping variables with \code{renameGroupingVariable()}.
 
-Use \code{getgroupingOptions()} afterwards to obtain the exact names.
+Use \code{getGroupingVariableNames()} afterwards to obtain all grouping variables.
 }

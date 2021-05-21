@@ -6,14 +6,20 @@
 \usage{
 addPamClusterVariables(
   object,
+  variable_set,
+  k,
   phase = NULL,
   method_pam = NULL,
-  k = NULL,
   verbose = NULL
 )
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
+
+\item{k}{Numeric vector. All k-values of interest.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -22,8 +28,6 @@ Ignored if the experiment design contains only one phase.}
 
 \item{method_pam}{Character vector (or value see details for more.) Denotes the algorithm of interest.
 Valid input options are \emph{'euclidean'} and \emph{'manhattan'}.}
-
-\item{k}{Numeric vector. All k-values of interest.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.
@@ -41,8 +45,10 @@ argument.
 \details{
 The last step of the PAM clustering pipeline. This function iterates
 over all combinations of \code{method_pam} and \code{k} and
-adds the respective clustering variable to the object's overall data named according to
-the following syntax: \emph{pam_\code{method_pam}_k_\code{k}}.
+adds the respective clustering variables to the object's overall data named according to
+the following syntax: \emph{pam_\code{method_pam}_k_\code{k}_\code{(variable_set)}}.
+This naming concept results in somewhat bulky but unambiguous clustering names. You can always
+rename grouping variables with \code{renameGroupingVariable()}.
 
-Use \code{getgroupingOptions()} afterwards to obtain the exact names.
+Use \code{getGroupingVariableNames()} afterwards to obtain all grouping variables.
 }

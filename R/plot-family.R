@@ -35,7 +35,8 @@ plotAllTracks <- function(object,
                           ...,
                           verbose = TRUE){
   
-  check_object(object)
+  check_object(object, exp_type_req = "time_lapse")
+  
   assign_default(object)
   
   phase <- check_phase(object, phase = phase)
@@ -308,11 +309,12 @@ plotScatterplot <- function(object,
 
 plotSingleTracks <- function(object,
                              cell_ids,
+                             phase = "all",
                              color_by = NULL,
                              scales = "free"){
   
   track_df <-
-    getTracks(object = object) %>% 
+    getTracksDf(object = object, phase = phase) %>% 
     dplyr::filter(cell_id %in% {{cell_ids}}) 
   
   start_df <- 
@@ -371,7 +373,7 @@ plotVelocityHeatmap <- function(object,
                                 verbose = TRUE, 
                                 in_shiny = FALSE){
   
-  check_object(object)
+  check_object(object, exp_type_req = "time_lapse")
   assign_default(object)
   
   if(!base::is.na(color)){
@@ -553,6 +555,9 @@ plotVelocityLineplot <- function(object,
                                  ...,
                                  in_shiny = FALSE){
   
+  check_object(object, exp_type_req = "time_lapse")
+  assign_default(object)
+  
   # speed data shifted 
   speed_df <- 
     getTracksDf(object,
@@ -666,7 +671,7 @@ plotVelocityLineplot <- function(object,
 #'
 
 plotWellPlate <- function(object, 
-                          well_plate,
+                          well_plate = NULL,
                           color_by = "condition", 
                           clrp_adjust = NULL,
                           make_pretty = NULL){
@@ -674,7 +679,13 @@ plotWellPlate <- function(object,
   check_object(object)
   assign_default(object)
   
-  wp_df <- getWellPlateDf(object, well_plate = well_plate)  
+  if(base::is.null(well_plate)){
+    
+    well_plate <- getWellPlateNames(object)[1]
+    
+  }
+  
+  wp_df <- object@well_plates[[well_plate]]$wp_df_eval
   
   pt_size <- 13.5
   pt_stroke <- 2

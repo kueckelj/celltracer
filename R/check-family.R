@@ -9,9 +9,14 @@
 #'
 check_availability <- function(evaluate, phase, ref_input, ref_fun){
   
+  ce <- rlang::caller_env()
+  
+  object <- base::parse(text = "object") %>% base::eval(envir = ce)
+  
   if(!base::isTRUE(evaluate)){
     
-    msg <- glue::glue("Could not find {ref_input} of {phase} phase. You might have to use function '{ref_fun}' first.")
+    msg <- glue::glue("Could not find {ref_input}{ref_phase}. You might have to use function '{ref_fun}' first.",
+                      ref_phase = hlpr_glue_phase(object, phase, FALSE))
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
@@ -25,7 +30,7 @@ check_availability <- function(evaluate, phase, ref_input, ref_fun){
 #' @description Makes sure that object input is of class celltracer and 
 #' that it contains the relevant information needed for the function.
 #' @param object A valid celltracer object. 
-check_object <- function(object, experiment = NULL, set_up_req = "process_data"){
+check_object <- function(object, experiment = NULL, set_up_req = "process_data", exp_type_req = NULL){
   
   input_class <- base::class(object)
   input_attribute <- base::attr(input_class, "package")
@@ -48,6 +53,22 @@ check_object <- function(object, experiment = NULL, set_up_req = "process_data")
     
   }
   
+  if(base::is.character(exp_type_req)){
+    
+    if(exp_type_req == "time_lapse"){
+      
+      if(!isTimeLapseExp(object)){
+        
+        msg <- "This function requires a time lapse experiment set up."
+        
+        confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+        
+      }
+      
+    }
+    
+  }
+  
   base::invisible(TRUE)
   
 }
@@ -65,59 +86,63 @@ check_object <- function(object, experiment = NULL, set_up_req = "process_data")
 #' 
 check_phase <- function(object, phase, max_phases = NULL){
   
-  if(base::is.numeric(phase)){
+  if(multiplePhases(object)){
     
-    lp <- base::length(getPhases(object))
-    
-    confuns::is_vec(phase, mode = "numeric", max.length = lp)
-    
-    if(base::max(phase) > lp){
+    if(base::is.numeric(phase)){
       
-      base::stop(glue::glue("Input for argument 'phase' must not exceed the number of phases of the experiment which is {lp}."))
+      lp <- base::length(getPhases(object))
+      
+      confuns::is_vec(phase, mode = "numeric", max.length = lp)
+      
+      if(base::max(phase) > lp){
+        
+        base::stop(glue::glue("Input for argument 'phase' must not exceed the number of phases of the experiment which is {lp}."))
+        
+      }
+      
+      phase <- base::names(object@set_up$phases)[phase]
       
     }
     
-    phase <- base::names(object@set_up$phases)[phase]
     
-  }
-  
-  
-  if(base::is.numeric(max_phases)){
-    
-    if(max_phases == 1){
+    if(base::is.numeric(max_phases)){
       
-      confuns::is_vec(x = phase, mode = "character", of.length = max_phases)
+      if(max_phases == 1){
+        
+        confuns::is_vec(x = phase, mode = "character", of.length = max_phases)
+        
+      } else {
+        
+        confuns::is_vec(x = phase, mode = "character", max.length = max_phases)
+        
+      }
+      
+    }
+    
+    if(base::all(phase == "all") & base::is.null(max_phases)){
+      
+      phase <- getPhases(object)
+      
+    } else if(base::is.numeric(max_phases) && base::length(phase) > max_phases){
+      
+      msg <- glue::glue("Length of input for argument phase must be equal to or lower than {max_phases}.")
+      
+      confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+      
+    } else if(base::all(phase == "all") && base::is.numeric(max_phases) && base::length(getPhases(object) > max_phases)){
+      
+      msg <- glue::glue("Length of input for argument phase must be equal to or lower than {max_phases}. All phases sum up to {base::length(getPhases(object))}.")
+      
+      confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
       
     } else {
       
-      confuns::is_vec(x = phase, mode = "character", max.length = max_phases)
+      confuns::check_one_of(
+        input = phase, 
+        against = getPhases(object)
+      )
       
     }
-    
-  }
-  
-  if(base::all(phase == "all") & base::is.null(max_phases)){
-    
-    phase <- getPhases(object)
-    
-  } else if(base::is.numeric(max_phases) && base::length(phase) > max_phases){
-    
-    msg <- glue::glue("Length of input for argument phase must be equal to or lower than {max_phases}.")
-    
-    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
-    
-  } else if(base::all(phase == "all") && base::is.numeric(max_phases) && base::length(getPhases(object) > max_phases)){
-    
-    msg <- glue::glue("Length of input for argument phase must be equal to or lower than {max_phases}. All phases sum up to {base::length(getPhases(object))}.")
-    
-    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
-    
-  } else {
-    
-    confuns::check_one_of(
-      input = phase, 
-      against = getPhases(object)
-    )
     
   }
   

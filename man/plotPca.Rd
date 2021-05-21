@@ -8,6 +8,7 @@
 \usage{
 plotPca(
   object,
+  variable_set,
   phase = NULL,
   color_by = NULL,
   color_aes = "fill",
@@ -22,6 +23,7 @@ plotPca(
 
 plotTsne(
   object,
+  variable_set,
   phase = NULL,
   color_by = NULL,
   color_aes = "fill",
@@ -36,6 +38,7 @@ plotTsne(
 
 plotUmap(
   object,
+  variable_set,
   phase = NULL,
   color_by = NULL,
   color_aes = "fill",
@@ -50,6 +53,9 @@ plotUmap(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.

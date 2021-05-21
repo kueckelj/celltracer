@@ -4,7 +4,7 @@
 \alias{valid_example_cols}
 \title{Title}
 \usage{
-valid_example_cols(software_example)
+valid_example_cols(example_list)
 }
 \description{
 Make sure that all denoted columns appear only one time.

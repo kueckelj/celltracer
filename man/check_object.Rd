@@ -4,7 +4,12 @@
 \alias{check_object}
 \title{Check Celltracer Object Input}
 \usage{
-check_object(object, experiment = NULL, set_up_req = "process_data")
+check_object(
+  object,
+  experiment = NULL,
+  set_up_req = "process_data",
+  exp_type_req = NULL
+)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

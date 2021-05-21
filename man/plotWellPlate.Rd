@@ -6,7 +6,7 @@
 \usage{
 plotWellPlate(
   object,
-  well_plate,
+  well_plate = NULL,
   color_by = "condition",
   clrp_adjust = NULL,
   make_pretty = NULL

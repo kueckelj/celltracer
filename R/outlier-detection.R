@@ -17,14 +17,14 @@
 #' 
 #' @export
 
-detectOutliers <- function(object, method_outlier = "iqr", verbose = NULL){
+detectOutliers <- function(object, method_outlier = "iqr", variable_names = NULL, verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
   if("iqr" %in% method_outlier){
     
-    object <- detect_outliers_iqr(object, verbose = verbose)
+    object <- detect_outliers_iqr(object, variable_names = variable_names, verbose = verbose)
     
   }
   
@@ -78,12 +78,11 @@ removeOutliers <- function(object, method_outlier = NULL, verbose = NULL){
       purrr::map(.x = object@data$stats, .f = ~ dplyr::filter(.x, !cell_id %in% {{outlier_ids}}))
     
     object@data$meta <- 
-      purrr::map(.x = object@data$meta, .f = ~ dplyr::filter(.x, !cell_id %in% {{outlier_ids}}))
+      dplyr::filter(object@data$meta, !cell_id %in% {{outlier_ids}})
     
-    object@data$cluster <- 
-      purrr::map(.x = object@data$meta,
-                 .f = ~ dplyr::filter(.x, !cell_id %in% {{outlier_ids}}) %>% 
-                   dplyr::select(cell_id, phase)
+    object@data$grouping <- 
+      purrr::map(.x = object@data$grouping,
+                 .f = ~ dplyr::filter(.x, !cell_id %in% {{outlier_ids}})
       )
     
     object@analysis <- list()
@@ -101,10 +100,16 @@ removeOutliers <- function(object, method_outlier = NULL, verbose = NULL){
 
 
 #' @title Outlier detection functions
-detect_outliers_iqr <- function(object, verbose = NULL, starts_with = "max"){
+detect_outliers_iqr <- function(object, verbose = NULL, variable_names = NULL){
   
   check_object(object)
   assign_default(object)
+  
+  if(base::is.null(variable_names)){
+    
+    variable_names <- getStatVariableNames(object)
+    
+  }
   
   confuns::give_feedback(msg = "Running outlier detection with method = 'iqr'")
   
@@ -114,7 +119,7 @@ detect_outliers_iqr <- function(object, verbose = NULL, starts_with = "max"){
                  
                  stat_df <-
                    getStatsDf(object, phase = phase, with_cluster = FALSE, with_meta = FALSE) %>% 
-                   confuns::select_columns(keep = "cell_id", starts.with = starts_with)
+                   dplyr::select(cell_id, dplyr::all_of(variable_names))
                  
                  numeric_vars <-
                    dplyr::select_if(stat_df, .predicate = base::is.numeric) %>% 

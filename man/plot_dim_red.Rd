@@ -6,6 +6,7 @@
 \usage{
 plot_dim_red(
   object,
+  variable_set,
   phase = NULL,
   method_dim_red = "pca",
   color_by = NULL,

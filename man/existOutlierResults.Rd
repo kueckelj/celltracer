@@ -2,9 +2,18 @@
 % Please edit documentation in R/logical-tests.R
 \name{existOutlierResults}
 \alias{existOutlierResults}
+\alias{isTimeLapseExp}
+\alias{isUsable}
+\alias{multiplePhases}
 \title{Logical Tests}
 \usage{
 existOutlierResults(object)
+
+isTimeLapseExp(object)
+
+isUsable(object, module)
+
+multiplePhases(object)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

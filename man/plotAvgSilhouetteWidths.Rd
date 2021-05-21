@@ -7,6 +7,7 @@
 \usage{
 plotAvgSilhouetteWidths(
   object,
+  variable_set,
   k,
   method_pam = NULL,
   phase = NULL,
@@ -18,6 +19,7 @@ plotAvgSilhouetteWidths(
 
 plotSilhouetteWidths(
   object,
+  variable_set,
   k,
   method_pam = NULL,
   phase = NULL,
@@ -29,6 +31,9 @@ plotSilhouetteWidths(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{k}{Numeric vector. The k-values of interest.}
 

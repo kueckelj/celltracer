@@ -2,18 +2,9 @@
 % Please edit documentation in R/get-family.R
 \name{getTracksDf}
 \alias{getTracksDf}
-\alias{getTracks}
 \title{Obtain track data.frame.}
 \usage{
 getTracksDf(
-  object,
-  phase = NULL,
-  with_cluster = NULL,
-  with_meta = NULL,
-  verbose = NULL
-)
-
-getTracks(
   object,
   phase = NULL,
   with_cluster = NULL,

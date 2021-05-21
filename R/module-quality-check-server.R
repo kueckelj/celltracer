@@ -17,9 +17,9 @@ moduleQualityCheckServer <- function(id, object){
 
 # Reactive values ---------------------------------------------------------
       
-      phase_max_frames <- shiny::reactiveVal(value = purrr::map(.x = object@data$tracks, .f = ~ base::max(.x[["frame"]])))
+      phase_max_frames <- shiny::reactiveVal(value = purrr::map(.x = object@cdata$tracks, .f = ~ base::max(.x[["frame"]])))
       
-      track_df <- shiny::reactiveVal(value = purrr::map_df(.x = object@data$tracks, .f = ~ .x) %>% dplyr::ungroup())
+      track_df <- shiny::reactiveVal(value = purrr::map_df(.x = object@cdata$tracks, .f = ~ .x) %>% dplyr::ungroup())
       
       filter <- shiny::reactiveValues(
         
@@ -143,7 +143,7 @@ moduleQualityCheckServer <- function(id, object){
           case_false = "no_cells_remaining"
         )
         
-        object@data$tracks <- 
+        object@cdata$tracks <- 
           purrr::map(.x = base::names(object@set_up$phases), .f = ~ dplyr::filter(remaining_cells_df(), phase == {{.x}})) %>% 
           purrr::set_names(nm = base::names(object@set_up$phases))
         

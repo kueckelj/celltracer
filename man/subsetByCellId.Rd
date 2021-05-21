@@ -7,13 +7,19 @@
 \alias{subsetByCluster}
 \title{Create subsets of your experiment}
 \usage{
-subsetByCellId(object, cell_ids, phase, verbose = NULL, ...)
+subsetByCellId(object, cell_ids, phase = "all", verbose = NULL, ...)
 
-subsetByCellLine(object, cell_lines, phase, verbose = NULL)
+subsetByCellLine(object, cell_lines, phase = "all", verbose = NULL)
 
-subsetByCondition(object, conditions, phase, verbose = NULL)
+subsetByCondition(object, conditions, phase = NULL, verbose = NULL)
 
-subsetByCluster(object, cluster_variable, cluster, phase, verbose = NULL)
+subsetByCluster(
+  object,
+  cluster_variable,
+  cluster,
+  phase = NULL,
+  verbose = NULL
+)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

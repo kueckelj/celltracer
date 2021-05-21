@@ -2,7 +2,6 @@
 % Please edit documentation in R/get-family.R
 \name{getStatsDf}
 \alias{getStatsDf}
-\alias{getStats}
 \title{Obtain stat data.frame}
 \usage{
 getStatsDf(
@@ -10,14 +9,7 @@ getStatsDf(
   phase = NULL,
   with_cluster = NULL,
   with_meta = NULL,
-  verbose = NULL
-)
-
-getStats(
-  object,
-  phase = NULL,
-  with_cluster = NULL,
-  with_meta = NULL,
+  wit_well_plate = NULL,
   verbose = NULL
 )
 }

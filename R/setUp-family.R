@@ -1,3 +1,247 @@
+# NOT Exported ------------------------------------------------------------
+
+# cdata set up
+
+set_up_cdata_meta <- function(object, verbose = TRUE){
+  
+  confuns::give_feedback(msg = "Creating cell meta data.", verbose = verbose)
+  
+  data_slot <- base::ifelse(test = isTimeLapseExp(object), yes = "tracks", no = "stats")
+  
+  if(multiplePhases(object)){
+    
+    all_phases <- getPhases(object)
+    
+    object@cdata$meta <- 
+      purrr::map(.x = all_phases,
+                 .f = function(phase){
+                   
+                   dplyr::select(object@cdata[[data_slot]][[phase]], 
+                                 cell_id, phase, cell_line, condition) %>% 
+                     dplyr::distinct()
+                   
+                   
+                 }) %>% 
+      purrr::set_names(nm = all_phases)
+    
+  } else {
+    
+    object@cdata$meta <- 
+      dplyr::select(object@cdata[[data_slot]][[1]], 
+                    cell_id, cell_line, condition) %>% 
+      dplyr::distinct()
+    
+  }
+  
+  base::return(object)
+  
+}
+
+set_up_cdata_cluster <- function(object, verbose){
+  
+  confuns::give_feedback(msg = "Creating cell cluster data.", verbose = verbose)
+  
+  data_slot <- base::ifelse(test = isTimeLapseExp(object), yes = "tracks", no = "stats")
+  
+  if(multiplePhases(object)){
+    
+    all_phases <- getPhases(object)
+    
+    object@cdata$cluster <- 
+      purrr::map(.x = all_phases,
+                 .f = function(phase){
+                   
+                   dplyr::select(object@cdata[[data_slot]][[phase]], cell_id, phase) %>% 
+                     dplyr::distinct()
+                   
+                   
+                 }) %>% 
+      purrr::set_names(nm = all_phases)
+    
+  } else {
+    
+    object@cdata$cluster <- 
+      dplyr::select(object@cdata[[data_slot]][[1]], cell_id) %>% 
+      dplyr::distinct()
+    
+  }
+  
+  base::return(object)
+  
+}
+
+set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
+  
+  confuns::give_feedback(msg = "Creating track- & stat data.", verbose = verbose)
+  
+  # if time lapse experiment way of processing depends on phase set up
+  if(isTimeLapseExp(object)){
+    
+    if(multiplePhases(object)){
+      
+      # multiple phases => named list of data.frames
+      
+      # process tracks
+      object@cdata$tracks <- 
+        purrr::map2(.x = object@data$tracks,
+                    .y = getPhases(object),
+                    object = object,
+                    verbose = verbose,
+                    .f = hlpr_process_tracks) %>% 
+        purrr::set_names(nm = getPhases(object))
+      
+      # compute statistics 
+      object@cdata$stats <- 
+        purrr::map2(.x = object@data$tracks,
+                    .y = getPhases(object),
+                    object = object,
+                    verbose = verbose,
+                    .f = compute_cell_stats) %>% 
+        purrr::set_names(nm = getPhases(object))
+      
+      
+    } else {
+      
+      # one phase => single data.frame 
+      
+      # process tracks
+      object@cdata$tracks <- 
+        purrr::map_df(.x = object@data$tracks, 
+                      phase = NULL, 
+                      object = object, 
+                      verbose = verbose, 
+                      .f = hlpr_process_tracks)
+      
+      # compute statistics 
+      object@cdata$stats <- 
+        purrr::map_df(.x = object@data$tracks,
+                      phase = NULL, 
+                      object = object,
+                      verbose = verbose,
+                      .f = compute_cell_stats) 
+      
+    }
+    
+    # if none time lapse only one way of processing
+  } else {
+    
+    # data stored in slot stats as list of one slot "only"
+    df <- object@cdata$stats$only
+    
+    # reset slot
+    object@cdata$stats <- NULL
+    
+    # convert to data.frame
+    object@cdata$stats <- df
+    
+    cnames <- base::colnames(df)
+    
+    # if available shift cell location info to track data 
+    if(base::all(c("x_coords", "y_coords") %in% cnames)){
+      
+      object@cdata$tracks <- 
+        dplyr::select(df, cell_id, x_coords, y_coords) %>% 
+        dplyr::mutate(frame_num = 1)
+      
+    } else {
+      
+      object@cdata$tracks <- data.frame()
+      
+    }
+    
+    if("x_coords" %in% cnames){
+      
+      object@cdata$stats$x_coords <- NULL
+      
+    }
+    
+    if("y_coords" %in% cnames){
+      
+      object@cdata$stats$y_coords <- NULL
+      
+    }
+    
+    
+  }
+  
+  base::return(object)
+  
+}
+
+# vdata set up 
+
+#' @title Computes variable summaries
+#' 
+#' @inherit argument_dummy  
+#'
+#' @inherit updated_object return
+#' @export
+#'
+set_up_vdata <- function(object, verbose = TRUE){
+  
+  confuns::give_feedback(msg = "Computing variable statistics.", verbose = verbose)
+  
+  vdata <- list()
+  
+  # over all phases
+  stats_mtr <- 
+    purrr::map_df(.x = object@cdata$stats, .f = ~ .x) %>% 
+    dplyr::select_if(.predicate = base::is.numeric) %>% 
+    base::as.matrix() 
+  
+  var_summary_total <- 
+    psych::describe(stats_mtr, IQR = TRUE) %>% 
+    base::as.data.frame() %>% 
+    tibble::rownames_to_column(var = "variable") %>% 
+    tibble::as_tibble() 
+  
+  vdata$total <- var_summary_total 
+  
+  all_phases <- getPhases(object)
+  
+  if(base::length(all_phases) > 1){
+    
+    vdata$by_phase <- 
+      purrr::map(.x = all_phases, 
+                 .f = function(phase){
+                   
+                   getStatsDf(object, phase = phase) %>% 
+                     dplyr::select_if(base::is.numeric) %>% 
+                     base::as.matrix() %>% 
+                     psych::describe(IQR = TRUE) %>% 
+                     base::as.data.frame() %>% 
+                     tibble::rownames_to_column(var = "variable") %>% 
+                     tibble::as_tibble() 
+                   
+                 }) %>% 
+      purrr::set_names(nm = all_phases)
+    
+  }
+  
+  object@vdata <- vdata
+  
+  base::return(object)
+  
+}
+
+
+# wpdata 
+set_up_cdata_well_plate <- function(object, verbose = TRUE){
+  
+  data_slot <- base::ifelse(test = isTimeLapseExp(object), yes = "tracks", no = "stats")
+  
+  object@cdata$well_plate <- 
+    dplyr::select(object@cdata[[data_slot]][[1]], dplyr::all_of(x = c("cell_id", well_plate_vars))) %>% 
+    dplyr::distinct()
+  
+  base::return(object)
+  
+}
+
+
+
+# EXPORTED ----------------------------------------------------------------
+
 #' @title Well Plate Data.frame 
 #' 
 #' @description Sets up a data.frame in which each observation refers

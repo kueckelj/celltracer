@@ -6,7 +6,7 @@
 \alias{getVariableSetNames}
 \title{Obtain defined sets of variables}
 \usage{
-getVariableSet(object, set_name)
+getVariableSet(object, variable_set)
 
 getVariableSets(object)
 
@@ -15,7 +15,7 @@ getVariableSetNames(object)
 \arguments{
 \item{object}{A valid celltracer object.}
 
-\item{set_name}{Character value. The name of the variable set of interest.}
+\item{variable_set}{Character value. The name of the variable set of interest.}
 }
 \value{
 A list of character vectors or a character vector of names.

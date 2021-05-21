@@ -167,6 +167,8 @@ dim_red_df <- function(dim_red_df){}
 #' to the output data.frame. 
 #' @param with_stats Logical. If set to TRUE the numeric variables of the stat data slots are added
 #' tot he output data.frame. 
+#' @param variable_set Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+#' to obtain all names of currently stored variable sets in your object.
 #' @param verbose Logical. If set to TRUE informative messages regarding
 #' the computational progress will be printed.
 #'

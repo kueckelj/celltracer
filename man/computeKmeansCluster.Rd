@@ -6,6 +6,7 @@
 \usage{
 computeKmeansCluster(
   object,
+  variable_set,
   k,
   phase = NULL,
   method_kmeans = NULL,
@@ -14,6 +15,9 @@ computeKmeansCluster(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{k}{Numeric vector. For every value the kmeans cluster assignment is calculated via
 \code{stats::kmeans()}.}

@@ -16,9 +16,7 @@ getConditions(object, phase = NULL)
 Character vector.
 }
 \description{
-Quick wrapper around the functionality of getGroupingVariableNames(). As
-the cell line does not change from experiment phase to experiment phase there is no
-need to specify it.
+Quick wrapper around the functionality of getGroupingVariableNames().
 }
 \details{
 Useful helper function when it comes to specify conditions and cell lines

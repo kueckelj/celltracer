@@ -7,7 +7,7 @@
 \usage{
 getGroups(object, option)
 
-getGroupNames(object, grouping_variable, phase = "all")
+getGroupNames(object, grouping_variable, ..., phase = NULL)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

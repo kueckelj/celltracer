@@ -33,3 +33,21 @@ isUsable <- function(object, module){
   base::return(base::isTRUE(object@information$modules[[module]]))
   
 }
+
+#' @rdname existOutlierResults
+#' @export
+multiplePhases <- function(object){
+  
+  if(base::length(getPhases(object)) == 1){
+    
+    base::return(FALSE)
+    
+  } else {
+    
+    base::return(TRUE)
+    
+  }
+  
+}
+
+

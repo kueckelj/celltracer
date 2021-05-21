@@ -4,7 +4,7 @@
 \alias{get_dim_red_obj}
 \title{Title}
 \usage{
-get_dim_red_obj(object, phase = NULL, method_dim_red)
+get_dim_red_obj(object, variable_set, phase = NULL, method_dim_red)
 }
 \arguments{
 \item{object}{}

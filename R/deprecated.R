@@ -2,39 +2,7 @@
 
 # EXPORTED ----------------------------------------------------------------
 
-getClusterDf <- function(object, phase = NULL){
-  
-  warning("getClusterDf() deprecated in favor of getGroupingDf()")
-  
-  check_object(object)
-  assign_default(object)
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_df <- object@data$grouping[[phase]]
-  
-  base::return(cluster_df)
-  
-}
 
-
-#' @rdname getClusterDf
-#' @export
-getClusterData <- function(object, phase = NULL){
-  
-  warning("getClusterData() is deprecatd in favor of getClusterDf()")
-  
-  check_object(object)
-  
-  assign_default(object)
-  
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_df <- object@data$grouping[[phase]]
-  
-  return(cluster_df)
-  
-}
 
 
 #' @title Obtain data slots
@@ -140,6 +108,57 @@ getGroups <- function(object, option){
   }
   
 }
+
+#' @title Obtain variable overview
+#' 
+#' @description If the variable denoted in \emph{variable_name} is categorical (character or factor)
+#' all unique values/levels are returned. If the variable is numeric it is given to 
+#' \code{psych::describe()} which returns a statistical summary. 
+#'
+#' @inherit argument_dummy params 
+#' @param variable_name Character value. Denotes the variable of interest. Valid inputs can be 
+#' obtained via the function \code{getVariableNames()}.
+#'
+#' @return A character vector or a data.frame of one row containing basic descriptive statistics.
+#' @export
+#'
+
+getVariableValues <- function(object, phase = NULL, variable_name){
+  
+  warning("getVariableValues is deprecated.")
+  
+  check_object(object)
+  assign_default(object)
+  
+  confuns::is_value(variable_name, "character", ref = "variable_name")
+  
+  
+  
+  extracted_var <- 
+    getStatsDf(object, phase = phase) %>% 
+    dplyr::pull(var = {{variable_name}})
+  
+  
+  if(base::is.factor(extracted_var)){
+    
+    values <- base::levels(extracted_var)
+    
+  } else if(base::is.character(extracted_var)){
+    
+    values <- base::unique(extracted_var)
+    
+  } else if(base::is.numeric(extracted_var)){
+    
+    values <-
+      psych::describe(x = extracted_var) %>% 
+      magrittr::set_rownames(value = variable_name)
+    
+  }
+  
+  base::return(values)
+  
+}
+
 
 
 #' @title Plot dimensional reduction 
@@ -621,6 +640,23 @@ plotDistributionDiscrete <- function(object,
     theme_add_on +
     ggplot2::theme(strip.background = ggplot2::element_blank()) +
     ggplot2::labs(y = NULL, x = "Groups / Clusters")
+  
+}
+
+
+time_displaced_tmt <- function(object){
+  
+  warning("deprecated in favor of multiplePhases()")
+  
+  if(base::length(getPhases(object)) == 1){
+    
+    base::return(FALSE)
+    
+  } else {
+    
+    base::return(TRUE)
+    
+  }
   
 }
 

@@ -4,7 +4,12 @@
 \alias{detectOutliers}
 \title{Detect outliers}
 \usage{
-detectOutliers(object, method_outlier = "iqr", verbose = NULL)
+detectOutliers(
+  object,
+  method_outlier = "iqr",
+  variable_names = NULL,
+  verbose = NULL
+)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

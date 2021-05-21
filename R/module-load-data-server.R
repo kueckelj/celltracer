@@ -236,8 +236,8 @@ moduleLoadDataServer <- function(id, object){
         
         object@well_plates <- well_plate_list()
         
-        object@data$stats <- stat_list()
-        object@data$tracks <- track_list()
+        object@cdata$stats <- stat_list()
+        object@cdata$tracks <- track_list()
         
         ld_output$proceed <- input$ld_save_and_proceed
         ld_output$object <- object
@@ -415,7 +415,7 @@ moduleLoadDataServer <- function(id, object){
       
       stat_list <- shiny::reactive({
         
-        if(object@set_up$experiment_type != "time_lapse"){
+        if(!isTimeLapseExp(object)){
           
           stat_list <- assemble_stat_list_shiny(stat_data_list = read_in_data(), 
                                                 well_plate_list = well_plate_list(), 
@@ -434,7 +434,7 @@ moduleLoadDataServer <- function(id, object){
       
       track_list <- shiny::reactive({
         
-        if(object@set_up$experiment_type == "time_lapse"){
+        if(isTimeLapseExp(object)){
           
           track_list <- assemble_track_list_shiny(track_data_list = read_in_data(),
                                                   well_plate_list = well_plate_list(), 

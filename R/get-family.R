@@ -1,19 +1,5 @@
 
 # Helper ------------------------------------------------------------------
-time_displaced_tmt <- function(object){
-  
-  if(base::length(getPhases(object)) == 1){
-    
-    base::return(FALSE)
-    
-  } else {
-    
-    base::return(TRUE)
-    
-  }
-  
-}
-
 join_with_meta <- function(object, df, phase){
   
   dplyr::left_join(x = df, y = purrr::map_df(phase, .f = ~ object@data$meta[[.x]]), by = "cell_id")
@@ -37,9 +23,17 @@ getHclustConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase, max_phase = 1)
-  
-  cluster_object <- object@analysis$clustering$hclust[[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase, max_phase = 1)
+    
+    cluster_object <- object@analysis$clustering$hclust[[variable_set]][[phase]]
+    
+  } else {
+    
+    cluster_object <- object@analysis$clustering$hclust[[variable_set]]
+    
+  }
   
   check_availability(
     evaluate = !base::is.null(cluster_object) & base::class(cluster_object) == "hclust_conv",
@@ -62,9 +56,17 @@ getKmeansConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_object <- object@analysis$clustering$kmeans[[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    cluster_object <- object@analysis$clustering$kmeans[[variable_set]][[phase]]
+    
+  } else {
+    
+    cluster_object <- object@analysis$clustering$kmeans[[variable_set]]
+    
+  }
   
   check_availability(
     evaluate = !base::is.null(cluster_object) & base::class(cluster_object) == "kmeans_conv",
@@ -87,9 +89,17 @@ getPamConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_object <- object@analysis$clustering$pam[[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    cluster_object <- object@analysis$clustering$pam[[variable_set]][[phase]]
+    
+  } else {
+    
+    cluster_object <- object@analysis$clustering$pam[[variable_set]]
+    
+  }
   
   check_availability(
     evaluate = !base::is.null(cluster_object) & base::class(cluster_object) == "pam_conv",
@@ -118,9 +128,17 @@ getCorrConv <- function(object, phase = NULL){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  corr_object <- object@analysis$correlation[[phase]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    corr_object <- object@analysis$correlation[[phase]]
+    
+  } else {
+    
+    corr_object <- object@analysis$correlation
+    
+  }
   
   check_availability(
     evaluate = !base::is.null(corr_object) & base::class(corr_object) == "corr_conv",
@@ -140,11 +158,15 @@ getCorrConv <- function(object, phase = NULL){
 
 # Data extraction ---------------------------------------------------------
 
-#' @title Obtain cluster data
+
+#' @title Obtain grouping information
+#' 
+#' @description These functions let you extract a data.frame that contain variables 
+#' with which cells are grouped. 
 #'
 #' @inherit argument_dummy params
 #' 
-#' @return A data.frame that contains the cell ids and their cluster belonging.
+#' @return A data.frame that contains the cell ids and their group belonging.
 #' @export
 #'
 
@@ -153,35 +175,98 @@ getGroupingDf <- function(object, phase = NULL){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
+  grouping_df <- 
+    dplyr::left_join(x = getMetaDf(object, phase = phase),
+                     y = getClusterDf(object, phase = phase), 
+                     by = "cell_id") %>% 
+    dplyr::left_join(x = .,
+                     y = getWellPlateDf(object), 
+                     by = "cell_id")
   
-  group_df <- object@data$grouping[[phase]]
-  
-  base::return(group_df)
-  
+  base::return(grouping_df)
   
 }
 
-
-#' @title Obtain meta data
-#'
-#' @inherit check_object params
-#'
-#' @return A data.frame with all variables providing meta information about cells of 
-#' the track data.frame. (such as condition, cell line, well plate belonging etc.)
+#' @rdname getGroupingDf
 #' @export
-#'
-
-getMetaDf <- function(object){
+getClusterDf <- function(object, phase = NULL, verbose = TRUE){
   
   check_object(object)
   assign_default(object)
   
-  meta_df <- object@data$meta
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    cluster_df <- object@cdata$cluster[[phase]]
+    
+  } else {
+    
+    cluster_df <- object@cdata$cluster
+    
+  }
+  
+  if(base::ncol(cluster_df) == 1){
+    
+    if(multiplePhases(object)){
+      
+      add <- glue::glue(" for {phase} phase.")
+      
+    } else {
+      
+      add <- "."
+      
+    }
+    
+    msg <- glue::glue("No cluster variables have been calculated yet{add}")
+    
+    confuns::give_feedback(msg = msg, verbose = verbose)
+    
+  } 
+  
+  base::return(cluster_df)
+  
+}
+
+#' @rdname getGroupingDf
+#' @export
+getMetaDf <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    meta_df <- object@cdata$meta[[phase]]
+    
+  } else {
+    
+    meta_df <- object@cdata$meta
+    
+  }
   
   base::return(meta_df)
   
 }
+
+#' @rdname getGroupingDf
+#' @export
+getWellPlateDf <- function(object){
+  
+  base::return(object@cdata$well_plate)
+  
+}
+
+
+
+
+
+
+
+
+
 
 #' @title Obtain stat data.frame 
 #'
@@ -193,60 +278,60 @@ getMetaDf <- function(object){
 #' @export
 #'
 
-getStatsDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL, verbose = NULL){
+getStatsDf <- function(object,
+                       phase = NULL,
+                       with_cluster = NULL,
+                       with_meta = NULL,
+                       wit_well_plate = NULL, 
+                       verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase, max_phases = 1)
-  
-  stat_df <- object@data$stats[[phase]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase, max_phases = 1)
+    
+    stat_df <- object@cdata$stats[[phase]]
+    
+  } else {
+    
+    stat_df <- object@cdata$stats
+    
+  }
+
   
   # add cluster
   if(base::isTRUE(with_cluster)){
     
-    cluster_df <- dplyr::select(object@data$grouping[[phase]], -phase)  
+    cluster_df <- getClusterDf(object, phase = phase)  
     
-    if(base::ncol(cluster_df) == 1){
-      
-      if(time_displaced_tmt(object)){
-        
-        add <- glue::glue(" for the {phase} phase.")
-        
-      } else {
-        
-        add <- "."
-        
-      }
-      
-      msg <- glue::glue("You set 'with_cluster' to TRUE but no cluster variables have been calculated yet{add}")
-      
-      confuns::give_feedback(msg = msg, verbose = verbose)
-      
-    } else {
-      
-      stat_df <- dplyr::left_join(x = stat_df, y = cluster_df, by = "cell_id")  
-      
-    }
+    stat_df <- 
+      dplyr::left_join(x = stat_df, y = cluster_df, by = "cell_id")
     
   }
   
   # add meta
   if(base::isTRUE(with_meta)){
     
-    meta_df <- getMetaDf(object)
+    meta_df <- getMetaDf(object, phase = phase)
     
     stat_df <- dplyr::left_join(x = stat_df, y = meta_df, by = "cell_id")
+    
+  }
+  
+  # add well plate info
+  if(base::isTRUE(with_well_plate)){
+    
+    wp_df <- getWellPlateDf(object, phase = phase)
+    
+    stat_df <- dplyr::left_join(x = stat_df, y = wp_df, by = "cell_id")
     
   }
   
   base::return(stat_df)  
   
 }
-
-#' @rdname getStatsDf
-#' @export
-getStats <- getStatsDf
 
 
 
@@ -259,58 +344,57 @@ getStats <- getStatsDf
 #' @export
 #'
 
-getTracksDf <- function(object, phase = NULL, with_cluster = NULL, with_meta = NULL, verbose = NULL){
+getTracksDf <- function(object,
+                        phase = NULL,
+                        with_cluster = NULL,
+                        with_meta = NULL,
+                        verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase)
-  
-  track_df_final <- purrr::map_df(
-    .x = phase, 
-    .f = function(p){
-      
-      track_df <- object@data$tracks[[p]]
-      
-      if(base::isTRUE(with_meta)){
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase)
+    
+    track_df_final <- purrr::map_df(
+      .x = phase, 
+      .f = function(p){
         
-        meta_df <- getMetaDf(object)
+        track_df <- object@cdata$tracks[[p]]
         
-        track_df <- dplyr::left_join(x = track_df, y = meta_df, by = "cell_id")
+        if(base::isTRUE(with_meta)){
+          
+          meta_df <- getMetaDf(object, phase = phase)
+          
+          track_df <- dplyr::left_join(x = track_df, y = meta_df, by = "cell_id")
+          
+        }
+        
+        base::return(track_df)
         
       }
-      
-      base::return(track_df)
-      
-    }
-  )
+    )
+    
+  } else {
+    
+    track_df_final <- object@cdata$tracks
+    
+  }
+  
+
   
   if(base::isTRUE(with_cluster) & base::length(phase) == 1){
     
-    cluster_df <- dplyr::select(object@data$grouping[[phase]], - phase)
+    cluster_df <- getClusterDf(object, phase = phase)
     
-    if(base::ncol(cluster_df) == 1){
-      
-      msg <- glue::glue("No custer variables found for {phase} phase. Set argument 'with_cluster' to FALSE to proceed.")
-      
-      confuns::give_feedback(msg = msg, with.time = FALSE, verbose = verbose)
-      
-    } else {
-      
-      track_df_final <- dplyr::left_join(x = track_df_final, y = cluster_df, by = "cell_id")
-      
-    }
+    track_df_final <- dplyr::left_join(x = track_df_final, y = cluster_df, by = "cell_id")
     
   }
   
   base::return(track_df_final)
   
 }
-
-
-#' @rdname getTracksDf
-#' @export
-getTracks <- getTracksDf
 
 
 #' @title Obtain defined sets of variables
@@ -458,19 +542,23 @@ getOutlierIds <- function(object, method_outlier = NULL, check = FALSE){
 #' 
 #' @export
 
-getGroupNames <- function(object, grouping_variable, phase = "all"){
+getGroupNames <- function(object, grouping_variable, ..., phase = NULL){
+  
+  check_object(object)
+  
+  assign_default(object)
   
   group_vec <- 
-    getStats(object = object, phase = phase) %>% 
+    getGroupingDf(object = object, phase = phase) %>% 
     dplyr::pull(var = {{grouping_variable}}) 
   
   if(base::is.factor(group_vec)){
     
-    base::levels(x = group_vec)
+    group_vec <- base::levels(x = group_vec)
     
   } else if(base::is.character(group_vec)){
     
-    base::unique(group_vec)
+    group_vec <- base::unique(group_vec)
     
   } else {
     
@@ -480,13 +568,18 @@ getGroupNames <- function(object, grouping_variable, phase = "all"){
     
   }
   
+  res <- confuns::vselect(input = group_vec, ...)
+  
+  base::return(res)
+  
 }
 
 
-#' @title Obtain variable names of your data
+#' @title Obtain grouping variable names of cell data
 #' 
 #' @description Convenient access to the names of your objects data variables. Useful to 
-#' obtain vectors of variable names as input for recurring arguments like \code{variables}.
+#' obtain vectors of variable names as input for recurring arguments like \code{across} or
+#' \code{grouping_variable}.
 #'
 #' @inherit argument_dummy params
 #' @param ... Additional selection helpers from the \code{tidyselect} package that match 
@@ -498,12 +591,6 @@ getGroupNames <- function(object, grouping_variable, phase = "all"){
 #' 
 #' @export
 #' 
-#' @examples 
-#' 
-#'  # returns all stat variable names starting with 'mean'
-#'  mean_vars <- getStatVariableNames(object, starts_with("mean"))
-#'  
-#'  plotBoxplot(object, variables = mean_vars)
 
 getGroupingVariableNames <- function(object, ..., phase = NULL){
   
@@ -511,11 +598,9 @@ getGroupingVariableNames <- function(object, ..., phase = NULL){
   
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
   group_df <- 
     getGroupingDf(object, phase = phase) %>% 
-    dplyr::select(-phase, -cell_id)
+    dplyr::select(-cell_id)
   
   selected_df <- dplyr::select(group_df, ...)
   
@@ -547,16 +632,136 @@ getGroupingVariableNames <- function(object, ..., phase = NULL){
     
   }
   
-  grouping_vars <- 
+  all_var_names <- 
     base::colnames(selected_df)
   
-  base::return(grouping_vars)
+  base::return(all_var_names)
   
 }
 
+#' @rdname getGroupingVariableNames
+#' @export
+getClusterVariableNames <- function(object, ..., phase = NULL){
+  
+  check_object(object)
+  
+  assign_default(object)
+  
+  cluster_df <- 
+    getClusterDf(object, phase = phase) %>% 
+    dplyr::select(-cell_id)
+  
+  selected_df <- dplyr::select(cluster_df, ...)
+  
+  if(base::ncol(selected_df) == 0){
+    
+    # if TRUE then ncol == 0 because selection resulted in no vars
+    selection_helpers_provided <- 
+      base::tryCatch({
+        
+        # leads to error if tidyselection specified
+        list(...)
+        
+      }, error = function(error){
+        
+        TRUE
+        
+      })
+    
+    if(base::isTRUE(selection_helpers_provided)){
+      
+      base::stop("Tidyselect input resulted in no variables.")
+      
+      # if FALSE then ncol == 0 because no tidyselection specified: return all variable names
+    } else {
+      
+      selected_df <- cluster_df
+      
+    }
+    
+  }
+  
+  all_var_names <- 
+    base::colnames(selected_df)
+  
+  base::return(all_var_names)
+  
+}
 
-#' @rdname getClusterVariableNames
-#' @export 
+#' @rdname getGroupingVariableNames
+#' @export
+getMetaVariableNames <- function(object, ..., phase = NULL){
+  
+  check_object(object)
+  
+  assign_default(object)
+  
+  meta_df <- 
+    getMetaDf(object, phase = phase) %>% 
+    dplyr::select(-cell_id)
+  
+  selected_df <- dplyr::select(meta_df, ...)
+  
+  if(base::ncol(selected_df) == 0){
+    
+    # if TRUE then ncol == 0 because selection resulted in no vars
+    selection_helpers_provided <- 
+      base::tryCatch({
+        
+        # leads to error if tidyselection specified
+        list(...)
+        
+      }, error = function(error){
+        
+        TRUE
+        
+      })
+    
+    if(base::isTRUE(selection_helpers_provided)){
+      
+      base::stop("Tidyselect input resulted in no variables.")
+      
+      # if FALSE then ncol == 0 because no tidyselection specified: return all variable names
+    } else {
+      
+      selected_df <- meta_df
+      
+    }
+    
+  }
+  
+  all_var_names <- 
+    base::colnames(selected_df)
+  
+  base::return(all_var_names)
+  
+}
+
+#' @rdname getGroupingVariableNames
+#' @export
+getWellPlateVariableNames <- function(object, ...){
+  
+  confuns::vselect(input = well_plate_vars, ...)
+  
+} 
+
+
+#' @title Obtain numeric variables of cell data
+#'
+#' @description Convenient access to the names of your objects data variables. Useful to 
+#' obtain vectors of variable names as input for recurring arguments like \code{variables}.
+#'
+#' @inherit argument_dummy params
+#' @param ... Additional selection helpers from the \code{tidyselect} package that match 
+#' variable names according to a given pattern. 
+#' 
+#' @return A character vector. 
+#' 
+#' @seealso starts_with(), ends_with(), contains(), matches()
+#' 
+#' @export
+#' 
+
 getStatVariableNames <- function(object, ..., phase = NULL){
   
   check_object(object)
@@ -607,29 +812,6 @@ getStatVariableNames <- function(object, ..., phase = NULL){
 }
 
 
-
-
-#' @title Obtain well plate information 
-#'
-#' @inherit argument_dummy params
-#'
-#' @return A data.frame in which each row contains information about a well. 
-#' @export
-#'
-
-getWellPlateDf <- function(object, well_plate = NULL){
-  
-  confuns::check_one_of(
-    input = well_plate, 
-    against = getWellPlateNames(object)
-  )
-  
-  wp_df <- object@well_plates[[well_plate]]$wp_df_eval
-  
-  base::return(wp_df)
-  
-}
-
 #' @title Obtain well plate names
 #'
 #' @inherit argument_dummy params
@@ -644,58 +826,12 @@ getWellPlateNames <- function(object){
 }
 
 
-#' @title Obtain variable overview
-#' 
-#' @description If the variable denoted in \emph{variable_name} is categorical (character or factor)
-#' all unique values/levels are returned. If the variable is numeric it is given to 
-#' \code{psych::describe()} which returns a statistical summary. 
-#'
-#' @inherit argument_dummy params 
-#' @param variable_name Character value. Denotes the variable of interest. Valid inputs can be 
-#' obtained via the function \code{getVariableNames()}.
-#'
-#' @return A character vector or a data.frame of one row containing basic descriptive statistics.
-#' @export
-#'
 
-getVariableValues <- function(object, phase = NULL, variable_name){
-  
-  check_object(object)
-  assign_default(object)
-  
-  confuns::is_value(variable_name, "character", ref = "variable_name")
-  
-  extracted_var <- 
-    getStatsDf(object, phase = phase) %>% 
-    dplyr::pull(var = {{variable_name}})
-  
-  
-  if(base::is.factor(extracted_var)){
-    
-    values <- base::levels(extracted_var)
-    
-  } else if(base::is.character(extracted_var)){
-    
-    values <- base::unique(extracted_var)
-    
-  } else if(base::is.numeric(extracted_var)){
-    
-    values <-
-      psych::describe(x = extracted_var) %>% 
-      magrittr::set_rownames(value = variable_name)
-    
-  }
-  
-  base::return(values)
-  
-}
 
 
 #' @title Obtain cell line and condition names 
 #' 
-#' @description Quick wrapper around the functionality of getGroupingVariableNames(). As 
-#' the cell line does not change from experiment phase to experiment phase there is no 
-#' need to specify it.
+#' @description Quick wrapper around the functionality of getGroupingVariableNames().
 #'
 #' @inherit check_object params 
 #'
@@ -711,7 +847,7 @@ getCellLines <- function(object){
   check_object(object)
   assign_default(object)
   
-  getMetaDf(object) %>%
+  getGroupingDf(object) %>%
     dplyr::pull(cell_line) %>%
     base::levels()
   
@@ -725,12 +861,9 @@ getConditions <- function(object, phase = NULL){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
   getGroupingDf(object, phase = phase) %>% 
     dplyr::pull(condition) %>% 
     base::levels()
-  
   
 }
 
@@ -739,13 +872,13 @@ getConditions <- function(object, phase = NULL){
 # NOT EXPORTED ------------------------------------------------------------
 
 
-
-
 #' @title Helper functions to extract information from the
 #'
 #' @return
 
 getCategoricalVariablesNames <- function(object, phase = NULL){
+  
+  warning("getCategoricalVariablesNames() is deprecated.")
   
   check_object(object)
   assign_default(object)
@@ -760,6 +893,8 @@ getCategoricalVariablesNames <- function(object, phase = NULL){
 
 #' @rdname getCategoricalVariablesNames
 getNumericVariableNames <- function(object){
+  
+  warning("getNumericVariableNames() is deprecated.")
   
   getStatsDf(object = object) %>% 
     dplyr::select_if(.predicate = base::is.numeric) %>% 
@@ -824,6 +959,9 @@ getVariableNames <- function(object,
                              phase = NULL,
                              variable_classes = c("cluster", "meta", "stats", "well_plate"),
                              flatten = TRUE){
+  
+  warning("getVariableNames() is deprecated.")
+  
   
   check_object(object)
   assign_default(object)

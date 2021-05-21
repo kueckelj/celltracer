@@ -179,6 +179,43 @@ hlpr_create_meta_data <- function(df, phase, verbose){
 }
 
 
+#' @title Adjust phase input for feedback messages 
+hlpr_glue_phase <- function(object, phase, empty_space = TRUE){ # do not change argument order!!!
+  
+  all_phases <- getPhases(object)
+  
+  # if only one phase exist input for argument phase is irrelevant
+  if(base::length(all_phases) == 1){
+    
+    if(base::isTRUE(empty_space)){
+    
+      string <- " "  
+      
+    } else {
+      
+      string <- ""
+      
+    }
+    
+  } else {
+    
+    if(base::isTRUE(empty_space)){
+      
+      string <- glue::glue(" for {phase} phase ")
+      
+    } else {
+      
+      string <- glue::glue(" for {phase} phase")
+      
+    }
+    
+    
+  }
+  
+  base::return(string)
+  
+}
+
 
 
 #' @title Merge conditions
@@ -342,6 +379,60 @@ hlpr_order_input <- function(order_input){
   
 }
 
+
+#' @title Processing helper
+#' 
+#' @description To be used as mapped function in purrr::map_*(). Only used 
+#' if experiment type is 'time_lapse'. Processes the track data.frame 
+#' with regards to column names as well as some migration data computation if 
+#' x- and y-coords are available. 
+hlpr_process_tracks <- function(df, phase, object, verbose){
+  
+  itvl <- object@set_up$itvl
+  itvl_u <- object@set_up$itvl_u
+  exp_type <- object@set_up$experiment_type
+  
+  mutated_df <- 
+    dplyr::mutate(
+      .data = df, 
+      frame_num = frame,
+      frame_time = frame * itvl,
+      frame_itvl = stringr::str_c(frame_time, itvl_u, sep = " "),
+      frame = NULL) %>% 
+    dplyr::filter(frame_num <= object@set_up$nom) # only affects last phase
+  
+  if(isUsable(object, module = "migration")){
+    
+    confuns::give_feedback(
+      msg = glue::glue("Computing migration data{ref_phase}.", 
+                       ref_phase = hlpr_glue_phase(object, phase, FALSE)),
+      verbose = verbose)
+    
+    mutated_df <- 
+      dplyr::group_by(.data = mutated_df, cell_id) %>% 
+      dplyr::mutate(
+        dfo = compute_distances_from_origin(x_coords, y_coords),
+        dflp = compute_distances_from_last_point(x_coords, y_coords), 
+        speed = dflp / object@set_up$itvl
+      )
+    
+    final_df <-
+      dplyr::select(.data = mutated_df,
+                    cell_id, x_coords, y_coords, speed, dfo, dflp,
+                    dplyr::starts_with(match = "frame"), 
+                    dplyr::everything() 
+      ) %>% 
+      dplyr::select(-dplyr::starts_with(match = "well"))
+    
+  } else {
+    
+    final_df <- mutated_df
+    
+  }
+  
+  base::return(final_df)
+  
+} 
 
 
 #' @title Split subset input 

@@ -56,7 +56,7 @@ plotBoxplot <- function(object,
                         verbose = TRUE,
                         ...){
   
-  stat_df <- getStatsDf(object = object, phase = phase)
+  stat_df <- getStatsDf(object = object, phase = phase, verbose = FALSE)
   
   confuns::plot_boxplot(df = stat_df,
                         variables = variables, 
@@ -102,7 +102,7 @@ plotDensityplot <- function(object,
                             verbose = TRUE,
                             ...){
   
-  stat_df <- getStatsDf(object = object, phase = phase)
+  stat_df <- getStatsDf(object = object, phase = phase, verbose = FALSE)
   
   confuns::plot_density(df = stat_df,
                         variables = variables,
@@ -136,7 +136,7 @@ plotHistogram <- function(object,
                           verbose = TRUE,
                           ...){
   
-  stat_df <- getStatsDf(object = object, phase = phase)
+  stat_df <- getStatsDf(object = object, phase = phase, verbose = FALSE)
   
   confuns::plot_histogram(df = stat_df,
                           variables = variables,
@@ -170,7 +170,7 @@ plotRidgeplot <- function(object,
                           verbose = TRUE,
                           ...){
   
-  stat_df <- getStatsDf(object = object, phase = phase)
+  stat_df <- getStatsDf(object = object, phase = phase, verbose = FALSE)
   
   confuns::plot_ridgeplot(df = stat_df,
                           variables = variables,
@@ -215,7 +215,7 @@ plotViolinplot <- function(object,
                            verbose = TRUE,
                            ...){
   
-  stat_df <- getStatsDf(object = object, phase = phase)
+  stat_df <- getStatsDf(object = object, phase = phase, verbose = FALSE)
   
   confuns::plot_violin(df = stat_df,
                        variables = variables,
@@ -271,7 +271,7 @@ plotBarchart <- function(object,
                          nrow = NULL,
                          ...){
   
-  stat_df <- getStatsDf(object = object, phase = phase)
+  stat_df <- getStatsDf(object = object, phase = phase, verbose = FALSE)
   
   confuns::plot_barplot(df = stat_df,
                         variables = variables,
@@ -312,7 +312,7 @@ plotStatisticsInteractive <- function(object, phase = NULL){
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
   stats_df <-
-    getStatsDf(object, phase = phase) %>% 
+    getStatsDf(object, phase = phase, verbose = FALSE) %>% 
     dplyr::select(-phase, -cell_id)
   
   

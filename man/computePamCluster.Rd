@@ -6,6 +6,7 @@
 \usage{
 computePamCluster(
   object,
+  variable_set,
   k,
   phase = NULL,
   method_pam = NULL,
@@ -15,6 +16,9 @@ computePamCluster(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{k}{Numeric vector. Denotes the numbers of clusters the pam-algorithm
 is supposed to assign return. Values must be bigger than 2.}

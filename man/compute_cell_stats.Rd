@@ -5,7 +5,7 @@
 \alias{compute_stat}
 \title{Summarize tracking data}
 \usage{
-compute_cell_stats(df, phase, verbose, software)
+compute_cell_stats(df, phase, verbose, object)
 
 compute_stat(track_df)
 }

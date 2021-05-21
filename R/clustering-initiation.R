@@ -43,9 +43,17 @@ initiateHierarchicalClustering <- function(object,
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_object <- object@analysis$clustering$hclust[[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    cluster_object <- object@analysis$clustering$hclust[[variable_set]][[phase]]
+    
+  } else {
+    
+    cluster_object <- object@analysis$clustering$hclust[[variable_set]]
+    
+  }
   
   variables <- getVariableSet(object, variable_set)
   
@@ -73,15 +81,17 @@ initiateHierarchicalClustering <- function(object,
         verbose = FALSE
       )
     
-    msg <- glue::glue("Successfully initiated hierarchical clustering for {phase} phase with '{variable_set}'-variables: '{variables}'", 
-                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '"))
+    msg <- glue::glue("Successfully initiated hierarchical clustering{ref_phase}with '{variable_set}'-variables: '{variables}'", 
+                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '", width = 100), 
+                      ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
     
   } else {
     
-    msg <- glue::glue("Hierarchical clustering for {phase} phase with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.")
+    msg <- glue::glue("Hierarchical clustering{ref_phase}with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.", 
+                      ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
@@ -109,9 +119,17 @@ initiateKmeansClustering <- function(object,
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_object <- object@analysis$clustering$kmeans[[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    cluster_object <- object@analysis$clustering$kmeans[[variable_set]][[phase]]
+    
+  } else {
+    
+    cluster_object <- object@analysis$clustering$kmeans[[variable_set]]
+    
+  }
   
   variables <- getVariableSet(object, variable_set = variable_set)
   
@@ -139,8 +157,9 @@ initiateKmeansClustering <- function(object,
         verbose = FALSE
       )
     
-    msg <- glue::glue("Successfully initiated kmeans clustering for {phase} phase with '{variable_set}'-variables: '{variables}'", 
-                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '"))
+    msg <- glue::glue("Successfully initiated kmeans clustering{ref_phase}with '{variable_set}'-variables: '{variables}'", 
+                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '", width = 100), 
+                      ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
@@ -148,7 +167,8 @@ initiateKmeansClustering <- function(object,
   } else {
     
     msg <-
-      glue::glue("Kmeans clustering for {phase} phase with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.")
+      glue::glue("Kmeans clustering{ref_phase}with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.", 
+                 ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
@@ -175,9 +195,17 @@ initiatePamClustering <- function(object,
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  cluster_object <- object@analysis$clustering$pam[[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    cluster_object <- object@analysis$clustering$pam[[variable_set]][[phase]]
+    
+  } else {
+    
+    cluster_object <- object@analysis$clustering$pam[[variable_set]]
+    
+  }
   
   variables <- getVariableSet(object, variable_set)
   
@@ -203,14 +231,16 @@ initiatePamClustering <- function(object,
         verbose = FALSE
       )
     
-    msg <- glue::glue("Successfully initiated partitioning around medoids (PAM) clustering for {phase} phase with '{variable_set}'-variables: '{variables}'", 
-                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '"))
+    msg <- glue::glue("Successfully initiated partitioning around medoids (PAM) clustering{ref_phase}with '{variable_set}'-variables: '{variables}'", 
+                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '", width = 100), 
+                      ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
   } else {
     
-    msg <- glue::glue("Partitioning around medoids (PAM) clustering clustering for {phase} phase with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.")
+    msg <- glue::glue("Partitioning around medoids (PAM) clustering clustering{ref_phase}with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.", 
+                      ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
