@@ -375,9 +375,8 @@ processData <- function(object, verbose = TRUE){
   if(isTimeLapseExp(object)){
     
     # module: migration (TRUE if coordinates vars are available )
-    coords_available <- base::all(c("x_coords", "y_coords") %in% base::names(set_up$example$denoted_columns))
+    coords_available <- base::all(c("x_coords", "y_coords") %in% base::names(object@set_up$example$denoted_columns))
     object@information$modules$migration <- coords_available
-    
     
   } else {
     

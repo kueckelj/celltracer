@@ -1077,7 +1077,7 @@ moduleExperimentDesignServer <- function(id, usage = "in_function"){
     
     ed_list$object <- 
       methods::new(Class = "cto", 
-                   default = list(directory_cto = ed_list$default_directory),
+                   information = list(directory_cto = ed_list$default_directory),
                    name = ed_list$experiment_name,
                    set_up = ed_list$set_up, 
                    well_plates = well_plate_list()

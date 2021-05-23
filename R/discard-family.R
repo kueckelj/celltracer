@@ -91,10 +91,18 @@ discardStatVariables <- function(object, stat_variables, phase = NULL){
     getStatsDf(object, phase = phase, with_cluster = FALSE, with_meta = FALSE) %>% 
     dplyr::select(-dplyr::all_of(x = stat_variables))
   
-  object@data$stats[[phase]] <- stat_df
+  object <- setCellDf(object, slot = "stats", df = stat_df, phase = phase)
   
-  object@variable_statistics$total <- 
-    object@variable_statistics$total %>% dplyr::filter(!variable %in% {{stat_variables}})
+  object@vdata$total <- 
+    object@vdata$total%>% dplyr::filter(!variable %in% {{stat_variables}})
+  
+  if(multiplePhases(object)){
+    
+    object@vdata$by_phase <- 
+      purrr::map(.x = object@vdata$by_phase, 
+                 .f = ~ dplyr::filter(.x, !variable %in% {{stat_variables}}))
+    
+  }
   
   base::return(object)
   

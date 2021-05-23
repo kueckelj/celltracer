@@ -6,7 +6,7 @@
 
 saveCelltracerObject <- function(object, verbose = TRUE){
   
-  dir <- object@default$directory_cto
+  dir <- object@information$directory_cto
 
   confuns::give_feedback(
     msg = glue::glue("Saving celltracer object under '{dir}'."), 

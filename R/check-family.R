@@ -150,6 +150,22 @@ check_phase <- function(object, phase, max_phases = NULL){
   
 }
 
+
+#' @title Check that phase is specified manually
+check_phase_manually <- function(object, phase = NULL){
+  
+  if(multiplePhases(object)){
+    
+    if(base::is.null(phase)){
+      
+      base::stop("Creating a subset of your data impacts downstream analysis. Please specify argument 'phase' manually to ensure that you are referring to the right one.")
+      
+    }
+    
+  }
+  
+}
+
 #' @title Detect missing variables
 #' 
 #' @description Returns \code{variable} if it was not detected in the column names 

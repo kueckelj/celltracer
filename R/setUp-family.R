@@ -16,9 +16,13 @@ set_up_cdata_meta <- function(object, verbose = TRUE){
       purrr::map(.x = all_phases,
                  .f = function(phase){
                    
-                   dplyr::select(object@cdata[[data_slot]][[phase]], 
-                                 cell_id, phase, cell_line, condition) %>% 
-                     dplyr::distinct()
+                   object@cdata[[data_slot]][[phase]] %>% 
+                     dplyr::select(cell_id,cell_line, condition) %>% 
+                     dplyr::distinct() %>% 
+                     dplyr::mutate(
+                       cell_line = base::as.factor(cell_line), 
+                       condition = base::as.factor(condition)
+                      )
                    
                    
                  }) %>% 
@@ -26,9 +30,9 @@ set_up_cdata_meta <- function(object, verbose = TRUE){
     
   } else {
     
-    object@cdata$meta <- 
-      dplyr::select(object@cdata[[data_slot]][[1]], 
-                    cell_id, cell_line, condition) %>% 
+    object@cdata$meta <-
+      object@cdata[[data_slot]][[1]] %>% 
+      dplyr::select(cell_id, cell_line, condition) %>% 
       dplyr::distinct()
     
   }
@@ -51,7 +55,7 @@ set_up_cdata_cluster <- function(object, verbose){
       purrr::map(.x = all_phases,
                  .f = function(phase){
                    
-                   dplyr::select(object@cdata[[data_slot]][[phase]], cell_id, phase) %>% 
+                   dplyr::select(object@cdata[[data_slot]][[phase]], cell_id) %>% 
                      dplyr::distinct()
                    
                    
@@ -83,7 +87,7 @@ set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
       
       # process tracks
       object@cdata$tracks <- 
-        purrr::map2(.x = object@data$tracks,
+        purrr::map2(.x = object@cdata$tracks,
                     .y = getPhases(object),
                     object = object,
                     verbose = verbose,
@@ -92,7 +96,7 @@ set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
       
       # compute statistics 
       object@cdata$stats <- 
-        purrr::map2(.x = object@data$tracks,
+        purrr::map2(.x = object@cdata$tracks,
                     .y = getPhases(object),
                     object = object,
                     verbose = verbose,
@@ -106,7 +110,7 @@ set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
       
       # process tracks
       object@cdata$tracks <- 
-        purrr::map_df(.x = object@data$tracks, 
+        purrr::map_df(.x = object@cdata$tracks, 
                       phase = NULL, 
                       object = object, 
                       verbose = verbose, 
@@ -114,7 +118,7 @@ set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
       
       # compute statistics 
       object@cdata$stats <- 
-        purrr::map_df(.x = object@data$tracks,
+        purrr::map_df(.x = object@cdata$tracks,
                       phase = NULL, 
                       object = object,
                       verbose = verbose,
@@ -205,7 +209,7 @@ set_up_vdata <- function(object, verbose = TRUE){
       purrr::map(.x = all_phases, 
                  .f = function(phase){
                    
-                   getStatsDf(object, phase = phase) %>% 
+                   object@cdata$stats[[phase]] %>% 
                      dplyr::select_if(base::is.numeric) %>% 
                      base::as.matrix() %>% 
                      psych::describe(IQR = TRUE) %>% 

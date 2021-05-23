@@ -52,7 +52,6 @@ compute_cell_stats <- function(df, phase, verbose, object){
     dplyr::select(-dplyr::all_of(x = stat_vars)) %>% 
     dplyr::distinct() %>% 
     dplyr::left_join(y = mgr_eff_df, by = "cell_id") %>% # join with migration efficiency
-    dplyr::mutate(phase = {{phase}}) %>% 
     dplyr::ungroup() %>% 
     dplyr::select(cell_id, where(fn = base::is.numeric))
   

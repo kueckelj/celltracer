@@ -305,7 +305,6 @@ plotBarchart <- function(object,
 
 plotStatisticsInteractive <- function(object, phase = NULL){
   
-  
   check_object(object)
   assign_default(object)
   
@@ -313,11 +312,10 @@ plotStatisticsInteractive <- function(object, phase = NULL){
   
   stats_df <-
     getStatsDf(object, phase = phase, verbose = FALSE) %>% 
-    dplyr::select(-phase, -cell_id)
+    dplyr::select(-cell_id)
   
   
-  confuns::plot_statistics_interactive(df = stats_df, n.across.subset = 25)
-  
+  confuns::plot_statistics_interactive(df = stats_df, n.across.subset = Inf)
   
 }
 

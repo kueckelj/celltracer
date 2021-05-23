@@ -480,7 +480,7 @@ assemble_stat_list_shiny <- function(stat_data_list, well_plate_list, object){
                   cl_condition = base::factor(x = cl_condition, levels = cl_conditions)
     )
   
-  stat_list <- base::list("only" = dplyr::mutate(final_df, phase = "first"))
+  stat_list <- base::list("only" = final_df)
   
   base::return(stat_list)
   
@@ -567,7 +567,6 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
                    
                    df$condition <- condition_vec
                    df$cl_condition <- stringr::str_c(df$cell_line, df$condition, sep = " & ")
-                   df$phase <- english::ordinal(x = phase_index)
                    
                    base::return(df)
                    
@@ -576,10 +575,9 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
     
   } else {
     
-    track_list <- base::list("first" = dplyr::mutate(final_df, phase = "first"))
+    track_list <- base::list("first" = final_df)
     
   }
-  
   
   base::return(track_list)
   

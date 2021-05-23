@@ -867,7 +867,7 @@ getStatVariableNames <- function(object, ..., phase = NULL){
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
   stat_df <-
-    getStatsDf(object, with_meta = FALSE, with_cluster = FALSE) %>% 
+    getStatsDf(object, with_meta = FALSE, with_cluster = FALSE, with_well_plate = FALSE) %>% 
     dplyr::select(-cell_id)
   
   selected_df <- dplyr::select(stat_df, ...)
