@@ -15,7 +15,7 @@ referring to the phase of interest. If set to NULL takes the phase denoted as de
 Ignored if the experiment design contains only one phase.}
 }
 \description{
-Opens an interactive application in which statistc related
+Opens an interactive application in which statistic related
 plots like violinplots, boxplots as well as statistical tests across
-groups can be conducted conveniently.
+groups can be conducted.
 }

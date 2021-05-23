@@ -160,15 +160,39 @@ subsetByCellId <- function(object, new_name, cell_ids, verbose = NULL, ...){
     
   }
   
+  # rename the object
+  
+  parent_name <- object@name
+  
+  if(base::is.null(new_name)){
+    
+    object@name <- stringr::str_c(object@name, "subset", sep = "_")
+    
+  } else if(base::is.character(new_name)){
+    
+    if(new_name == object@name){
+      
+      base::stop("Input for argument 'new_name' must not be identical with the objects name.")
+      
+    }
+    
+    object@name <- new_name
+    
+  }
+  
   # save subset information, if not provided in ... subsetByCellId is the main subsetter
   # else its one of the other
   if(!confuns::is_list(input = subset_by)){
     
-    subset_by <- list(by = "cell_id", ids = cell_ids)
+    subset_by <- list(by = "cell_id")
     
   }
   
+  subset_by$ids_remaining = cell_ids
   subset_by$n_remaining <- nCells(object)
+  
+  subset_by$parent_object <- parent_name
+  subset_by$new_object <- object@name
   
   if(multiplePhases(object)){
     
@@ -192,16 +216,6 @@ subsetByCellId <- function(object, new_name, cell_ids, verbose = NULL, ...){
     
   }
   
-  # rename the object
-  if(base::is.null(new_name)){
-    
-    object@name <- stringr::str_c(object@name, "subset", sep = "_")
-    
-  } else {
-    
-    object@name <- new_name
-    
-  }
   
   confuns::give_feedback(
     msg = glue::glue("New object name: {object@name}"), 
@@ -350,6 +364,7 @@ subsetByCluster <- function(object, new_name, cluster_variable, cluster, phase =
     subsetByCellId(object,
                    cell_ids = cell_ids,
                    phase = phase,
+                   new_name = new_name,
                    verbose = FALSE,
                    subset_by = list(by = "cluster", cluster_variable = cluster_variable, cluster = cluster)
     )

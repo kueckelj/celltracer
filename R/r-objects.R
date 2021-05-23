@@ -42,6 +42,11 @@ short_ct_variables <- c("well_image", "condition", "cell_line", "cell_id", "x_co
 
 # Miscellaneuos -----------------------------------------------------------
 
+analysis_methods <- list(
+  dim_red = c("pca", "tsne", "umap"), 
+  clustering = c("hclust", "kmeans", "pam")
+)
+
 app_title <- "celltracer"
 
 ambiguity_colors <- c("Clear" = "#1CE35B", "Ambiguous" = "#E02424", "Dismissed" = "lightgrey")
@@ -239,6 +244,12 @@ well_plate_vars <- c("well_plate_name", "well_plate_index", "well",  "well_image
 
 
 # Pretty names ------------------------------------------------------------
+
+pretty_exp_types <- 
+  list("one_time_imaging" = "One Time Imaging", 
+       "time_lapse" = "Time Lapse", 
+       "time_lapse_smrd" = "Time Lapse (summarized)"
+       )
 
 pretty_grouping_variables_list <-
   list("Cell Line &\n Condition" = "cl_condition", 

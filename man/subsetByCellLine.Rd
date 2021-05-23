@@ -33,5 +33,5 @@ is why these results are reset in the subsetted object and must be computed agai
 the default directory is reset as well. Make sure to set a new one via \code{setDefaultDirectory()}.
 
 The mechanism with which you create the subset is stored in the output object. Use \code{printSubsetHistory()}
-to reconstruct the way from the original object till the current one.
+to reconstruct the way from the original object to the current one.
 }

@@ -294,9 +294,9 @@ plotBarchart <- function(object,
 
 #' @title Plot statistics related plots interactively
 #' 
-#' @description Opens an interactive application in which statistc related 
+#' @description Opens an interactive application in which statistic related 
 #' plots like violinplots, boxplots as well as statistical tests across 
-#' groups can be conducted conveniently.
+#' groups can be conducted.
 #'
 #' @inherit argument_dummy params
 #'
