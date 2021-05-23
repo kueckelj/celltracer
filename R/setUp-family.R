@@ -232,7 +232,10 @@ set_up_cdata_well_plate <- function(object, verbose = TRUE){
   
   object@cdata$well_plate <- 
     dplyr::select(object@cdata[[data_slot]][[1]], dplyr::all_of(x = c("cell_id", well_plate_vars))) %>% 
-    dplyr::distinct()
+    dplyr::distinct() %>% 
+    dplyr::mutate(
+      dplyr::across(.cols = dplyr::starts_with("well"), .fns = base::as.factor)
+    )
   
   base::return(object)
   

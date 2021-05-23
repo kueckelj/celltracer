@@ -6,6 +6,7 @@
 \usage{
 plotCorrelationSD(
   object,
+  variable_set,
   method_corr = NULL,
   phase = NULL,
   across = NULL,
@@ -17,6 +18,9 @@ plotCorrelationSD(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
 or \code{'spearman'}.}

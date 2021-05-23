@@ -173,7 +173,7 @@ moduleLoadDataServer <- function(id, object){
         well_plate_list_new[[wp_name]][["directory"]] <- dir_string()
         
         well_plate_list_new[[wp_name]] <-
-          evaluate_file_availability(
+          evaluate_file_availability_shiny(
             wp_list = well_plate_list_new[[wp_name]],
             recursive = input$ld_recursive, 
             keep = input$ld_keep_filetype

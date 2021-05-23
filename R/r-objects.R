@@ -83,11 +83,24 @@ default_list <-
     pt_fill = "black",
     pt_size = 3, 
     verbose = TRUE, 
-    well_plate = NULL, 
+    well_plate = "", 
     with_cluster = TRUE, 
     with_meta = TRUE, 
     with_well_plate = TRUE
   )
+
+default_character_values <- c("method_aggl", "method_corr", "method_dist", "method_kmeans", 
+                       "method_pam", "phase", "pt_clr", "pt_clrp", "pt_clrsp", "pt_fill", 
+                       "well_plate")
+
+default_logical_values <- c("make_pretty", "with_cluster", "with_meta", "with_well_plate")
+
+default_numeric_values <- c("pt_alpha", "pt_size")
+
+
+
+
+
 
 filetypes <- c("csv$", "xls$", "xlsx$")
 
@@ -187,6 +200,9 @@ not_splitted <- c("No treatment", "From beginning")
 object_class <- "cto"
 base::attr(object_class, which = "package") <- "celltracer"
 
+protected_vars <- c("cell_id", "cell_line", "condition",
+                    "well_plate_name", "well_plate_index", "well",  "well_image")
+
 set_up_funs <- list(experiment_design = "designExperiment()", 
                     load_data = "loadData()", 
                     quality_check = "checkDataQuality()", 
@@ -216,6 +232,8 @@ storage_slots <- c("directory", "valid_directories", "missing_files")
 testable_plottypes <- c("boxplot", "violinplot")
 
 well_plate_vars <- c("well_plate_name", "well_plate_index", "well",  "well_image")
+
+
 
 # -----
 

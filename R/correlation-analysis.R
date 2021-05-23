@@ -24,8 +24,8 @@
 #' @export
 #'
 initiateCorrelation <- function(object,
+                                variables_set,
                                 phase = NULL, 
-                                variables_subset = NULL,
                                 force = FALSE, 
                                 verbose = NULL, 
                                 ...){
@@ -33,50 +33,49 @@ initiateCorrelation <- function(object,
   check_object(object)
   assign_default(object)
   
-  corr_obj <- object@analysis$correlation[[phase]]
+  variables <- getVariableSet(object, variable_set = variable_set)
   
-  if(base::class(corr_obj) != "corr_conv" | base::isTRUE(force)){
+  if(multiplePhases(object)){
     
-    stat_df <- getStatsDf(object = object, 
-                          phase = phase,
-                          with_cluster = FALSE, 
-                          with_meta = FALSE) %>% 
-      dplyr::select(-phase)
+    phase <- check_phase(object, phase = phase, max_phases = 1)
     
-    cell_ids <- stat_df$cell_id
-    stat_df$cell_id <- NULL
+    corr_object <- object@analysis$correlation[[variable_set]][[phase]]
     
-    numeric_df <- hlpr_select(stat_df, variables_subset = variables_subset) # only numeric variables for feedback
+  } else {
     
-    stat_df <- base::as.data.frame(numeric_df)
-    base::rownames(stat_df) <- cell_ids
+    corr_object <- object@analysis$correlation[[variable_set]]
     
+  }
+  
+  
+  if(base::class(corr_object) != "corr_conv" | base::isTRUE(force)){
+
     stat_df <- 
-      dplyr::left_join(x = tibble::rownames_to_column(stat_df, var = "cell_id"), y = getClusterDf(object, phase = phase), by = "cell_id") %>% 
-      dplyr::select(-phase) %>% 
-      dplyr::left_join(x = ., y = getMetaDf(object, phase = phase), by = "cell_id") %>% 
-      dplyr::select(-phase) %>% 
-      base::as.data.frame() %>%
-      tibble::column_to_rownames(var = "cell_id") %>% 
-      dplyr::select(-dplyr::starts_with(match = "well"))
-      
+      getStatsDf(object, with_cluster = FALSE, with_meta = FALSE, with_well_plate = FALSE) %>% 
+      dplyr::select(cell_id, dplyr::all_of(variables))
     
-    corr_obj <- confuns::initiate_corr_object(corr.data = stat_df)
+    corr_object <- confuns::initiate_corr_object(corr.data = stat_df, key.name = "cell_id")
     
-    msg <- glue::glue("Successfully initiated correlation analysis for {phase} phase with variables: '{remaining_vars}'", 
-                      remaining_vars = glue::glue_collapse(x = base::colnames(numeric_df), sep = "', '", last = "' and '"))
+    msg <- glue::glue("Successfully initiated correlation analysis {ref_phase}with '{variable_set}'-variables: '{variables}'", 
+                      variables = glue::glue_collapse(x = variables, sep = "', '", last = "' and '", width = 100), 
+                      ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
   } else {
     
-    msg <- glue::glue("Correlation analysis for {phase} phase already exists. Set argument 'force' to TRUE in order to overwrite it.")
+    msg <- glue::glue("Correlation analysis {ref_phase}with variable set '{variable_set}' already exists. Set argument 'force' to TRUE in order to overwrite it.", 
+                      ref_phase = hlpr_glue_phase(object, phase))
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     
   }
   
-  object@analysis$correlation[[phase]] <- corr_obj
+  object <-
+    setCorrConv(object = object,
+                corr_object = corr_object,
+                variable_set = variable_set,
+                phase = phase)
   
   base::return(object)  
   
@@ -96,7 +95,7 @@ initiateCorrelation <- function(object,
 #' correlation is computed. Meaning that before correlation is computed the data is split
 #' into the groups suggested by the respective grouping variable. 
 #' 
-#' If set to NULL defaults to all grouping variables. 
+#' If set to NULL defaults to all grouping variables obtained via \code{getGroupingVariableNames()}.
 #' 
 #' 
 #' @details \code{correlateAcross()} iterates over all grouping variables and computes the 
@@ -106,18 +105,18 @@ initiateCorrelation <- function(object,
 #' @return 
 #' @export
 #'
-correlateAll <- function(object, method_corr = NULL, phase = NULL, print_errors = FALSE, verbose = NULL){
+correlateAll <- function(object, variable_set, method_corr = NULL, phase = NULL, print_errors = FALSE, verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  corr_obj <- getCorrConv(object, phase = phase)
+  corr_object <- getCorrConv(object, variable_set = variable_set, phase = phase)
   
-  corr_obj <- confuns::correlate_all(corr.obj = corr_obj, methods.corr = method_corr)
+  corr_object <- confuns::correlate_all(corr.obj = corr_object, methods.corr = method_corr)
   
-  object@analysis$correlation[[phase]] <- corr_obj
+  object <- setCorrConv(object, corr_object = corr_object, variable_set = variable_set, phase = phase)
   
   confuns::give_feedback(msg = "Done.", verbose = verbose)
   
@@ -128,6 +127,7 @@ correlateAll <- function(object, method_corr = NULL, phase = NULL, print_errors 
 #' @rdname correlateAll
 #' @export
 correlateAcross <- function(object, 
+                            variable_set, 
                             phase = NULL, 
                             across = NULL, 
                             method_corr = NULL, 
@@ -138,17 +138,19 @@ correlateAcross <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  corr_obj <- getCorrConv(object, phase = phase)
+  corr_object <- getCorrConv(object, variable_set = variable_set, phase = phase)
   
-  corr_obj <- 
+  corr_object <- 
     confuns::correlate_across(
-      corr.obj = corr_obj, 
+      corr.obj = corr_object, 
       across = across, 
       methods.corr = method_corr, 
-      verbose = verbose
+      verbose = verbose, 
+      print.errors = TRUE
     )
   
-  object@analysis$correlation[[phase]] <- corr_obj
+  object <-
+    setCorrConv(object, corr_object = corr_object, variable_set = variable_set, phase = phase)
   
   confuns::give_feedback(msg = "Done.", verbose = verbose)
   
@@ -210,6 +212,7 @@ correlateAcross <- function(object,
 #' @export
 #'
 plotCorrplot <- function(object, 
+                         variable_set,
                          phase = NULL,
                          method_corr = NULL, 
                          across = NULL, 
@@ -241,13 +244,13 @@ plotCorrplot <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  corr_obj <- getCorrConv(object, phase = phase)
+  corr_object <- getCorrConv(object, variable_set = variable_set, phase = phase)
   
   
   if(base::is.null(across)){
     
     confuns::plot_corrplot(
-      corr.input = corr_obj, 
+      corr.input = corr_object, 
       variables.subset = variables_subset, 
       plot.type = plot_type, 
       display.diagonal = display_diagonal, 
@@ -270,7 +273,7 @@ plotCorrplot <- function(object,
   } else if(base::is.character(across)){
     
     confuns::plot_corrplots(
-      corr.obj = corr_obj, 
+      corr.obj = corr_object, 
       across = across, 
       across.subset = across_subset, 
       variables.subset = variables_subset, 
@@ -319,6 +322,7 @@ plotCorrplot <- function(object,
 #' @export
 #'
 plotCorrelationSD <- function(object, 
+                              variable_set,
                               method_corr = NULL, 
                               phase = NULL,
                               across = NULL, 
@@ -333,10 +337,10 @@ plotCorrelationSD <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  corr_obj <- getCorrConv(object, phase = phase)
+  corr_object <- getCorrConv(object, variable_set = variable_set, phase = phase)
   
   confuns::plot_correlation_sd(
-    corr.obj = corr_obj, 
+    corr.obj = corr_object, 
     method.corr = method_corr, 
     across = across, 
     aes.fill = "sd", 

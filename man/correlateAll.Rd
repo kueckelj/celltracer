@@ -7,6 +7,7 @@
 \usage{
 correlateAll(
   object,
+  variable_set,
   method_corr = NULL,
   phase = NULL,
   print_errors = FALSE,
@@ -15,6 +16,7 @@ correlateAll(
 
 correlateAcross(
   object,
+  variable_set,
   phase = NULL,
   across = NULL,
   method_corr = NULL,
@@ -23,6 +25,9 @@ correlateAcross(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
 or \code{'spearman'}.}
@@ -41,7 +46,7 @@ the computational progress will be printed.
 correlation is computed. Meaning that before correlation is computed the data is split
 into the groups suggested by the respective grouping variable.
 
-If set to NULL defaults to all grouping variables.}
+If set to NULL defaults to all grouping variables obtained via \code{getGroupingVariableNames()}.}
 }
 \value{
 

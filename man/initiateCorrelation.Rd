@@ -6,8 +6,8 @@
 \usage{
 initiateCorrelation(
   object,
+  variables_set,
   phase = NULL,
-  variables_subset = NULL,
   force = FALSE,
   verbose = NULL,
   ...
@@ -21,6 +21,14 @@ referring to the phase of interest. If set to NULL takes the phase denoted as de
 
 Ignored if the experiment design contains only one phase.}
 
+\item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
+set up or already existing results.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
+
 \item{variables_subset}{Character vector or NULL. Specifies the numeric variables the subsequent correlation
 steps will include..
 
@@ -29,14 +37,6 @@ with a \emph{'-'}. (Saves writing if there are more variables you are interested
 than variables you are not interested in.)
 
 Use \code{getNumericVariableNames()} to obtain all valid input options.}
-
-\item{force}{Logical value. Needs to be set to TRUE if you want to overwrite an already existing
-set up or already existing results.}
-
-\item{verbose}{Logical. If set to TRUE informative messages regarding
-the computational progress will be printed.
-
-(Warning messages will always be printed.)}
 }
 \value{
 An updated celltracer object.

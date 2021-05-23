@@ -7,9 +7,9 @@
 \alias{getWellPlateDf}
 \title{Obtain grouping information}
 \usage{
-getGroupingDf(object, phase = NULL)
+getGroupingDf(object, phase = NULL, verbose = NULL)
 
-getClusterDf(object, phase = NULL, verbose = TRUE)
+getClusterDf(object, phase = NULL, verbose = NULL)
 
 getMetaDf(object, phase = NULL)
 

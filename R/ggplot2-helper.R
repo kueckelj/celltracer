@@ -1,6 +1,6 @@
 
 
-#' @title Rotate labels of ggplot output 
+#' @title Manipulate labels of ggplot output 
 #' 
 #' @description Allows to rotate the labels of the x-/y-axis 
 #' of ggplot2 plots. Useful in case of overlap. 
@@ -12,7 +12,7 @@
 #' @export
 #'
 
-rotateLabelsX <- function(angle = 90){
+labelsXrotate <- function(angle = 90){
   
   ggplot2::theme(
     axis.text.x = ggplot2::element_text(angle = angle)
@@ -20,12 +20,32 @@ rotateLabelsX <- function(angle = 90){
   
 }
 
-#' @rdname rotateLabelsX
+#' @rdname labelsXrotate
 #' @export
-rotateLabelsY <- function(angle = 90){
+labelsYrotate <- function(angle = 90){
   
   ggplot2::theme(
     axis.text.y = ggplot2::element_text(angle = angle)
+  )
+  
+}
+
+#' @rdname labelsXrotate
+#' @export
+labelsXremove <- function(){
+  
+  ggplot2::theme(
+    axis.text.x = ggplot2::element_blank()
+  )
+  
+}
+
+#' @rdname labelsXrotate
+#' @export
+labelsYremove <- function(){
+  
+  ggplot2::theme(
+    axis.text.y = ggplot2::element_blank()
   )
   
 }

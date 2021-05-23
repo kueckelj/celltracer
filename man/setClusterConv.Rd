@@ -3,22 +3,25 @@
 \name{setClusterConv}
 \alias{setClusterConv}
 \alias{setDimRedConv}
-\title{Set clustering object}
+\alias{setCorrConv}
+\title{Set analysis objects}
 \usage{
-setClusterConv(object, cluster_object, method, phase, variable_set)
+setClusterConv(object, cluster_object, method, variable_set, phase)
 
-setDimRedConv(object, dim_red_object, method, phase, variable_set)
+setDimRedConv(object, dim_red_object, method, variable_set, phase)
+
+setCorrConv(object, corr_object, variable_set, phase)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
-
-\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
-to obtain all names of currently stored variable sets in your object.}
 }
 \description{
 Sets a convenient object and empties its data slot.

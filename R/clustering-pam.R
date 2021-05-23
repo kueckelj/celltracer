@@ -133,7 +133,7 @@ plotSilhouetteWidths <- function(object,
   
   phase <- check_phase(object, phase, max_phases = 1)
   
-  confuns::is_vec(k, mode = "numeric", min.length = 2)
+  confuns::is_vec(k, mode = "numeric")
   
   cluster_object <- getPamConv(object, variable_set = variable_set, phase = phase, with_data = FALSE)
   

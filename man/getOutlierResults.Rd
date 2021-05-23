@@ -7,7 +7,7 @@
 \usage{
 getOutlierResults(object, method_outlier = NULL, check = TRUE)
 
-getOutlierIds(object, method_outlier = NULL, check = FALSE)
+getOutlierIds(object, method_outlier = NULL, check = FALSE, flatten = TRUE)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

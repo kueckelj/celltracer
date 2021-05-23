@@ -56,7 +56,7 @@ subsetByCellId <- function(object, cell_ids, phase = "all", verbose = NULL, ...)
     
     # subsetting tracks 
     object@cdata$tracks <- 
-      purrr::map(.x = object@data$tracks[phases],
+      purrr::map(.x = object@cdata$tracks[phases],
                  .f = function(track_df){
                    
                    dplyr::filter(track_df, cell_id %in% {{cell_ids}})
@@ -66,7 +66,7 @@ subsetByCellId <- function(object, cell_ids, phase = "all", verbose = NULL, ...)
     
     # subsetting stats
     object@cdata$stats <- 
-      purrr::map(.x = object@data$stats[phases], 
+      purrr::map(.x = object@cdata$stats[phases], 
                  .f = function(stat_df){
                    
                    dplyr::filter(stat_df, cell_id %in% {{cell_ids}})
@@ -75,16 +75,17 @@ subsetByCellId <- function(object, cell_ids, phase = "all", verbose = NULL, ...)
     
     # subsetting meta 
     object@cdata$meta <- 
-      purrr::map(.x = object@data$meta[phases], 
+      purrr::map(.x = object@cdata$meta[phases], 
                  .f = function(meta_df){
                    
-                   dplyr::filter(meta_df, cell_id %in% {{cell_ids}})
+                   dplyr::filter(meta_df, cell_id %in% {{cell_ids}}) %>% 
+                     dplyr::mutate_if(.predicate = base::is.factor, .funs = base::droplevels)
                    
                  })
     
     # new cluster data 
     object@cdata$cluster <- 
-      purrr::map(.x = object@data$cluster[phases], 
+      purrr::map(.x = object@cdata$cluster[phases], 
                  .f = function(cluster_df){
                    
                    dplyr::filter(cluster_df, cell_id %in% {{cell_ids}}) %>% 
@@ -98,7 +99,9 @@ subsetByCellId <- function(object, cell_ids, phase = "all", verbose = NULL, ...)
       purrr::imap(.x = object@cdata, 
                   .f = function(df, slot){
                     
-                    df <- dplyr::filter(df, cell_id %in% {{cell_ids}})
+                    df <- 
+                      dplyr::filter(df, cell_id %in% {{cell_ids}}) %>% 
+                      dplyr::mutate_if(.predicate = base::is.factor, .funs = base::droplevels)
                     
                     if(slot == "cluster"){
                       
@@ -112,13 +115,9 @@ subsetByCellId <- function(object, cell_ids, phase = "all", verbose = NULL, ...)
     
   }
   
-  empty_named_list <- 
-    base::vector(mode = "list", length = base::length(phases)) %>% 
-    purrr::set_names(nm = phases)
-  
   object@analysis <- list()
   
-  wp_subset_info <- object@data$meta[[1]] %>% select(well_plate_name, well)
+  wp_subset_info <- object@cdata$well_plate %>% select(well_plate_name, well)
   
   if(multiplePhases(object)){
     
@@ -233,7 +232,7 @@ subsetByCellLine <- function(object, cell_lines, phase = "all", verbose = NULL){
   )
   
   cell_ids <-
-    getGroupingDf(object, phase = 1) %>% 
+    getGroupingDf(object, phase = 1, verbose = FALSE) %>% 
     dplyr::filter(cell_line %in% {{cell_lines}}) %>% 
     dplyr::pull(cell_id)
   
@@ -262,26 +261,25 @@ subsetByCondition <- function(object, conditions, phase = NULL, verbose = NULL){
   
   confuns::check_one_of(
     input = conditions, 
-    against = getConditions(object)
+    against = getConditions(object, phase = phase)
   )
   
   confuns::give_feedback(
     msg = glue::glue("Subsetting celltracer object by {ref_conditions} '{conditions}'.", 
-                     ref_phase = glue::glue_collapse(x = phases, sep = ",", last = " and "), 
                      ref_conditions = confuns::adapt_reference(conditions, "condition", "conditions"),
                      conditions = glue::glue_collapse(conditions, sep = "', '", last = "' and '")), 
     verbose = verbose
   )
   
   cell_ids <-
-    getGroupingDf(object, phase = phase) %>% 
+    getGroupingDf(object, phase = phase, verbose = FALSE) %>% 
     dplyr::filter(condition %in% {{conditions}}) %>% 
     dplyr::pull(cell_id)
   
   object_new <-
     subsetByCellId(object,
                    cell_ids = cell_ids,
-                   phase = phases,
+                   phase = phase,
                    verbose = FALSE,
                    subset_by = list(by = "conditions", conditions = conditions)
     )
@@ -301,6 +299,8 @@ subsetByCluster <- function(object, cluster_variable, cluster, phase = NULL, ver
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
+  confuns::is_value(cluster_variable, mode = "character")
+  
   confuns::check_one_of(
     input = cluster_variable, 
     against = getClusterVariableNames(object, phase = phase)
@@ -310,7 +310,7 @@ subsetByCluster <- function(object, cluster_variable, cluster, phase = NULL, ver
   
   confuns::check_one_of(
     input = cluster, 
-    against = getGroupNames(object, option = cluster_variables, phase = phase)
+    against = getGroupNames(object, grouping_variable = cluster_variable, phase = phase)
   )
   
   confuns::give_feedback(
@@ -320,7 +320,7 @@ subsetByCluster <- function(object, cluster_variable, cluster, phase = NULL, ver
   )
   
   cell_ids <-
-    getGroupingDf(object, phase = phase) %>% 
+    getGroupingDf(object, phase = phase, verbose = FALSE) %>% 
     dplyr::filter(!!rlang::sym(cluster_variable) %in% {{cluster}}) %>% 
     dplyr::pull(cell_id)
   

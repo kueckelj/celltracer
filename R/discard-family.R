@@ -2,9 +2,12 @@
 
 
 #' @title Discard unwanted variables from your data
+#' 
+#' @description Discards variables from the provided object. They can not be restored apart
+#' from adding them again artificially. Use with caution.
 #'
 #' @inherit argument_dummy 
-#' @param cluster_variables Character vector. The cluster variables you want to discard.
+#' @param cluster_variables,meta_variables Character vector. The variables you want to discard.
 #'
 #' @return An updated celltracer object.
 #' @export
@@ -26,11 +29,38 @@ discardClusterVariables <- function(object, cluster_variables, phase = NULL){
     getClusterDf(object, phase = phase) %>% 
     dplyr::select(-dplyr::all_of(cluster_variables))
   
-  object@data$cluster[[phase]] <- cluster_df
+  object <- setCellDf(object, slot = "cluster", df = cluster_df, phase = phase)
   
   base::return(object)
   
 }
+
+
+#' @rdname discardClusterVariables
+#' @export
+discardMetaVariables <- function(object, meta_variables, phase = NULL){
+  
+  check_object(object)
+  
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  confuns::check_one_of(
+    input = meta_variables, 
+    against = getMetaVariableNames(object, phase = phase)
+  )
+  
+  meta_df <-
+    getMetaDf(object, phase = phase) %>% 
+    dplyr::select(-dplyr::all_of(meta_variables))
+  
+  object <- setCellDf(object, slot = "meta", df = meta_df, phase = phase)
+  
+  base::return(object)
+  
+}
+
 
 
 

@@ -22,7 +22,16 @@ run_dim_red <- function(object,
   
   variables <- getVariableSet(object, variable_set = variable_set)
   
-  dim_red_obj <- object@analysis$dim_red[[method_dim_red]][[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    dim_red_obj <- object@analysis$dim_red[[method_dim_red]][[variable_set]][[phase]]
+    
+  } else {
+    
+    dim_red_obj <- object@analysis$dim_red[[method_dim_red]][[variable_set]]
+    
+  }
+  
   
   if(base::class(dim_red_obj) != "dim_red_conv" | base::isTRUE(force)){
     
@@ -88,9 +97,17 @@ get_dim_red_obj <- function(object, variable_set, phase = NULL, method_dim_red){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
-  
-  dim_red_obj <- object@analysis$dim_red[[method_dim_red]][[phase]][[variable_set]]
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    dim_red_obj <- object@analysis$dim_red[[method_dim_red]][[variable_set]][[phase]]
+    
+  } else {
+    
+    dim_red_obj <- object@analysis$dim_red[[method_dim_red]][[variable_set]]
+    
+  }
   
   ref_fun <-
     stringr::str_c("run",

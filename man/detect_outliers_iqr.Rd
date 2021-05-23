@@ -2,9 +2,17 @@
 % Please edit documentation in R/outlier-detection.R
 \name{detect_outliers_iqr}
 \alias{detect_outliers_iqr}
+\alias{detect_outliers_mahalanobis}
 \title{Outlier detection functions}
 \usage{
-detect_outliers_iqr(object, verbose = NULL, variable_names = NULL)
+detect_outliers_iqr(object, variable_names = NULL, verbose = NULL)
+
+detect_outliers_mahalanobis(
+  object,
+  variable_names = NULL,
+  threshold_pval = 0.001,
+  verbose = NULL
+)
 }
 \description{
 Outlier detection functions

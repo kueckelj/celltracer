@@ -17,7 +17,11 @@
 #' 
 #' @export
 
-detectOutliers <- function(object, method_outlier = "iqr", variable_names = NULL, verbose = NULL){
+detectOutliers <- function(object,
+                           method_outlier = "iqr",
+                           threshold_pval = 0.001,
+                           variable_names = NULL,
+                           verbose = NULL){
   
   check_object(object)
   assign_default(object)
@@ -27,6 +31,17 @@ detectOutliers <- function(object, method_outlier = "iqr", variable_names = NULL
     object <- detect_outliers_iqr(object, variable_names = variable_names, verbose = verbose)
     
   }
+  
+  if("mahalanobis" %in% method_outlier){
+    
+    object <- detect_outliers_mahalanobis(object, variable_names = variable_names, 
+                                          verbose = verbose, threshold_pval = threshold_pval)
+    
+  }
+  
+  confuns::give_feedback(msg = "Done.", verbose = verbose)
+  
+  
   
   base::return(object)
   
@@ -55,7 +70,11 @@ removeOutliers <- function(object, method_outlier = NULL, verbose = NULL){
     getOutlierResults(object, method_outlier = method_outlier) %>% 
     base::names()
   
-  outlier_ids <- getOutlierIds(object, check = TRUE)
+  outlier_ids <- getOutlierIds(object, method_outlier = method_outlier, check = TRUE)
+  
+  cell_ids <- getStatsDf(object) %>% dplyr::pull(cell_id)
+  
+  keep_ids <- cell_ids[!cell_ids %in% outlier_ids]
   
   n_outliers <- base::length(outlier_ids)
   
@@ -70,20 +89,7 @@ removeOutliers <- function(object, method_outlier = NULL, verbose = NULL){
     
     confuns::give_feedback(msg = msg, verbose = verbose)
     
-    
-    object@data$tracks <- 
-      purrr::map(.x = object@data$tracks, .f = ~ dplyr::filter(.x, !cell_id %in% {{outlier_ids}}))
-    
-    object@data$stats <- 
-      purrr::map(.x = object@data$stats, .f = ~ dplyr::filter(.x, !cell_id %in% {{outlier_ids}}))
-    
-    object@data$meta <- 
-      dplyr::filter(object@data$meta, !cell_id %in% {{outlier_ids}})
-    
-    object@data$grouping <- 
-      purrr::map(.x = object@data$grouping,
-                 .f = ~ dplyr::filter(.x, !cell_id %in% {{outlier_ids}})
-      )
+    object <- subsetByCellId(object, cell_ids = keep_ids, verbose = verbose)
     
     object@analysis <- list()
     
@@ -100,7 +106,7 @@ removeOutliers <- function(object, method_outlier = NULL, verbose = NULL){
 
 
 #' @title Outlier detection functions
-detect_outliers_iqr <- function(object, verbose = NULL, variable_names = NULL){
+detect_outliers_iqr <- function(object, variable_names = NULL, verbose = NULL){
   
   check_object(object)
   assign_default(object)
@@ -114,7 +120,7 @@ detect_outliers_iqr <- function(object, verbose = NULL, variable_names = NULL){
   confuns::give_feedback(msg = "Running outlier detection with method = 'iqr'")
   
   outlier_results <- 
-    purrr::map(.x = getPhases(object), 
+    purrr::map(.x = getPhases(object), # in case of non time lapse experiment phase is ignored anyway
                .f = function(phase){
                  
                  stat_df <-
@@ -148,13 +154,91 @@ detect_outliers_iqr <- function(object, verbose = NULL, variable_names = NULL){
                }) %>% 
     purrr::set_names(getPhases(object))
   
+  if(!multiplePhases(object)){
+    
+    outlier_results <- outlier_results[[1]]
+    
+  }
+  
   object@analysis$outlier_detection$iqr <- outlier_results
   
-  confuns::give_feedback(msg = "Done.", verbose = verbose)
+  msg <- glue::glue("Found {n} {ref_outliers}.",
+                    n = base::length(getOutlierIds(object, method_outlier = "iqr")), 
+                    ref_outliers = confuns::adapt_reference(getOutlierIds(object), "outlier", "outliers"))
+  
+  confuns::give_feedback(msg = msg, verbose = verbose)
   
   base::return(object)
   
 }
+
+
+#' @rdname detect_outliers_iqr
+detect_outliers_mahalanobis <- function(object, variable_names = NULL, threshold_pval = 0.001, verbose = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  if(base::is.null(variable_names)){
+    
+    variable_names <- getStatVariableNames(object)
+    
+  }
+  
+  outlier_results <- 
+    purrr::map(.x = getPhases(object), # in case of non time lapse experiment phase is ignored anyway
+               .f = function(phase){
+                 
+                 stat_df <-
+                   getStatsDf(object, phase = phase, with_cluster = FALSE, with_meta = FALSE) %>% 
+                   dplyr::select(cell_id, dplyr::all_of(variable_names)) %>% 
+                   tibble::column_to_rownames(var = "cell_id")
+                 
+                 stat_df$mahal <- 
+                   stats::mahalanobis(x = stat_df,
+                                      center = base::colMeans(stat_df), 
+                                      cov = stats::cov(stat_df)
+                                      )
+                 
+                 stat_df$pval <- 
+                   stats::pchisq(q = stat_df$mahal, 
+                                 df = base::length(variable_names)-1, 
+                                 lower.tail = FALSE
+                                 )
+                 
+                 outlier_ids <- 
+                   tibble::rownames_to_column(stat_df, var = "cell_id") %>% 
+                   dplyr::filter(pval <= {{threshold_pval}}) %>% 
+                   pull(cell_id)
+                 
+                 base::return(outlier_ids)
+                 
+               }) %>% 
+    purrr::set_names(getPhases(object))
+  
+  if(!multiplePhases(object)){
+    
+    outlier_results <- outlier_results[[1]]
+    
+  }
+  
+  object@analysis$outlier_detection$mahalanobis <- 
+    list(
+      outlier_ids = outlier_results, 
+      threshold_pval = threshold_pval, 
+      variable_names = variable_names
+    )
+  
+  msg <- glue::glue("Found {n} {ref_outliers}.",
+                    n = base::length(getOutlierIds(object, method_outlier = "mahalanobis")), 
+                    ref_outliers = confuns::adapt_reference(getOutlierIds(object), "outlier", "outliers"))
+  
+  confuns::give_feedback(msg = msg, verbose = verbose)
+  
+  base::return(object)
+  
+}
+
 
 
 

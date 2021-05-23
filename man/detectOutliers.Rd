@@ -7,6 +7,7 @@
 detectOutliers(
   object,
   method_outlier = "iqr",
+  threshold_pval = 0.001,
   variable_names = NULL,
   verbose = NULL
 )

@@ -180,7 +180,31 @@ check_df_variables <- function(variable, df){
 }
 
 
-
+#' @title Detect protected variables
+#' @description Makes sure that renaming variables does not conflict with 
+#' protected variable names,
+check_renamed_variables <- function(cnames){
+  
+  found_pos <- base::which(protected_vars %in% cnames)
+  
+  found_vars <- protected_vars[found_pos]
+  
+  if(base::length(found_vars) >= 1){
+    
+    msg <- 
+      glue::glue(
+        "'{ref_found_vars} {ref1} invalid new {ref2}.", 
+        ref_found_vars = glue::glue_collapse(x = found_vars, sep = "', '", last = "' and '"), 
+        ref1 = confuns::adapt_reference(found_vars, "is an", "are"), 
+        ref2 = confuns::adapt_reference(found_vars, "name", "names")
+      )
+    
+    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    
+  } 
+  
+  
+}
 
 
 #' @title Check track data.frame 

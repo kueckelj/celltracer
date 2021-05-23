@@ -7,7 +7,7 @@
 \alias{getWellPlateVariableNames}
 \title{Obtain grouping variable names of cell data}
 \usage{
-getGroupingVariableNames(object, ..., phase = NULL)
+getGroupingVariableNames(object, ..., named = FALSE, phase = NULL)
 
 getClusterVariableNames(object, ..., phase = NULL)
 

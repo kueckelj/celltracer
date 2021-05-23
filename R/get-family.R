@@ -123,7 +123,7 @@ getPamConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
 #' @return An S4 object of class \emph{'corr_conv'}
 #' @export
 #'
-getCorrConv <- function(object, phase = NULL){
+getCorrConv <- function(object, variable_set, phase = NULL){
   
   check_object(object)
   assign_default(object)
@@ -132,11 +132,11 @@ getCorrConv <- function(object, phase = NULL){
     
     phase <- check_phase(object, phase = phase, max_phases = 1)
     
-    corr_object <- object@analysis$correlation[[phase]]
+    corr_object <- object@analysis$correlation[[variable_set]][[phase]]
     
   } else {
     
-    corr_object <- object@analysis$correlation
+    corr_object <- object@analysis$correlation[[variable_set]]
     
   }
   
@@ -146,6 +146,20 @@ getCorrConv <- function(object, phase = NULL){
     ref_input = "correlation object", 
     ref_fun = "initiateCorrelation()"
   )
+  
+  corr_object@meta <- 
+    dplyr::left_join(
+      x = corr_object@meta, 
+      y = getGroupingDf(object, phase = phase, verbose = FALSE), 
+      by = c("key" = "cell_id"))
+  
+  corr_object@data <- 
+    getStatsDf(object, phase = phase, verbose = FALSE) %>% 
+    tibble::column_to_rownames(var = "cell_id") %>% 
+    dplyr::select(dplyr::all_of(corr_object@variables_num)) %>% 
+    base::as.matrix()
+  
+  corr_object@variables_discrete <- getGroupingVariableNames(object, phase = phase)
   
   base::return(corr_object)
   
@@ -159,6 +173,26 @@ getCorrConv <- function(object, phase = NULL){
 # Data extraction ---------------------------------------------------------
 
 
+getCellDf <- function(object, slot, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    object@cdata[[slot]][[phase]]
+    
+  } else {
+    
+    object@cdata[[slot]]
+    
+  }
+  
+}
+
+
 #' @title Obtain grouping information
 #' 
 #' @description These functions let you extract a data.frame that contain variables 
@@ -170,14 +204,14 @@ getCorrConv <- function(object, phase = NULL){
 #' @export
 #'
 
-getGroupingDf <- function(object, phase = NULL){
+getGroupingDf <- function(object, phase = NULL, verbose = NULL){
   
   check_object(object)
   assign_default(object)
   
   grouping_df <- 
     dplyr::left_join(x = getMetaDf(object, phase = phase),
-                     y = getClusterDf(object, phase = phase), 
+                     y = getClusterDf(object, phase = phase, verbose = verbose), 
                      by = "cell_id") %>% 
     dplyr::left_join(x = .,
                      y = getWellPlateDf(object), 
@@ -189,7 +223,7 @@ getGroupingDf <- function(object, phase = NULL){
 
 #' @rdname getGroupingDf
 #' @export
-getClusterDf <- function(object, phase = NULL, verbose = TRUE){
+getClusterDf <- function(object, phase = NULL, verbose = NULL){
   
   check_object(object)
   assign_default(object)
@@ -220,7 +254,7 @@ getClusterDf <- function(object, phase = NULL, verbose = TRUE){
     
     msg <- glue::glue("No cluster variables have been calculated yet{add}")
     
-    confuns::give_feedback(msg = msg, verbose = verbose)
+    confuns::give_feedback(msg = msg, verbose = verbose, with.time = FALSE)
     
   } 
   
@@ -259,18 +293,12 @@ getWellPlateDf <- function(object){
   
 }
 
-
-
-
-
-
-
-
-
-
 #' @title Obtain stat data.frame 
 #'
 #' @inherit argument_dummy params
+#' @param with_cluster,with_meta,with_well_plate Logical values. Denoting 
+#' if the respective grouping information should be joined to the stats data.frame
+#' or not.
 #'
 #' @return A data.frame with all numeric variables summarizing the measurements of 
 #' the track data.frame. 
@@ -282,7 +310,7 @@ getStatsDf <- function(object,
                        phase = NULL,
                        with_cluster = NULL,
                        with_meta = NULL,
-                       wit_well_plate = NULL, 
+                       with_well_plate = NULL, 
                        verbose = NULL){
   
   check_object(object)
@@ -304,7 +332,7 @@ getStatsDf <- function(object,
   # add cluster
   if(base::isTRUE(with_cluster)){
     
-    cluster_df <- getClusterDf(object, phase = phase)  
+    cluster_df <- getClusterDf(object, phase = phase, verbose = FALSE)  
     
     stat_df <- 
       dplyr::left_join(x = stat_df, y = cluster_df, by = "cell_id")
@@ -323,7 +351,7 @@ getStatsDf <- function(object,
   # add well plate info
   if(base::isTRUE(with_well_plate)){
     
-    wp_df <- getWellPlateDf(object, phase = phase)
+    wp_df <- getWellPlateDf(object)
     
     stat_df <- dplyr::left_join(x = stat_df, y = wp_df, by = "cell_id")
     
@@ -386,7 +414,7 @@ getTracksDf <- function(object,
   
   if(base::isTRUE(with_cluster) & base::length(phase) == 1){
     
-    cluster_df <- getClusterDf(object, phase = phase)
+    cluster_df <- getClusterDf(object, phase = phase, verbose = FALSE)
     
     track_df_final <- dplyr::left_join(x = track_df_final, y = cluster_df, by = "cell_id")
     
@@ -488,7 +516,7 @@ getOutlierResults <- function(object, method_outlier = NULL, check = TRUE){
       ref.against = "methods with which outliers have been detected", 
       fdb.fn = "stop")
     
-    outlier_list <- outlier_list[method_outlier]
+    outlier_list <- outlier_list[[method_outlier]]
     
   }
   
@@ -498,15 +526,45 @@ getOutlierResults <- function(object, method_outlier = NULL, check = TRUE){
 
 #' @rdname getOutlierResults
 #' @export
-getOutlierIds <- function(object, method_outlier = NULL, check = FALSE){
+getOutlierIds <- function(object, method_outlier = NULL, check = FALSE, flatten = TRUE){
   
-  outlier_list <- getOutlierResults(object, check = check)
+  if(base::is.null(method_outlier)){
+    
+    method_outlier <- base::names(object@analysis$outlier_detection)
+    
+  }
   
-  outlier_ids <-  
-    purrr::map(outlier_list, .f = ~ purrr::flatten(.x = .x)) %>% 
-    purrr::flatten() %>% 
-    purrr::flatten_chr() %>% 
-    base::unique()
+  outlier_ids <- list()
+  
+  if("iqr" %in% method_outlier){
+    
+    outlier_list <- getOutlierResults(object, check = check, method_outlier = "iqr")
+    
+    outlier_ids$iqr <-  
+      purrr::flatten(outlier_list) %>% 
+      purrr::flatten_chr() %>% 
+      base::unique()
+    
+  }
+  
+  if("mahalanobis" %in% method_outlier){
+    
+    outlier_list <- getOutlierResults(object, check = check, method_outlier = "mahalanobis")
+  
+    outlier_ids$mahalanobis <- 
+      outlier_list$outlier_ids
+      
+  }
+  
+
+  if(base::isTRUE(flatten)){
+    
+    outlier_ids <- 
+      purrr::flatten_chr(.x = outlier_ids) %>% 
+      base::unique()
+    
+  }
+
   
   base::return(outlier_ids)
   
@@ -549,7 +607,7 @@ getGroupNames <- function(object, grouping_variable, ..., phase = NULL){
   assign_default(object)
   
   group_vec <- 
-    getGroupingDf(object = object, phase = phase) %>% 
+    getGroupingDf(object = object, phase = phase, verbose = FALSE) %>% 
     dplyr::pull(var = {{grouping_variable}}) 
   
   if(base::is.factor(group_vec)){
@@ -590,9 +648,8 @@ getGroupNames <- function(object, grouping_variable, ..., phase = NULL){
 #' @seealso starts_with(), ends_with(), contains(), matches()
 #' 
 #' @export
-#' 
 
-getGroupingVariableNames <- function(object, ..., phase = NULL){
+getGroupingVariableNames <- function(object, ..., named = FALSE, phase = NULL){
   
   check_object(object)
   
@@ -635,6 +692,40 @@ getGroupingVariableNames <- function(object, ..., phase = NULL){
   all_var_names <- 
     base::colnames(selected_df)
   
+  if(base::isTRUE(named)){
+    
+    sources <- base::vector("character", base::length(all_var_names))
+    
+    cluster_names <- getClusterVariableNames(object, phase = phase)
+    
+    meta_names <- getMetaVariableNames(object, phase = phase)
+    
+    wp_names <- getWellPlateVariableNames(object)
+    
+    for(i in base::seq_along(all_var_names)){
+      
+      var <- all_var_names[i]
+      
+      if(var %in% cluster_names){
+        
+        sources[i] <- "cluster"
+        
+      } else if(var %in% meta_names){
+        
+        sources[i] <- "meta"
+        
+      } else if(var %in% wp_names){
+        
+        sources[i] <- "well_plate"
+        
+      }
+      
+    }
+    
+    base::names(all_var_names) <- sources
+    
+  }
+  
   base::return(all_var_names)
   
 }
@@ -650,6 +741,12 @@ getClusterVariableNames <- function(object, ..., phase = NULL){
   cluster_df <- 
     getClusterDf(object, phase = phase) %>% 
     dplyr::select(-cell_id)
+  
+  if(base::ncol(cluster_df) == 0){
+    
+    base::stop("Can not continue without clustering variables.")
+    
+  }
   
   selected_df <- dplyr::select(cluster_df, ...)
   
@@ -771,7 +868,7 @@ getStatVariableNames <- function(object, ..., phase = NULL){
   
   stat_df <-
     getStatsDf(object, with_meta = FALSE, with_cluster = FALSE) %>% 
-    dplyr::select(-cell_id, -phase)
+    dplyr::select(-cell_id)
   
   selected_df <- dplyr::select(stat_df, ...)
   
@@ -827,8 +924,6 @@ getWellPlateNames <- function(object){
 
 
 
-
-
 #' @title Obtain cell line and condition names 
 #' 
 #' @description Quick wrapper around the functionality of getGroupingVariableNames().
@@ -847,7 +942,7 @@ getCellLines <- function(object){
   check_object(object)
   assign_default(object)
   
-  getGroupingDf(object) %>%
+  getMetaDf(object) %>%
     dplyr::pull(cell_line) %>%
     base::levels()
   
@@ -861,7 +956,7 @@ getConditions <- function(object, phase = NULL){
   check_object(object)
   assign_default(object)
   
-  getGroupingDf(object, phase = phase) %>% 
+  getMetaDf(object, phase = phase) %>% 
     dplyr::pull(condition) %>% 
     base::levels()
   
@@ -1025,4 +1120,7 @@ getVariableNames <- function(object,
   base::return(select_list)
   
 }
+
+
+
 

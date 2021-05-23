@@ -9,7 +9,7 @@ getStatsDf(
   phase = NULL,
   with_cluster = NULL,
   with_meta = NULL,
-  wit_well_plate = NULL,
+  with_well_plate = NULL,
   verbose = NULL
 )
 }
@@ -21,11 +21,9 @@ referring to the phase of interest. If set to NULL takes the phase denoted as de
 
 Ignored if the experiment design contains only one phase.}
 
-\item{with_cluster}{Logical. If set to TRUE the discrete variables of the meta data slot are added
-to the output data.frame.}
-
-\item{with_meta}{Logical. If set to TRUE the discrete variables of the meta data slot are added
-to the output data.frame.}
+\item{with_cluster, with_meta, with_well_plate}{Logical values. Denoting
+if the respective grouping information should be joined to the stats data.frame
+or not.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.

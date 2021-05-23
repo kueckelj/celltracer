@@ -2,14 +2,17 @@
 % Please edit documentation in R/discard-family.R
 \name{discardClusterVariables}
 \alias{discardClusterVariables}
+\alias{discardMetaVariables}
 \title{Discard unwanted variables from your data}
 \usage{
 discardClusterVariables(object, cluster_variables, phase = NULL)
+
+discardMetaVariables(object, meta_variables, phase = NULL)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
 
-\item{cluster_variables}{Character vector. The cluster variables you want to discard.}
+\item{cluster_variables, meta_variables}{Character vector. The variables you want to discard.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -20,5 +23,6 @@ Ignored if the experiment design contains only one phase.}
 An updated celltracer object.
 }
 \description{
-Discard unwanted variables from your data
+Discards variables from the provided object. They can not be restored apart
+from adding them again artificially. Use with caution.
 }

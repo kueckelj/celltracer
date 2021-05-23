@@ -26,9 +26,7 @@ animateWellImage <- function(object,
   check_object(object)
   assign_default(object)
   
-  
   confuns::is_value(x = image, mode = "numeric")
-  
   
   well_image <- stringr::str_c(well, image, sep = "_")
   

@@ -6,6 +6,7 @@
 \usage{
 plotCorrplot(
   object,
+  variable_set,
   phase = NULL,
   method_corr = NULL,
   across = NULL,
@@ -34,6 +35,9 @@ plotCorrplot(
 }
 \arguments{
 \item{object}{A valid celltracer object.}
+
+\item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
+to obtain all names of currently stored variable sets in your object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.

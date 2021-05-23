@@ -1,5 +1,19 @@
 
 
+#' @title Valid default arguments
+#' 
+#' @description Obtain a character vector of argument names whose 
+#' default input you can adjust via \code{adjustDefaultInstructions()}.
+#'
+#' @return Character vector. 
+#' @export
+#'
+adjustableDefaultInstructions <- function(){
+  
+  base::return(base::names(default_list))
+  
+}
+
 
 
 #' @title Valid input options

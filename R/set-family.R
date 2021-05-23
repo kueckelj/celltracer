@@ -1,12 +1,14 @@
 
 
-#' @title Set clustering object
+#' @title Set analysis objects
 #' 
 #' @description Sets a convenient object and empties its data slot. 
 #'
 #' @inherit argument_dummy params 
+#' 
+#' @export
 #'
-setClusterConv <- function(object, cluster_object, method, phase, variable_set){
+setClusterConv <- function(object, cluster_object, method, variable_set, phase){
   
   cluster_object@data <- matrix()
   
@@ -17,7 +19,7 @@ setClusterConv <- function(object, cluster_object, method, phase, variable_set){
     
   } else {
     
-    object@analysis$clusering[[method]][[variable_set]] <- 
+    object@analysis$clustering[[method]][[variable_set]] <- 
       cluster_object
     
   }
@@ -28,7 +30,7 @@ setClusterConv <- function(object, cluster_object, method, phase, variable_set){
 
 #' @rdname setClusterConv
 #' @export
-setDimRedConv <- function(object, dim_red_object, method, phase, variable_set){
+setDimRedConv <- function(object, dim_red_object, method, variable_set, phase){
   
   dim_red_object@data <- matrix()
   
@@ -41,6 +43,29 @@ setDimRedConv <- function(object, dim_red_object, method, phase, variable_set){
     
     object@analysis$dim_red[[method]][[variable_set]] <- 
       dim_red_object
+    
+  }
+  
+  base::return(object)
+  
+}
+
+#' @rdname setClusterConv
+#' @export
+setCorrConv <- function(object, corr_object, variable_set, phase){
+
+  corr_object@variables_discrete <- base::character()
+    
+  corr_object@data <- base::matrix()
+  corr_object@meta <- dplyr::select(corr_object@meta, key)
+  
+  if(multiplePhases(object)){
+    
+    object@analysis$correlation[[variable_set]][[phase]] <- corr_object
+    
+  } else {
+    
+    object@analysis$correlation[[variable_set]] <- corr_object
     
   }
   
@@ -82,6 +107,22 @@ setCellDf <- function(object, slot, df, phase){
   
 }
 
+
+#' @title Set default storage directory
+#' 
+#' @inherit argument_dummy params
+#' @param directory_cto Character value. The directory under which 
+#' the object is supposed to be stored via \code{saveCelltracerObject()}.
+#'
+setCtoDirectory <- function(object, directory_cto){
+  
+  confuns::is_value(directory_cto, "character")
+  
+  object@default$directory_cto <- directory_cto
+  
+  base::return(object)  
+  
+}
 
 
 

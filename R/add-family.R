@@ -99,7 +99,7 @@ addClusterVariables <- function(object,
     
   }
   
-  old_group_df <- getClusterDf(object, phase = phase)
+  old_group_df <- getClusterDf(object, phase = phase, verbose = FALSE)
   
   updated_group_df <- 
     confuns::join_safely(
@@ -282,10 +282,10 @@ addHierarchicalClusterVariables <- function(object,
     dplyr::select(new_cluster_df, -cell_id) %>% 
     base::colnames()
   
-  cluster_df <- getClusterDf(object, phase = phase)
+  cluster_df <- getClusterDf(object, phase = phase, verbose = FALSE)
   
   existing_cluster_names <- 
-    dplyr::select(cluster_df, -cell_id, -phase) %>% 
+    dplyr::select(cluster_df, -cell_id) %>% 
     base::colnames()
   
   if(base::length(existing_cluster_names) >= 1){
@@ -376,10 +376,10 @@ addKmeansClusterVariables <- function(object,
     dplyr::select(new_cluster_df, -cell_id) %>% 
     base::colnames()
   
-  cluster_df <- getClusterDf(object, phase = phase)
+  cluster_df <- getClusterDf(object, phase = phase, verbose = FALSE)
   
   existing_cluster_names <- 
-    dplyr::select(cluster_df, -cell_id, -phase) %>% 
+    dplyr::select(cluster_df, -cell_id) %>% 
     base::colnames()
   
   if(base::length(existing_cluster_names) >= 1){
@@ -464,10 +464,10 @@ addPamClusterVariables <- function(object,
     dplyr::select(new_cluster_df, -cell_id) %>% 
     base::colnames()
   
-  cluster_df <- getClusterDf(object, phase = phase)
+  cluster_df <- getClusterDf(object, phase = phase, verbose = FALSE)
   
   existing_cluster_names <- 
-    dplyr::select(cluster_df, -cell_id, -phase) %>% 
+    dplyr::select(cluster_df, -cell_id) %>% 
     base::colnames()
   
   if(base::length(existing_cluster_names) >= 1){
