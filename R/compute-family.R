@@ -7,13 +7,14 @@
 
 compute_cell_stats <- function(df, phase, verbose, object){
   
-  confuns::give_feedback(
-    msg = glue::glue("Computing cell statistics and summary{ref_phase}.",
-                     ref_phase = hlpr_glue_phase(object, phase, FALSE)), 
-    verbose = verbose
-  )
+  msg <- 
+    glue::glue(
+      "Computing cell statistics and summary{ref_phase}.",
+      ref_phase = hlpr_glue_phase(object, phase, FALSE)
+      )
   
-  # group data 
+  confuns::give_feedback(msg = msg, verbose = verbose)
+  
   df <- dplyr::group_by(df, cell_id)
   
   if(isUsable(object, module = "migration")){
@@ -21,58 +22,53 @@ compute_cell_stats <- function(df, phase, verbose, object){
     # compute migration efficiency 
     mgr_eff_df <- 
       dplyr::summarise(.data = df, 
-                       total_dist = base::sum(dflp),
-                       mgr_eff = compute_migration_efficiency(x_coords, y_coords, actual_distance = total_dist)
+        total_dist = base::sum(dflp, na.rm = TRUE),
+        mgr_eff = compute_migration_efficiency(x_coords, y_coords, total_dist)
       )
-    
-    select_vars <- non_data_track_variables
     
   } else {
     
     # empty data.frame with only cell id variable 
     mgr_eff_df <- dplyr::select(df, cell_id) %>% dplyr::distinct()
     
-    select_vars <- non_data_track_variables[!non_data_track_variables %in% c("x_coords", "y_coords")]
-    
   }
   
-  selected_df <- dplyr::select(.data = df, -dplyr::all_of(x = select_vars))
-  
-  stat_vars <- stringr::str_subset(base::colnames(selected_df), pattern = "cell_id", negate = TRUE)
-  
-  # summarise statistics
   stat_df <- 
-    dplyr::mutate(.data = selected_df,
-                  dplyr::across(
-                    .cols = where(fn = base::is.numeric), 
-                    .fns = stat_funs, 
-                    .names = "{.fn}_{.col}"
-                  )
-    ) %>% 
-    dplyr::select(-dplyr::all_of(x = stat_vars)) %>% 
-    dplyr::distinct() %>% 
-    dplyr::left_join(y = mgr_eff_df, by = "cell_id") %>% # join with migration efficiency
+    dplyr::select(df, -x_coords, -y_coords, -frame_num, -frame_time, -frame_itvl) %>% 
+    dplyr::summarise(
+      dplyr::across(
+        .cols = where(fn = base::is.numeric),
+        .fns = stat_funs,
+        .names = "{.fn}_{.col}",
+        na.rm = TRUE
+        ) 
+      ) %>% 
+    dplyr::left_join(y = mgr_eff_df, by = "cell_id") %>% 
     dplyr::ungroup() %>% 
-    dplyr::select(cell_id, where(fn = base::is.numeric))
+    # keep only numeric variables
+    # grouping variables are extracted and 
+    # stored previous to this function call
+    dplyr::select(cell_id, where(fn = base::is.numeric)) 
   
   base::return(stat_df)
   
 }
 
-#' @rdname compute_cell_stats
+#' @rdname compute_cell_stats  
 compute_stat <- function(track_df){ # deprecated
   
   dplyr::group_by(.data = track_df,
-                  cell_id, condition, cell_line, cl_condition,
-                  well, well_plate_name, well_plate_index, well_image) %>% 
+    cell_id, condition, cell_line, cl_condition,
+    well, well_plate_name, well_plate_index, well_image
+    ) %>% 
     dplyr::summarise(
-      total_dist = base::sum(dflp),
-      max_dist_fo = base::max(dfo),
-      avg_dist_fo = base::mean(dfo),
-      max_dist_flp = base::max(dflp),
-      avg_dist_flp = base::mean(dflp),
-      max_speed = base::max(speed),
-      avg_speed = base::mean(speed),
+      total_dist = base::sum(dflp, na.rm = TRUE),
+      max_dist_fo = base::max(dfo, na.rm = TRUE),
+      avg_dist_fo = base::mean(dfo, na.rm = TRUE),
+      max_dist_flp = base::max(dflp, na.rm = TRUE),
+      avg_dist_flp = base::mean(dflp, na.rm = TRUE),
+      max_speed = base::max(speed, na.rm = TRUE),
+      avg_speed = base::mean(speed, na.rm = TRUE),
       mgr_eff = compute_migration_efficiency(x_coords, y_coords, total_dist)
     ) %>% 
     dplyr::ungroup()
@@ -121,9 +117,11 @@ compute_distances_from_origin <- function(x_coords, y_coords){
   origin <- c(x_coords[1], y_coords[1])
   
   subsequent_positions <- 
-    purrr::map2(.x = x_coords[2:n_coords],
-                .y = y_coords[2:n_coords],
-                .f = ~ c(.x, .y))
+    purrr::map2(
+      .x = x_coords[2:n_coords],
+      .y = y_coords[2:n_coords],
+      .f = ~ c(.x, .y)
+      )
   
   distances_from_origin <- 
     purrr::map_dbl(
@@ -143,14 +141,18 @@ compute_distances_from_last_point <- function(x_coords, y_coords){
   n_coords <- base::length(x_coords)
   
   origins <- 
-    purrr::map2(.x = x_coords[1:(n_coords-1)],
-                .y = y_coords[1:(n_coords-1)],
-                .f = ~ c(.x, .y))
+    purrr::map2(
+      .x = x_coords[1:(n_coords-1)],
+      .y = y_coords[1:(n_coords-1)],
+      .f = ~ c(.x, .y)
+      )
   
   subsequent_positions <- 
-    purrr::map2(.x = x_coords[2:n_coords],
-                .y = y_coords[2:n_coords],
-                .f = ~ c(.x, .y))
+    purrr::map2(
+      .x = x_coords[2:n_coords],
+      .y = y_coords[2:n_coords],
+      .f = ~ c(.x, .y)
+      )
   
   distances_from_last_point <- 
     purrr::map2(

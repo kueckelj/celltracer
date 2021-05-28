@@ -10,8 +10,13 @@ assemble_track_list_shiny(track_data_list, well_plate_list, object)
 \item{track_data_list}{The output of \code{load_track_files_shiny()}.}
 }
 \value{
-A track data.frame
+A list of data.frames named by
 }
 \description{
-Subsets the successfully loaded files
+Subsets the successfully loaded files. In case of timelapse
+experiments with multiple phases it sorts the data into multiple
+data.frames and returns a list of multiple data.frames named according
+to the ordinal number of the phase ("first", "second" etc.). In case of
+non timelapse experimernts the list contains only one data.frame in a
+slot named "first".
 }

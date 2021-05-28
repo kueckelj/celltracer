@@ -17,7 +17,9 @@ plot_dim_red(
   pt_clr = NULL,
   pt_clrsp = NULL,
   pt_fill = NULL,
-  pt_size = NULL
+  pt_size = NULL,
+  add_ons = list(ggplot2::labs(fill = NULL, color = NULL)),
+  ...
 )
 }
 \arguments{

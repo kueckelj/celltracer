@@ -8,6 +8,7 @@ plotSingleTracks(
   object,
   cell_ids,
   phase = "all",
+  size = 1,
   color_by = NULL,
   scales = "free"
 )

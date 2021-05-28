@@ -82,27 +82,29 @@ set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
   if(isTimeLapseExp(object)){
     
     if(multiplePhases(object)){
-      
       # multiple phases => named list of data.frames
       
       # process tracks
       object@cdata$tracks <- 
-        purrr::map2(.x = object@cdata$tracks,
-                    .y = getPhases(object),
-                    object = object,
-                    verbose = verbose,
-                    .f = hlpr_process_tracks) %>% 
+        purrr::map2(
+          .x = object@cdata$tracks,
+          .y = getPhases(object),
+          object = object,
+          verbose = verbose,
+          .f = hlpr_process_tracks
+          ) %>% 
         purrr::set_names(nm = getPhases(object))
       
       # compute statistics 
       object@cdata$stats <- 
-        purrr::map2(.x = object@cdata$tracks,
-                    .y = getPhases(object),
-                    object = object,
-                    verbose = verbose,
-                    .f = compute_cell_stats) %>% 
+        purrr::map2(
+          .x = object@cdata$tracks,
+          .y = getPhases(object),
+          object = object,
+          verbose = verbose,
+          .f = compute_cell_stats
+          ) %>% 
         purrr::set_names(nm = getPhases(object))
-      
       
     } else {
       
@@ -110,30 +112,32 @@ set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
       
       # process tracks
       object@cdata$tracks <- 
-        purrr::map_df(.x = object@cdata$tracks, 
-                      phase = NULL, 
-                      object = object, 
-                      verbose = verbose, 
-                      .f = hlpr_process_tracks)
+        purrr::map_df(
+          .x = object@cdata$tracks,
+          phase = NULL,
+          object = object,
+          verbose = verbose,
+          .f = hlpr_process_tracks
+        )
       
       # compute statistics 
       object@cdata$stats <- 
-        purrr::map_df(.x = object@cdata$tracks,
-                      phase = NULL, 
-                      object = object,
-                      verbose = verbose,
-                      .f = compute_cell_stats) 
+        compute_cell_stats(
+          df = object@cdata$tracks,
+          phase = NULL,
+          verbose = verbose, 
+          object = object
+          )
       
     }
     
-    # if none time lapse only one way of processing
+    # if not time lapse only one way (not much processing necessary)
   } else {
     
     # data stored in slot stats as list of one slot "only"
-    df <- object@cdata$stats$only
-    
-    # reset slot
-    object@cdata$stats <- NULL
+    df <- 
+      object@cdata$stats$only %>% 
+      dplyr::select(cell_id, where(base::is.numeric))
     
     # convert to data.frame
     object@cdata$stats <- df
@@ -183,33 +187,17 @@ set_up_cdata_tracks_and_stats <- function(object, verbose = TRUE){
 #'
 set_up_vdata <- function(object, verbose = TRUE){
   
-  confuns::give_feedback(msg = "Computing variable statistics.", verbose = verbose)
+  confuns::give_feedback(msg = "Computing variable statistics and summary.", verbose = verbose)
   
   vdata <- list()
   
-  # over all phases
-  stats_mtr <- 
-    purrr::map_df(.x = object@cdata$stats, .f = ~ .x) %>% 
-    dplyr::select_if(.predicate = base::is.numeric) %>% 
-    base::as.matrix() 
-  
-  var_summary_total <- 
-    psych::describe(stats_mtr, IQR = TRUE) %>% 
-    base::as.data.frame() %>% 
-    tibble::rownames_to_column(var = "variable") %>% 
-    tibble::as_tibble() 
-  
-  vdata$total <- var_summary_total 
-  
-  all_phases <- getPhases(object)
-  
-  if(base::length(all_phases) > 1){
+  if(multiplePhases(object)){
     
-    vdata$by_phase <- 
-      purrr::map(.x = all_phases, 
+    vdata$summary <- 
+      purrr::map(.x = getPhases(object), 
                  .f = function(phase){
                    
-                   object@cdata$stats[[phase]] %>% 
+                   getStatsDf(object, phase = phase) %>% 
                      dplyr::select_if(base::is.numeric) %>% 
                      base::as.matrix() %>% 
                      psych::describe(IQR = TRUE) %>% 
@@ -218,7 +206,21 @@ set_up_vdata <- function(object, verbose = TRUE){
                      tibble::as_tibble() 
                    
                  }) %>% 
-      purrr::set_names(nm = all_phases)
+      purrr::set_names(nm = getPhases(object))
+    
+  } else {
+    
+    # over all phases
+    stats_mtr <- 
+      getStatsDf(object) %>% 
+      dplyr::select_if(.predicate = base::is.numeric) %>% 
+      base::as.matrix() 
+    
+    vdata$summary <- 
+      psych::describe(stats_mtr, IQR = TRUE) %>% 
+      base::as.data.frame() %>% 
+      tibble::rownames_to_column(var = "variable") %>% 
+      tibble::as_tibble() 
     
   }
   

@@ -115,7 +115,7 @@ hlpr_assemble_df <- function(track_df, wp_data, wp_index, wp_name){
 
 hlpr_caption_add_on <- function(object, phase){
   
-  if(time_displaced_tmt(object)){
+  if(multiplePhases(object)){
     
     phases <-
       purrr::map_chr(phase, .f = confuns::make_capital_letters) %>% 
@@ -133,6 +133,39 @@ hlpr_caption_add_on <- function(object, phase){
   
 }
 
+#' @title ggplot2 add on helpers
+#' 
+#' @description Functions that either return an empty list 
+#' or the respective ggplot add-on. 
+
+hlpr_coords_flip_add_on <- function(flip_coords){
+  
+  if(base::isTRUE(flip_coords)){
+    
+    ggplot2::coord_flip()
+    
+  } else {
+    
+    list()
+    
+  }
+  
+}
+
+#' @rdname hlpr_coords_flip_add_on
+hlpr_plot_well_plate_fill <- function(input){
+  
+  if(input == "ambiguity"){
+    
+    ggplot2::scale_fill_manual(values = ambiguity_colors, drop = FALSE)
+    
+  } else {
+    
+    confuns::scale_color_add_on(aes = "fill", variable = "discrete", clrp = "milo")
+    
+  }
+  
+}
 
 
 #' @title Process Track Data.frame
@@ -145,7 +178,7 @@ hlpr_caption_add_on <- function(object, phase){
 #' inside the function \code{compileCto()}.
 #'
 
-hlpr_create_track_list <- function(phase, track_df){
+hlpr_create_track_list <- function(phase, track_df){ # deprecated
   
   filtered_df <- 
     dplyr::filter(.data = track_df, tmt == {{phase}}) %>% 
@@ -180,7 +213,7 @@ hlpr_create_meta_data <- function(df, phase, verbose){
 
 
 #' @title Adjust phase input for feedback messages 
-hlpr_glue_phase <- function(object, phase, empty_space = TRUE){ # do not change argument order!!!
+hlpr_glue_phase <- function(object, phase, empty_space = TRUE, string = "for"){ # do not change argument order!!!
   
   all_phases <- getPhases(object)
   
@@ -201,11 +234,11 @@ hlpr_glue_phase <- function(object, phase, empty_space = TRUE){ # do not change 
     
     if(base::isTRUE(empty_space)){
       
-      string <- glue::glue(" for {phase} phase ")
+      string <- glue::glue(" {string} {phase} phase ")
       
     } else {
       
-      string <- glue::glue(" for {phase} phase")
+      string <- glue::glue(" {string} {phase} phase")
       
     }
     
@@ -216,20 +249,44 @@ hlpr_glue_phase <- function(object, phase, empty_space = TRUE){ # do not change 
   
 }
 
+#' @title Assess number of missing values
+#' 
+#' @description Returns the maximum count of missing values per cell id 
+#' across all variables
+#'
+hlpr_max_track_na_count <- function(object){
+  
+  df <- object@information$track_na_count
+  
+  max_nas <- 
+    base::apply(X = dplyr::select(df, -cell_id), 
+                MARGIN = 1, 
+                FUN = base::max)
+  
+  res_df <- 
+    dplyr::mutate(df, max_nas = {{max_nas}}) %>% 
+    dplyr::select(cell_id, max_nas)
+  
+  base::return(res_df)
+  
+}
 
 
 #' @title Merge conditions
 hlpr_merge_conditions <- function(track_df, phase, across, verbose = TRUE){
   
-  if(base::length(phase) > 1 & across %in% c("condition", "cl_condition")){
+  if(base::length(phase) > 1 & across %in% c("condition")){
     
-    confuns::give_feedback(msg = glue::glue("Merging conditions over {base::length(phase)} phases by cell ID."), verbose = verbose, with.time = FALSE)
+    confuns::give_feedback(
+      msg = glue::glue("Merging conditions over {base::length(phase)} phases by cell ID."),
+      verbose = verbose,
+      with.time = FALSE
+      )
     
     track_df <- 
       dplyr::group_by(track_df, cell_id) %>% 
       dplyr::mutate(
-        condition = hlpr_merge_condition_by_id(condition), 
-        cl_condition = stringr::str_c(cell_line, condition, sep = ": ")
+        condition = hlpr_merge_condition_by_id(condition)
       )
     
   }
@@ -254,41 +311,6 @@ hlpr_merge_condition_by_id <- function(condition){
   
   base::return(res)
   
-  
-}
-
-
-#' @title ggplot2 add on helpers
-#' 
-#' @description Functions that either return an empty list 
-#' or the respective ggplot add-on. 
-
-hlpr_coords_flip_add_on <- function(flip_coords){
-  
-  if(base::isTRUE(flip_coords)){
-    
-    ggplot2::coord_flip()
-    
-  } else {
-    
-    list()
-    
-  }
-  
-}
-
-#' @rdname hlpr_coords_flip_add_on
-hlpr_plot_well_plate_fill <- function(input){
-  
-  if(input == "ambiguity"){
-    
-    ggplot2::scale_fill_manual(values = ambiguity_colors, drop = FALSE)
-    
-  } else {
-    
-    confuns::scale_color_add_on(aes = "fill", variable = "discrete", clrp = "milo")
-    
-  }
   
 }
 
@@ -382,31 +404,69 @@ hlpr_order_input <- function(order_input){
 
 #' @title Processing helper
 #' 
-#' @description To be used as mapped function in purrr::map_*(). Only used 
-#' if experiment type is 'time_lapse'. Processes the track data.frame 
-#' with regards to column names as well as some migration data computation if 
-#' x- and y-coords are available. 
+#' @description To be used as mapped function in purrr::map_*().
+#' Only used if experiment type is 'time_lapse'. Processes the track data.frame 
+#' with regards to column names as well as module based computation if 
+#' the needed variables are present.
+#' 
+#' - completes the track data.frame in cases of uncomplete tracks
+#' - creates frame related columns 
+#' - filters observations for frames within denoted timespan
+#' - if migration module usable: 
+#'   - computes distance from origin
+#'   - computes distance from last point
+#'   - computes speed 
+ 
 hlpr_process_tracks <- function(df, phase, object, verbose){
   
   itvl <- object@set_up$itvl
   itvl_u <- object@set_up$itvl_u
   exp_type <- object@set_up$experiment_type
   
+  # ensure that the data.frame is complete regarding the observations 
+  all_cell_ids <- base::unique(df$cell_id)
+  
+  frame_range <- base::range(df$frame)
+  
+  all_frames <- frame_range[1]:frame_range[2]
+  
+  df <- dplyr::ungroup(df)
+  
+  # split dfs to avoid NAs in grouping variables
+  group_df <- 
+    dplyr::select(df, cell_id, dplyr::starts_with("well"), where(base::is.factor))
+  
+  numeric_df <- dplyr::select(df, cell_id, where(base::is.numeric))
+  
+  complete_num_df <- 
+    tidyr::expand_grid(cell_id = {{all_cell_ids}}, frame = {{all_frames}}) %>% 
+    dplyr::left_join(x = ., y = numeric_df, by = c("cell_id", "frame"))
+  
+  complete_df <- 
+    dplyr::left_join(x = complete_num_df, y = group_df, by = "cell_id") %>% 
+    dplyr::distinct() %>% # temporary solution to weird multiplying of observations
+    dplyr::arrange(cell_id)
+  
   mutated_df <- 
-    dplyr::mutate(
-      .data = df, 
+    dplyr::mutate(.data = complete_df, 
       frame_num = frame,
       frame_time = frame * itvl,
       frame_itvl = stringr::str_c(frame_time, itvl_u, sep = " "),
-      frame = NULL) %>% 
-    dplyr::filter(frame_num <= object@set_up$nom) # only affects last phase
+      frame = NULL
+      ) %>% 
+    # in case of multiple phases this only affects the data.frame of 
+    # the last phase as previous phases have lower max(frame_num)
+    dplyr::filter(frame_num <= object@set_up$nom)
   
   if(isUsable(object, module = "migration")){
     
-    confuns::give_feedback(
-      msg = glue::glue("Computing migration data{ref_phase}.", 
-                       ref_phase = hlpr_glue_phase(object, phase, FALSE)),
-      verbose = verbose)
+    msg <-
+      glue::glue(
+        "Computing variables for migration module{ref_phase}.",
+        ref_phase = hlpr_glue_phase(object, phase, FALSE)
+        )
+    
+    confuns::give_feedback(msg = msg, verbose = verbose)
     
     mutated_df <- 
       dplyr::group_by(.data = mutated_df, cell_id) %>% 
@@ -416,21 +476,24 @@ hlpr_process_tracks <- function(df, phase, object, verbose){
         speed = dflp / object@set_up$itvl
       )
     
-    final_df <-
+    track_df <-
       dplyr::select(.data = mutated_df,
-                    cell_id, x_coords, y_coords, speed, dfo, dflp,
-                    dplyr::starts_with(match = "frame"), 
-                    dplyr::everything() 
+        cell_id, x_coords, y_coords, speed, dfo, dflp,
+        dplyr::starts_with(match = "frame"), 
+        dplyr::everything() 
       ) %>% 
       dplyr::select(-dplyr::starts_with(match = "well"))
     
   } else {
     
-    final_df <- mutated_df
+    track_df <- mutated_df
     
   }
   
-  base::return(final_df)
+  track_df_numeric <- 
+    dplyr::select(track_df, cell_id, dplyr::starts_with("frame"), where(base::is.numeric))
+  
+  base::return(track_df_numeric)
   
 } 
 
@@ -473,6 +536,7 @@ hlpr_select <- function(df, variables_subset){
   base::return(df)
   
 }
+
 
 #' @title Return directory of well plate
 #' 

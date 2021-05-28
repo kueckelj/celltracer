@@ -315,7 +315,7 @@ plotStatisticsInteractive <- function(object, phase = NULL){
     dplyr::select(-cell_id)
   
   
-  confuns::plot_statistics_interactive(df = stats_df, n.across.subset = Inf)
+  confuns::plot_statistics_interactive(df = stats_df, n.across.subset = 100)
   
 }
 

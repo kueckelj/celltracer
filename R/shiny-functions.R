@@ -488,11 +488,16 @@ assemble_stat_list_shiny <- function(stat_data_list, well_plate_list, object){
 
 #' @title Integrate cell track tables
 #' 
-#' @description Subsets the successfully loaded files 
+#' @description Subsets the successfully loaded files. In case of timelapse 
+#' experiments with multiple phases it sorts the data into multiple 
+#' data.frames and returns a list of multiple data.frames named according 
+#' to the ordinal number of the phase ("first", "second" etc.). In case of
+#' non timelapse experimernts the list contains only one data.frame in a 
+#' slot named "first".
 #'
 #' @param track_data_list The output of \code{load_track_files_shiny()}.
 #'
-#' @return A track data.frame
+#' @return A list of data.frames named by 
 
 assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
   
@@ -502,11 +507,7 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
     purrr::map(.x = ., .f = ~ purrr::map_df(.x = .x, "df"))
   
   all_data_list <- 
-    list(df_list,
-         well_plate_list,
-         base::seq_along(df_list), 
-         base::names(df_list)
-         )
+    list(df_list, well_plate_list, base::seq_along(df_list), base::names(df_list))
   
   df <- 
     purrr::pmap_dfr(.l = all_data_list, .f = hlpr_assemble_df)
@@ -517,10 +518,10 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
   
   final_df <-
     dplyr::mutate(.data = df, 
-                  cell_line = base::factor(x = cell_line, levels = cell_lines), 
-                  condition = base::factor(x = condition, levels = conditions), 
-                  cl_condition = base::factor(x = cl_condition, levels = cl_conditions)
-                  )
+      cell_line = base::factor(x = cell_line, levels = cell_lines),
+      condition = base::factor(x = condition, levels = conditions),
+      cl_condition = base::factor(x = cl_condition, levels = cl_conditions)
+    )
   
   phases <- object@set_up$phases
   
@@ -532,6 +533,7 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
   phase_starts <-
     purrr::map_dbl(.x = phases, .f = ~ base::which(x = measurements == .x))
   
+  # if more than one phase exists return list of data.frames named by phase
   if(base::length(phase_starts) > 1){
     
     phase_endings <- 
@@ -567,13 +569,16 @@ assemble_track_list_shiny <- function(track_data_list, well_plate_list, object){
                    
                    df$condition <- condition_vec
                    df$cl_condition <- stringr::str_c(df$cell_line, df$condition, sep = " & ")
+                   df$phase <- english::ordinal(phase_index)
                    
                    base::return(df)
                    
                  }) %>% 
       magrittr::set_names(value = base::names(phase_endings))
     
-  } else {
+  } else { # if only one phase return list of one data.frame named "first"
+    
+    final_df$phase = "first"
     
     track_list <- base::list("first" = final_df)
     

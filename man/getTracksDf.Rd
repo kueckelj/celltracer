@@ -9,6 +9,7 @@ getTracksDf(
   phase = NULL,
   with_cluster = NULL,
   with_meta = NULL,
+  with_well_plate = NULL,
   verbose = NULL
 )
 }

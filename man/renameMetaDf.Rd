@@ -7,40 +7,35 @@
 \usage{
 renameMetaDf(object, ..., phase = NULL)
 
-renameMetaDfWith(object, .fn, .cols = dplyr::everything(), ..., phase = NULL)
+renameMetaDfWith(object, ..., phase = NULL)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
-
-\item{...}{For \code{rename()}: <\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Use
-\code{new_name = old_name} to rename selected variables.
-
-For \code{rename_with()}: additional arguments passed onto \code{.fn}.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
 
-\item{.fn}{A function used to transform the selected \code{.cols}. Should
-return a character vector the same length as the input.}
-
-\item{.cols}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns to rename;
-defaults to all columns.}
+\item{.fn}{A function used to transform the variable names. Should return a character vector of the same
+length as the input. Can be specified with formula syntax.}
 }
 \value{
-
+An updated celltracer-object.
 }
 \description{
 Implementations of the functions \code{dplyr::rename()} and
 \code{dplyr::rename_with()} that can be used to rename the variables of the cell meta
 data.frame.
+
+\code{renameMetaDf()} changes the names of individual variables using \emph{new_name} = \emph{old_name}
+syntax. \code{renameMetaDfWith()} renames variables with a function specified in argument \code{.fn}.
 }
 \details{
-The variables \emph{cell_id, cell_line, condition,
-well_plate_name, well_plate_index, well} and \emph{well_image} are removed
+The variables \emph{cell_id, cell_line} and \emph{condition} are removed
 prior to the renaming as they are protected. The renaming process must not
-result in columns that carry one of these names.
+result in columns that carry one of these names nor in the names \emph{well_plate_name,
+well_index, well_image} or \emph{well}.
 
 Use \code{getGroupingVariableNames()} to check if renaming resulted in
 the desired output.

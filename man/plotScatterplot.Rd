@@ -118,6 +118,6 @@ A ggplot.
 Convenient wrapper around a variety of scatterplot functionalities. See details for more.
 }
 \details{
-In this particular case argument \code{across} can be specified of a character vector of length 2. In this case argument
+Argument \code{across} can be specified of a character vector of length 2. If so, argument
 \code{across_subset} must be a list of character vectors whereby the names are equal to the input for \code{across}.
 }

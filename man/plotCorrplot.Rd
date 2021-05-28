@@ -7,12 +7,12 @@
 plotCorrplot(
   object,
   variable_set,
-  phase = NULL,
   method_corr = NULL,
   across = NULL,
   across_subset = NULL,
   relevel = NULL,
   variables_subset = NULL,
+  phase = NULL,
   plot_type = "lower",
   display_diagonal = TRUE,
   signif_level = NULL,
@@ -21,7 +21,7 @@ plotCorrplot(
   shape = "tile",
   shape_size = 15,
   size_aes = FALSE,
-  display_values = TRUE,
+  display_values = FALSE,
   values_alpha = 0.9,
   values_clr = "black",
   values_digits = 2,
@@ -38,11 +38,6 @@ plotCorrplot(
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
-
-\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
-referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
-
-Ignored if the experiment design contains only one phase.}
 
 \item{method_corr}{Character value. Denotes the correlation method of interest. Either \code{'pearson'}
 or \code{'spearman'}.}
@@ -70,9 +65,12 @@ want to be included in the correlation plot.
 
 If set to NULL all of them are chosen. You can prefix variables you do NOT want to influence the clustering
 with a \emph{'-'}. (Saves writing if there are more variables you are interested in
-than variables you are not interested in.)
+than variables you are not interested in.)}
 
-Use \code{getNumericVariableNames()} to obtain all valid input options.}
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
 
 \item{plot_type}{Character value. Either \emph{'upper'}, \emph{'lower'} or \emph{'complete'}. Specifies
 how the correlation matrix is displayed.}
@@ -81,7 +79,8 @@ how the correlation matrix is displayed.}
 in the correlation plot.}
 
 \item{signif_level}{Numeric value or NULL. If numeric, specifies the minimum significance level a correlation pair
-must feature in order to be displayed. Insignificant correlation values are crossed out.}
+must feature in order to be displayed. Insignificant correlation values are crossed out. Argument \code{shape_size} denotes
+the size of the crosses.}
 
 \item{clr_low}{Character value. Specifies the color used for the lower end of the colorspectrum (negative correlations).}
 
@@ -91,7 +90,7 @@ must feature in order to be displayed. Insignificant correlation values are cros
 \emph{'circle'} and \emph{'rect'}. In the latter two cases the size of the geometric objects can be used to emphasize the correlation
 in addtion to the colorspectrum if \code{size_aes} is set to TRUE.}
 
-\item{shape_size}{Numeric value. Specifies the size with which to display the circles or rectangulars. If \code{shape_aes} is set to TRUE
+\item{shape_size}{Numeric value. Specifies the size with which to display the circles and rectangulars. If \code{shape_aes} is set to TRUE
 it Specifies the maximum size possible.}
 
 \item{size_aes}{Logical value. If set to TRUE the size of the circles or rectangulars is used to display the correlation.}

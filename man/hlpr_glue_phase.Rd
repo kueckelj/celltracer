@@ -4,7 +4,7 @@
 \alias{hlpr_glue_phase}
 \title{Adjust phase input for feedback messages}
 \usage{
-hlpr_glue_phase(object, phase, empty_space = TRUE)
+hlpr_glue_phase(object, phase, empty_space = TRUE, string = "for")
 }
 \description{
 Adjust phase input for feedback messages

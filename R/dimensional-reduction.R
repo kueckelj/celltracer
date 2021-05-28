@@ -168,7 +168,10 @@ plot_dim_red <- function(object,
                          pt_clr = NULL,
                          pt_clrsp = NULL,
                          pt_fill = NULL,
-                         pt_size = NULL){
+                         pt_size = NULL, 
+                         add_ons = list(ggplot2::labs(fill = NULL, color = NULL)),
+                         ...
+                         ){
   
   check_object(object)
   assign_default(object)
@@ -188,7 +191,9 @@ plot_dim_red <- function(object,
     pt.alpha = pt_alpha, 
     pt.fill = pt_fill, 
     pt.shape = base::ifelse(color_aes == "fill", 21, 19), 
-    pt.size = pt_size 
+    pt.size = pt_size ,
+    add.ons = add_ons,
+    ...
   )
   
 }
@@ -316,6 +321,10 @@ getPcaConv <- function(object, variable_set, phase = NULL){
   
 }
 
+#' @rdname getPcaConv
+#' @export
+getPcaObject <- getPcaConv
+
 
 #' @rdname getPcaConv
 #' @export
@@ -330,6 +339,10 @@ getTsneConv <- function(object, variable_set, phase = NULL){
 
 #' @rdname getPcaConv
 #' @export
+getTsneObject <- getTsneConv
+
+#' @rdname getPcaConv
+#' @export
 getUmapConv <- function(object, variable_set, phase = NULL){
   
   get_dim_red_obj(object = object, 
@@ -339,7 +352,9 @@ getUmapConv <- function(object, variable_set, phase = NULL){
   
 }
 
-
+#' @rdname getPcaConv
+#' @export
+getUmapObject <- getUmapConv
 
 
 
@@ -372,7 +387,9 @@ plotPca <- function(object,
                      pt_clr = NULL,
                      pt_fill = NULL,
                      pt_size = NULL, 
-                     clrp_adjust = NULL){
+                     clrp_adjust = NULL, 
+                    add_ons = list(ggplot2::labs(fill = NULL, color = NULL)), 
+                    ...){
   
   plot_dim_red(
     object = object, 
@@ -387,7 +404,9 @@ plotPca <- function(object,
     pt_clr = pt_clr, 
     pt_fill = pt_fill, 
     pt_size = pt_size, 
-    clrp_adjust = clrp_adjust
+    clrp_adjust = clrp_adjust, 
+    add_ons = add_ons, 
+    ...
   )
   
 }
@@ -407,7 +426,9 @@ plotTsne <- function(object,
                     pt_clr = NULL,
                     pt_fill = NULL,
                     pt_size = NULL, 
-                    clrp_adjust = NULL){
+                    clrp_adjust = NULL, 
+                    add_ons = list(ggplot2::labs(fill = NULL, color = NULL)), 
+                    ...){
   
   plot_dim_red(
     object = object, 
@@ -422,7 +443,9 @@ plotTsne <- function(object,
     pt_clr = pt_clr, 
     pt_fill = pt_fill, 
     pt_size = pt_size, 
-    clrp_adjust = clrp_adjust
+    clrp_adjust = clrp_adjust, 
+    add_ons = add_ons, 
+    ...
   )
   
 }
@@ -441,7 +464,9 @@ plotUmap <- function(object,
                     pt_clr = NULL,
                     pt_fill = NULL,
                     pt_size = NULL, 
-                    clrp_adjust = NULL){
+                    clrp_adjust = NULL,
+                    add_ons = list(ggplot2::labs(fill = NULL, color = NULL)), 
+                    ...){
   
   plot_dim_red(
     object = object, 
@@ -456,7 +481,9 @@ plotUmap <- function(object,
     pt_clr = pt_clr, 
     pt_fill = pt_fill, 
     pt_size = pt_size, 
-    clrp_adjust = clrp_adjust
+    clrp_adjust = clrp_adjust,
+    add_ons = add_ons, 
+    ...
   )
   
 }

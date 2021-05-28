@@ -51,6 +51,10 @@ getHclustConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
 
 #' @rdname getHclustConv
 #' @export
+getHclustObject <- getHclustConv
+
+#' @rdname getHclustConv
+#' @export
 getKmeansConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
   
   check_object(object)
@@ -84,6 +88,10 @@ getKmeansConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
 
 #' @rdname getHclustConv
 #' @export
+getKmeansObject <- getKmeansConv
+
+#' @rdname getHclustConv
+#' @export
 getPamConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
   
   check_object(object)
@@ -114,6 +122,10 @@ getPamConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
   base::return(cluster_object)
   
 }
+
+#' @rdname getHclustConv
+#' @export
+getPamObject <- getPamConv
 
 
 #' @title Obtain celltracers correlation objects
@@ -165,9 +177,62 @@ getCorrConv <- function(object, variable_set, phase = NULL){
   
 }
 
+#' @rdname getCorrConv
+#' @export
+getCorrObject <- getCorrConv
+
 
 # -----
 
+
+
+# Cell Ids ----------------------------------------------------------------
+
+#' @title Get cell ids
+#' 
+#' @description Allows to filter cell ids according to a variety of aspects.
+#'
+#' @inherit argument_dummy params 
+#' @param na_max Numeric value. Sets the threshold of the maximum number of missing values 
+#' a cell can have across all variables. Ignored if set to NULL or if the experiment 
+#' is not of type \emph{timelapse}.
+#'
+#' @return Character vector of cell ids.
+#' @export
+#'
+
+getCellIds <- function(object, ...,  na_max = Inf, phase = NULL){
+  
+  filtering <- rlang::enquos(...)
+  
+  check_object(object)
+  assign_default(object)
+  
+  cell_ids <- 
+    getStatsDf(object, verbose = FALSE) %>% 
+    dplyr::pull(cell_id)
+  
+  if(isTimeLapseExp(object) & base::is.numeric(na_max)){
+    
+    confuns::is_value(na_max, mode = "numeric")
+    
+    cell_ids <-
+      getMissingValuesMax(object) %>% 
+      dplyr::filter(max_nas <= {{na_max}}) %>% 
+      dplyr::pull(cell_id)
+    
+  }
+
+  
+  cell_ids <- 
+    getStatsDf(object, phase = phase) %>% 
+    dplyr::filter(cell_id %in% {{cell_ids}}) %>% 
+    dplyr::filter(!!!filtering) %>% 
+    dplyr::pull(cell_id)
+  
+  base::return(cell_ids)
+  
+}
 
 
 # Data extraction ---------------------------------------------------------
@@ -308,6 +373,7 @@ getWellPlateDf <- function(object){
 
 getStatsDf <- function(object,
                        phase = NULL,
+                       with_grouping = NULL,
                        with_cluster = NULL,
                        with_meta = NULL,
                        with_well_plate = NULL, 
@@ -315,6 +381,14 @@ getStatsDf <- function(object,
   
   check_object(object)
   assign_default(object)
+  
+  if(base::isFALSE(with_grouping)){
+    
+    with_cluster <- FALSE
+    with_meta <- FALSE
+    with_well_plate <- FALSE
+    
+  }
   
   if(multiplePhases(object)){
     
@@ -330,7 +404,7 @@ getStatsDf <- function(object,
 
   
   # add cluster
-  if(base::isTRUE(with_cluster)){
+  if(base::isTRUE(with_cluster) | base::isTRUE(with_grouping)){
     
     cluster_df <- getClusterDf(object, phase = phase, verbose = FALSE)  
     
@@ -340,7 +414,7 @@ getStatsDf <- function(object,
   }
   
   # add meta
-  if(base::isTRUE(with_meta)){
+  if(base::isTRUE(with_meta) | base::isTRUE(with_grouping)){
     
     meta_df <- getMetaDf(object, phase = phase)
     
@@ -349,7 +423,7 @@ getStatsDf <- function(object,
   }
   
   # add well plate info
-  if(base::isTRUE(with_well_plate)){
+  if(base::isTRUE(with_well_plate) | base::isTRUE(with_grouping)){
     
     wp_df <- getWellPlateDf(object)
     
@@ -374,12 +448,22 @@ getStatsDf <- function(object,
 
 getTracksDf <- function(object,
                         phase = NULL,
+                        with_grouping = NULL, 
                         with_cluster = NULL,
                         with_meta = NULL,
+                        with_well_plate = NULL,
                         verbose = NULL){
   
   check_object(object)
   assign_default(object)
+  
+  if(base::isFALSE(with_grouping)){
+    
+    with_cluster <- FALSE
+    with_meta <- FALSE
+    with_well_plate <- FALSE
+    
+  }
   
   if(multiplePhases(object)){
     
@@ -391,9 +475,9 @@ getTracksDf <- function(object,
         
         track_df <- object@cdata$tracks[[p]]
         
-        if(base::isTRUE(with_meta)){
+        if(base::isTRUE(with_meta) | base::isTRUE(with_grouping)){
           
-          meta_df <- getMetaDf(object, phase = phase)
+          meta_df <- getMetaDf(object, phase = p)
           
           track_df <- dplyr::left_join(x = track_df, y = meta_df, by = "cell_id")
           
@@ -408,11 +492,18 @@ getTracksDf <- function(object,
     
     track_df_final <- object@cdata$tracks
     
+    if(base::isTRUE(with_meta) | base::isTRUE(with_grouping)){
+      
+      meta_df <- getMetaDf(object, phase = phase)
+      
+      track_df_final <- dplyr::left_join(x = track_df_final, y = meta_df, by = "cell_id")
+      
+    }
+    
   }
-  
 
   
-  if(base::isTRUE(with_cluster) & base::length(phase) == 1){
+  if((base::isTRUE(with_cluster) | base::isTRUE(with_grouping)) & base::length(phase) == 1){
     
     cluster_df <- getClusterDf(object, phase = phase, verbose = FALSE)
     
@@ -420,10 +511,84 @@ getTracksDf <- function(object,
     
   }
   
+  if(base::isTRUE(with_well_plate) | base::isTRUE(with_grouping)){
+    
+    track_df_final <- dplyr::left_join(x = track_df_final, y = getWellPlateDf(object), by = "cell_id")
+    
+  }
+  
   base::return(track_df_final)
   
 }
 
+
+#' @title Obtain well plate set up 
+#' 
+#' @description Access function to the experiment set up in a tidy-data fashion. 
+#'
+#' @inherit argument_dummy params
+#'
+#' @return A data.frame in which each observation represents the well of a well plate
+#' @export
+#'
+getSetUpDf <- function(object, well_plate_name = NULL){
+  
+  check_object(object)
+  
+  if(base::is.null(well_plate_name)){
+    
+    well_plate_name <- getWellPlateNames(object)[1]
+    
+  }
+  
+  confuns::check_one_of(input = well_plate_name, against = getWellPlateNames(object))
+  
+  set_up_df <- object@well_plates[[well_plate_name]]$wp_df_eval
+  
+  base::return(set_up_df)
+  
+}
+
+
+#' @title Obtain variable centered summarys
+#' 
+#' @description Acces function for the data.frame that contains summary information 
+#' of all numeric data variables. 
+#' 
+#' @inherit argument_dummy params
+#'
+#' @return A data.frame.
+#' @export
+#'
+getVariableDf <- function(object, variable_subset = NULL, phase = NULL){
+
+  check_object(object)
+  assign_default(object)
+    
+  vdata <- object@vdata$summary
+  
+  if(multiplePhases(object)){
+    
+    phase <- check_phase(object, phase = phase, max_phases = 1)
+    
+    vdata <- vdata[[phase]]
+    
+  }
+  
+  if(base::is.character(variable_subset)){
+    
+    confuns::check_one_of(
+      input = variable_subset, 
+      against = vdata$variable
+    )
+    
+    vdata <- dplyr::filter(vdata, variable %in% {{variable_subset}})
+    
+  }
+  
+  base::return(vdata)
+  
+}
 
 #' @title Obtain defined sets of variables
 #' 
@@ -471,6 +636,52 @@ getVariableSetNames <- function(object){
 
 # -----
 
+
+
+
+
+
+
+# Missing values ----------------------------------------------------------
+
+
+
+#' @title Obtain missing value counts
+#' 
+#' @description This function returns a data.frame giving insight into 
+#' the number of missing values every cell has across all variables. 
+#'
+#' @inherit argument_dummy params
+#'
+#' @return A data.frame.
+#' @export
+#'
+getMissingValuesDf <- function(object){
+  
+  check_object(object, exp_type_req = "timelapse")
+  
+  object@information$track_na_count
+  
+}
+
+
+#' @title Obtain missing value counts
+#' 
+#' @description This function returns the maximum number of missing values 
+#' every cell has across all variables. 
+#'
+#' @inherit argument_dummy params
+#'
+#' @return A data.frame.
+#' @export
+#'
+getMissingValuesMax <- function(object){
+  
+  check_object(object, exp_type_req = "timelapse")
+  
+  df <- hlpr_max_track_na_count(object)
+  
+}
 
 
 
@@ -649,14 +860,14 @@ getGroupNames <- function(object, grouping_variable, ..., phase = NULL){
 #' 
 #' @export
 
-getGroupingVariableNames <- function(object, ..., named = FALSE, phase = NULL){
+getGroupingVariableNames <- function(object, ..., named = FALSE, phase = NULL, verbose = TRUE){
   
   check_object(object)
   
   assign_default(object)
   
   group_df <- 
-    getGroupingDf(object, phase = phase) %>% 
+    getGroupingDf(object, phase = phase, verbose = verbose) %>% 
     dplyr::select(-cell_id)
   
   selected_df <- dplyr::select(group_df, ...)
@@ -744,7 +955,7 @@ getClusterVariableNames <- function(object, ..., phase = NULL){
   
   if(base::ncol(cluster_df) == 0){
     
-    base::stop("Can not continue without clustering variables.")
+    base::return(base::character(0L))
     
   }
   
@@ -961,6 +1172,37 @@ getConditions <- function(object, phase = NULL){
     base::levels()
   
 }
+
+
+
+#' @title Obtain storage directory
+#' 
+#' @inherit argument_dummy params
+#' 
+#' @return Character value. 
+#' 
+getStorageDirectory <- function(object){
+  
+  check_object(object, set_up_req = "experiment_design")
+  
+  dir <- object@information$directory_cto
+  
+  if(base::is.null(dir) | dir == "not defined yet"){
+    
+    base::stop("Storage directory has not beend defined yet.")
+    
+  } else if(!stringr::str_detect(dir, pattern = "\\.{1}RDS")){
+    
+    base::stop("Storage directory must end with '.RDS'.")
+    
+  } else {
+    
+    base::return(dir)
+    
+  }
+  
+}
+
 
 
 

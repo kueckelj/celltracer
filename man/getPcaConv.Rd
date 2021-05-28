@@ -2,15 +2,24 @@
 % Please edit documentation in R/dimensional-reduction.R
 \name{getPcaConv}
 \alias{getPcaConv}
+\alias{getPcaObject}
 \alias{getTsneConv}
+\alias{getTsneObject}
 \alias{getUmapConv}
+\alias{getUmapObject}
 \title{Obtain dimensional reduction objects}
 \usage{
 getPcaConv(object, variable_set, phase = NULL)
 
+getPcaObject(object, variable_set, phase = NULL)
+
 getTsneConv(object, variable_set, phase = NULL)
 
+getTsneObject(object, variable_set, phase = NULL)
+
 getUmapConv(object, variable_set, phase = NULL)
+
+getUmapObject(object, variable_set, phase = NULL)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

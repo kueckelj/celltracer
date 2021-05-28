@@ -7,7 +7,13 @@
 \alias{getWellPlateVariableNames}
 \title{Obtain grouping variable names of cell data}
 \usage{
-getGroupingVariableNames(object, ..., named = FALSE, phase = NULL)
+getGroupingVariableNames(
+  object,
+  ...,
+  named = FALSE,
+  phase = NULL,
+  verbose = TRUE
+)
 
 getClusterVariableNames(object, ..., phase = NULL)
 
@@ -25,6 +31,11 @@ variable names according to a given pattern.}
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
 
 Ignored if the experiment design contains only one phase.}
+
+\item{verbose}{Logical. If set to TRUE informative messages regarding
+the computational progress will be printed.
+
+(Warning messages will always be printed.)}
 }
 \value{
 A character vector.

@@ -2,6 +2,7 @@
 % Please edit documentation in R/subset-celltracer-object.R
 \name{subsetByCluster}
 \alias{subsetByCluster}
+\alias{subsetByGroup}
 \title{Create data subset by cluster}
 \usage{
 subsetByCluster(
@@ -12,18 +13,27 @@ subsetByCluster(
   phase = NULL,
   verbose = NULL
 )
+
+subsetByGroup(
+  object,
+  new_name,
+  grouping_variable,
+  groups,
+  phase = NULL,
+  verbose = NULL
+)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
 
 \item{new_name}{Character value. Denotes the name of the output object. If set to NULL the name of the
-input object taken and suffixed with \emph{'_subset'}.}
+input object is taken and suffixed with \emph{'_subset'}.}
 
-\item{cluster_variable}{Character value. Denotes cluster variable from which
+\item{cluster_variable, grouping_variable}{Character value. Denotes variable from which
 to subset the cells.}
 
-\item{cluster}{Character vector. Denotes the exact cluster names carried by the
-cluster variable specified with argument \code{cluster_variable} to be kept.}
+\item{cluster, groups}{Character vector. Denotes the exact cluster/group names carried by the
+variable specified with argument \code{cluster_variable}/\code{grouping_variable} to be kept.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.
@@ -36,7 +46,7 @@ A celltracer object that contains the data for the subsetted cells.
 \description{
 Subset functions allow to conveniently split your data by certain characteristics such
 as cell lines, conditions, cluster etc. or for specific cell ids. This might be useful if you want apply some machine learning
-techniques such as clustering and correlation on only a subset of cells. See details for more information.
+algorithms such as clustering and correlation on only a subset of cells. See details for more information.
 }
 \details{
 Creating subsets of your data affects analysis results such as clustering and correlation which
@@ -50,9 +60,9 @@ to reconstruct the way from the original object to the current one.
 In case of experiment set ups with multiple phases:
 
 As creating subsets of your data affects downstream analysis results you have to
-manually specify the phase for which the clustering of interest has been calculated.
+manually specify the phase for which the grouping of interest has been calculated.
 
 The output object contains data for all phases but only for those cells that matched
-the input for argument \code{cluster} in the specified cluster variable during
+the input for argument \code{cluster}/\code{groups} in the specified variable during
 the specified phase.
 }

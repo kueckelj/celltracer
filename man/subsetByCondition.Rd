@@ -4,13 +4,13 @@
 \alias{subsetByCondition}
 \title{Create data subset by conditions}
 \usage{
-subsetByCondition(object, new_name, conditions, phase, verbose = NULL)
+subsetByCondition(object, new_name, conditions, phase = NULL, verbose = NULL)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
 
 \item{new_name}{Character value. Denotes the name of the output object. If set to NULL the name of the
-input object taken and suffixed with \emph{'_subset'}.}
+input object is taken and suffixed with \emph{'_subset'}.}
 
 \item{conditions}{Character vector. Denotes the conditions to be kept.}
 
@@ -25,7 +25,7 @@ A celltracer object that contains the data for the subsetted cells.
 \description{
 Subset functions allow to conveniently split your data by certain characteristics such
 as cell lines, conditions, cluster etc. or for specific cell ids. This might be useful if you want apply some machine learning
-techniques such as clustering and correlation on only a subset of cells. See details for more information.
+algorithms such as clustering and correlation on only a subset of cells. See details for more information.
 }
 \details{
 Creating subsets of your data affects analysis results such as clustering and correlation which

@@ -114,7 +114,7 @@ setCellDf <- function(object, slot, df, phase){
 #' @param directory_cto Character value. The directory under which 
 #' the object is supposed to be stored via \code{saveCelltracerObject()}.
 #'
-setDefaultDirectoy <- function(object, directory_cto){
+setStorageDirectory <- function(object, directory_cto){
   
   confuns::is_value(directory_cto, "character")
   

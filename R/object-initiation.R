@@ -370,12 +370,17 @@ processData <- function(object, verbose = TRUE){
     
   }
 
+  # update progress slot
+  object@set_up$progress$process_data <- TRUE
+  
   # declare module usability ------------------------------------------------
   
   if(isTimeLapseExp(object)){
     
-    # module: migration (TRUE if coordinates vars are available )
-    coords_available <- base::all(c("x_coords", "y_coords") %in% base::names(object@set_up$example$denoted_columns))
+    # module: migration (TRUE if coordinates vars are available)
+    coords_available <- 
+      base::all(c("x_coords", "y_coords") %in% base::names(object@set_up$example$denoted_columns))
+    
     object@information$modules$migration <- coords_available
     
   } else {
@@ -385,8 +390,29 @@ processData <- function(object, verbose = TRUE){
     
   }
 
-  # set up different data slots ---------------------------------------------
   confuns::give_feedback(msg = "Processing data.", verbose = verbose)
+  
+  if(isTimeLapseExp(object)){
+    
+    confuns::give_feedback(msg = "Counting missing values.", verbose = verbose)
+    
+    # summarise how many missing values every cell id has across all variables
+    track_df <- 
+      purrr::map_df(object@cdata$tracks, .f = ~ .x)
+    
+    all_cell_ids <- base::unique(track_df$cell_id)
+    all_frames <- 1:object@set_up$nom
+    
+    object@information$track_na_count <- 
+      tidyr::expand_grid(cell_id = {{all_cell_ids}}, frame = {{all_frames}}) %>% 
+      dplyr::left_join(x = ., y = track_df, by = c("cell_id", "frame")) %>% 
+      dplyr::group_by(cell_id) %>% 
+      dplyr::summarise_all(.funs = function(var){ base::is.na(var) %>% base::sum()}) %>% 
+      dplyr::select(-phase, -frame)
+    
+  }
+  
+  # set up different data slots ---------------------------------------------
   
   # create wp data
   object <- set_up_cdata_well_plate(object, verbose = verbose)
@@ -418,9 +444,6 @@ processData <- function(object, verbose = TRUE){
   
   # add default list 
   object@default <- c(object@default, default_list)
-  
-  # update progress slot
-  object@set_up$progress$process_data <- TRUE
   
   confuns::give_feedback(msg = "Done.", verbose = verbose)
   

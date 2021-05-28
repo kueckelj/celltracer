@@ -41,12 +41,11 @@ want to be included in the correlation plot.
 
 If set to NULL all of them are chosen. You can prefix variables you do NOT want to influence the clustering
 with a \emph{'-'}. (Saves writing if there are more variables you are interested in
-than variables you are not interested in.)
-
-Use \code{getNumericVariableNames()} to obtain all valid input options.}
+than variables you are not interested in.)}
 
 \item{signif_level}{Numeric value or NULL. If numeric, specifies the minimum significance level a correlation pair
-must feature in order to be displayed. Insignificant correlation values are crossed out.}
+must feature in order to be displayed. Insignificant correlation values are crossed out. Argument \code{shape_size} denotes
+the size of the crosses.}
 }
 \value{
 

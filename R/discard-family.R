@@ -35,7 +35,6 @@ discardClusterVariables <- function(object, cluster_variables, phase = NULL){
   
 }
 
-
 #' @rdname discardClusterVariables
 #' @export
 discardMetaVariables <- function(object, meta_variables, phase = NULL){
@@ -60,8 +59,6 @@ discardMetaVariables <- function(object, meta_variables, phase = NULL){
   base::return(object)
   
 }
-
-
 
 
 
@@ -107,9 +104,6 @@ discardStatVariables <- function(object, stat_variables, phase = NULL){
   base::return(object)
   
 }
-
-
-
 
 
 

@@ -7,7 +7,7 @@
 \usage{
 printSummary(object)
 
-printAnalysisSummary(object)
+printAnalysisSummary(object, slots = c("dim_red", "clustering"))
 }
 \arguments{
 \item{object}{A valid celltracer object.}

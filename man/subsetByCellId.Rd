@@ -4,15 +4,26 @@
 \alias{subsetByCellId}
 \title{Create data subset by cell ids}
 \usage{
-subsetByCellId(object, new_name, cell_ids, verbose = NULL, ...)
+subsetByCellId(
+  object,
+  new_name,
+  cell_ids,
+  reasoning = NULL,
+  verbose = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A valid celltracer object.}
 
 \item{new_name}{Character value. Denotes the name of the output object. If set to NULL the name of the
-input object taken and suffixed with \emph{'_subset'}.}
+input object is taken and suffixed with \emph{'_subset'}.}
 
 \item{cell_ids}{Character vector. Denotes the cells to keep unambiguously with their cell ids.}
+
+\item{reasoning}{Character value. Allows two write a short description of how the cell ids according
+to which the object is filtered were selected. This description is included in the output of \code{printSubsetHistory()}.
+Ignored if set to NULL.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.
@@ -25,7 +36,7 @@ A celltracer object that contains the data for the subsetted cells.
 \description{
 Subset functions allow to conveniently split your data by certain characteristics such
 as cell lines, conditions, cluster etc. or for specific cell ids. This might be useful if you want apply some machine learning
-techniques such as clustering and correlation on only a subset of cells. See details for more information.
+algorithms such as clustering and correlation on only a subset of cells. See details for more information.
 }
 \details{
 Creating subsets of your data affects analysis results such as clustering and correlation which

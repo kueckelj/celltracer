@@ -91,7 +91,7 @@ make_header <- function(info, slot_name){
 
 make_footer <- function(info, slot_name){
   
-  n_remaining <- stringr::str_c("Number remaining: ", info$n_remaining)
+  n_remaining <- stringr::str_c("Cells remaining: ", info$n_remaining)
   
   parent <- stringr::str_c("Parent object: ", info$parent_object)
   
@@ -100,6 +100,22 @@ make_footer <- function(info, slot_name){
   res <- stringr::str_c(parent, new, n_remaining, sep = "\n")
   
   base::return(res)
+  
+}
+
+make_phase <- function(object, info){
+  
+  if(multiplePhases(object)){
+    
+    phase <- stringr::str_c("Phase: ", info$phase)
+    
+  } else {
+    
+    phase <- NULL
+    
+  }
+  
+  base::return(phase)
   
 }
 
@@ -113,7 +129,19 @@ subset_history_cell_id <- function(info, slot_name){
   
   footer <- make_footer(info, slot_name)
   
-  text <- stringr::str_c(header, footer, sep = "\n")
+  if(base::is.character(info$reasoning)){
+    
+    reason <- info$reasoning
+    
+  } else {
+    
+    reason <- "none provided"
+    
+  }
+  
+  reasoning <- stringr::str_c("Reasoning: ", reason, sep = "")
+  
+  text <- stringr::str_c(header, reasoning, footer, sep = "\n")
   
   base::return(text)
   
@@ -142,7 +170,7 @@ subset_history_conditions <- function(info, slot_name){
   
   footer <- make_footer(info, slot_name)
   
-  phase <- stringr::str_c("Phase: ", info$phase)
+  phase <- make_phase(object, info)
   
   conditions <-
     stringr::str_c("Kept: '", glue::glue_collapse(info$conditions, sep = "', '", last = "' and '"), "'") 
@@ -160,7 +188,7 @@ subset_history_cluster <- function(info, slot_name){
   
   footer <- make_footer(info, slot_name)
   
-  phase <- stringr::str_c("Phase: ", info$phase)
+  phase <- make_phase(object, info)
   
   cluster_var <- 
     stringr::str_c("Cluster Name: '", info$cluster_variable, "'")
@@ -175,13 +203,34 @@ subset_history_cluster <- function(info, slot_name){
   
 }
 
+subset_history_group <- function(info, slot_name){
+  
+  header <- make_header(info, slot_name)
+  
+  footer <- make_footer(info, slot_name)
+  
+  phase <- make_phase(object, info)
+  
+  group_var <- 
+    stringr::str_c("Grouping Name: '", info$grouping_variable, "'")
+  
+  groups <-
+    stringr::str_c("Kept: '", glue::glue_collapse(info$groups, sep = "', '", last = "' and '"), "'") 
+  
+  text <- 
+    stringr::str_c(header, phase, group_var, groups, footer, sep = "\n")
+  
+  base::return(text)
+  
+}
+
 subset_history_filter <- function(info, slot_name){
   
   header <- make_header(info, slot_name)
   
   footer <- make_footer(info, slot_name)
   
-  phase <- stringr::str_c("Phase: ", info$phase)
+  phase <- make_phase(object, info)
   
   requirements <- 
     purrr::map2_chr(.x = info$requirements, 
@@ -203,6 +252,27 @@ subset_history_filter <- function(info, slot_name){
     stringr::str_c(header, phase, "Requirements:", requirements, footer, sep = "\n")
   
   base::return(text)
+  
+}
+
+
+subset_history_number <- function(info, slot_name){
+  
+  header <- make_header(info, slot_name)
+  
+  footer <- make_footer(info, slot_name)
+  
+  phase <- make_phase(object, info)
+  
+  across <- 
+    glue::glue_collapse(info$across, sep = "', '", last = "' and '") %>% 
+    stringr::str_c("Across: '", ., "'")
+  
+  text <- 
+    stringr::str_c(header, phase, across, footer, sep = "\n")
+  
+  base::return(text)
+  
   
 }
 

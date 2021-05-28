@@ -6,7 +6,7 @@
 \usage{
 plotVelocityLineplot(
   object,
-  across = "cl_condition",
+  across = "condition",
   across_subset = NULL,
   phase = NULL,
   threshold = NULL,

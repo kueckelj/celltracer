@@ -7,8 +7,19 @@
 hlpr_process_tracks(df, phase, object, verbose)
 }
 \description{
-To be used as mapped function in purrr::map_*(). Only used
-if experiment type is 'time_lapse'. Processes the track data.frame
-with regards to column names as well as some migration data computation if
-x- and y-coords are available.
+To be used as mapped function in purrr::map_*().
+Only used if experiment type is 'time_lapse'. Processes the track data.frame
+with regards to column names as well as module based computation if
+the needed variables are present.
+\itemize{
+\item completes the track data.frame in cases of uncomplete tracks
+\item creates frame related columns
+\item filters observations for frames within denoted timespan
+\item if migration module usable:
+\itemize{
+\item computes distance from origin
+\item computes distance from last point
+\item computes speed
+}
+}
 }

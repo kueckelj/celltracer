@@ -97,16 +97,19 @@ printSummary <- function(object){
     stringr::str_c(collapse = "") %>% 
     base::writeLines()
   
-  printAnalysisSummary(object)
-  
 }
 
 #' @rdname printSummary
 #' @export
-printAnalysisSummary <- function(object){
+printAnalysisSummary <- function(object, slots = c("dim_red", "clustering")){
   
   make_cutting_line() %>% 
     base::writeLines()
+  
+  confuns::check_one_of(
+    input = slots, 
+    against = base::names(analysis_methods)
+  )
   
   if(base::identical(object@analysis, base::list())){
     
@@ -116,7 +119,7 @@ printAnalysisSummary <- function(object){
     
     base::writeLines("Conducted analysis:\n\n")
     
-    for(slot in base::names(analysis_methods)){
+    for(slot in slots){
       
       print_analysis_info_dfs(object = object, slot = slot)
       

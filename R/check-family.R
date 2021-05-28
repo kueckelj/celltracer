@@ -30,7 +30,7 @@ check_availability <- function(evaluate, phase, ref_input, ref_fun){
 #' @description Makes sure that object input is of class celltracer and 
 #' that it contains the relevant information needed for the function.
 #' @param object A valid celltracer object. 
-check_object <- function(object, experiment = NULL, set_up_req = "process_data", exp_type_req = NULL){
+check_object <- function(object, experiment = NULL, set_up_req = "process_data", exp_type_req = NULL, module_req = NULL){
   
   input_class <- base::class(object)
   input_attribute <- base::attr(input_class, "package")
@@ -49,7 +49,7 @@ check_object <- function(object, experiment = NULL, set_up_req = "process_data",
     
     msg <- glue::glue("Seems like you've missed some object processing steps. Make sure to run '{missing_fun}' first and then try again.")
     
-    confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+    base::stop(msg)
     
   }
   
@@ -61,9 +61,22 @@ check_object <- function(object, experiment = NULL, set_up_req = "process_data",
         
         msg <- "This function requires a time lapse experiment set up."
         
-        confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
+        base::stop(msg)
         
       }
+      
+    }
+    
+  }
+  
+  
+  if(base::is.character(module_req)){
+    
+    if(!isUsable(object, module = module_req)){
+      
+      msg <- glue::glue("This functions requires specific module usability. Module: '{module_req}'")
+      
+      base::stop(msg)
       
     }
     

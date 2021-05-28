@@ -24,7 +24,7 @@
 #' @export
 #'
 initiateCorrelation <- function(object,
-                                variables_set,
+                                variable_set,
                                 phase = NULL, 
                                 force = FALSE, 
                                 verbose = NULL, 
@@ -184,19 +184,19 @@ correlateAcross <- function(object,
 #' with a \emph{'-'}. (Saves writing if there are more variables you are interested in
 #' than variables you are not interested in.)
 #' 
-#' Use \code{getNumericVariableNames()} to obtain all valid input options.
 #' @param plot_type Character value. Either \emph{'upper'}, \emph{'lower'} or \emph{'complete'}. Specifies
 #' how the correlation matrix is displayed. 
 #' @param display_diagonal Logical value. Specifies if the diagonal of the correlation matrix is supposed to be included 
 #' in the correlation plot. 
 #' @param signif_level Numeric value or NULL. If numeric, specifies the minimum significance level a correlation pair 
-#' must feature in order to be displayed. Insignificant correlation values are crossed out. 
+#' must feature in order to be displayed. Insignificant correlation values are crossed out. Argument \code{shape_size} denotes 
+#' the size of the crosses.  
 #' @param clr_low Character value. Specifies the color used for the lower end of the colorspectrum (negative correlations).
 #' @param clr_high Character value. Specifies the color used for the upper end of the colorspectrum (positive correlations).
 #' @param shape Character value. Specifies the geometric objects with which to display the correlation pairs. Either \emph{'tile'} or one of
 #' \emph{'circle'} and \emph{'rect'}. In the latter two cases the size of the geometric objects can be used to emphasize the correlation 
 #' in addtion to the colorspectrum if \code{size_aes} is set to TRUE. 
-#' @param shape_size Numeric value. Specifies the size with which to display the circles or rectangulars. If \code{shape_aes} is set to TRUE
+#' @param shape_size Numeric value. Specifies the size with which to display the circles and rectangulars. If \code{shape_aes} is set to TRUE
 #' it Specifies the maximum size possible. 
 #' @param size_aes Logical value. If set to TRUE the size of the circles or rectangulars is used to display the correlation. 
 #' @param display_values Logical value. If set to TRUE the actual correlation values are printed on the geometric objects.
@@ -213,12 +213,12 @@ correlateAcross <- function(object,
 #'
 plotCorrplot <- function(object, 
                          variable_set,
-                         phase = NULL,
                          method_corr = NULL, 
                          across = NULL, 
                          across_subset = NULL, 
                          relevel = NULL, 
                          variables_subset = NULL, 
+                         phase = NULL,
                          plot_type = "lower", 
                          display_diagonal = TRUE, 
                          signif_level = NULL, 
@@ -227,7 +227,7 @@ plotCorrplot <- function(object,
                          shape = "tile",
                          shape_size = 15,
                          size_aes = FALSE,
-                         display_values = TRUE, 
+                         display_values = FALSE, 
                          values_alpha = 0.9, 
                          values_clr = "black", 
                          values_digits = 2, 
@@ -299,8 +299,6 @@ plotCorrplot <- function(object,
     )
     
   }
-  
-  
   
   
 }

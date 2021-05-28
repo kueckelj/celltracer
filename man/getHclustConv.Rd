@@ -2,15 +2,24 @@
 % Please edit documentation in R/get-family.R
 \name{getHclustConv}
 \alias{getHclustConv}
+\alias{getHclustObject}
 \alias{getKmeansConv}
+\alias{getKmeansObject}
 \alias{getPamConv}
+\alias{getPamObject}
 \title{Obtain celltracers clustering objects}
 \usage{
 getHclustConv(object, variable_set, phase = NULL, with_data = TRUE)
 
+getHclustObject(object, variable_set, phase = NULL, with_data = TRUE)
+
 getKmeansConv(object, variable_set, phase = NULL, with_data = TRUE)
 
+getKmeansObject(object, variable_set, phase = NULL, with_data = TRUE)
+
 getPamConv(object, variable_set, phase = NULL, with_data = TRUE)
+
+getPamObject(object, variable_set, phase = NULL, with_data = TRUE)
 }
 \arguments{
 \item{object}{A valid celltracer object.}

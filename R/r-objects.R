@@ -28,7 +28,7 @@ file_regex <- "[A-Z]{1}\\d{1,2}_\\d{1}\\.(csv|xls|xlsx)$"
 # Column names ------------------------------------------------------------
 
 non_data_track_variables <- c("frame_itvl", "frame_num", "frame_time", "cell_line",
-                             "cl_condition", "condition", "phase", 
+                             "cl_condition", "condition", 
                              "x_coords", "y_coords") # keeps cell_id!!
 
 original_ct_variables <- c("y-coordinate [pixel]", "x-coordinate [pixel]", "Frame number", "Cell ID",
@@ -87,8 +87,8 @@ default_list <-
     pt_clrsp = "viridis",
     pt_fill = "black",
     pt_size = 3, 
+    smooth_method = "lm",
     verbose = TRUE, 
-    well_plate = "", 
     with_cluster = TRUE, 
     with_meta = TRUE, 
     with_well_plate = TRUE

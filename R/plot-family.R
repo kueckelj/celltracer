@@ -53,17 +53,19 @@ plotAllTracks <- function(object,
     
     confuns::check_one_of(
       input = across, 
-      against = getGroupingOptions(object, phase = phase) %>% purrr::flatten_chr()
+      against = getGroupingVariableNames(object, phase = phase, verbose = FALSE)
     )
     
   }
   
   track_df <- 
-    getTracksDf(object = object,
-                phase = phase,
-                with_meta = TRUE, 
-                with_cluster = TRUE,
-                verbose = FALSE) %>% 
+    getTracksDf(
+      object = object,
+      phase = phase,
+      with_meta = TRUE,
+      with_cluster = TRUE,
+      verbose = FALSE
+      ) %>% 
     hlpr_merge_conditions(
       track_df = ., 
       phase = phase, 
@@ -82,11 +84,7 @@ plotAllTracks <- function(object,
     dplyr::group_by(!!rlang::sym(across)) %>% 
     dplyr::slice_sample(n = n_cells)
   
-  confuns::check_across_subset(
-    df = ., 
-    across = across, 
-    across.subset = across_subset
-  ) %>% cell_ids <- 
+  cell_ids <- 
     dplyr::pull(.data = cell_id_df, var = "cell_id")
   
   plot_df <- 
@@ -95,7 +93,8 @@ plotAllTracks <- function(object,
     dplyr::mutate(
       x_coords = x_coords - x_coords[1], 
       y_coords = y_coords - y_coords[1], 
-      facet = !!rlang::sym(across)) %>% 
+      facet = !!rlang::sym(across)
+      ) %>% 
     dplyr::ungroup() 
   
   annotation_df <-  
@@ -137,12 +136,10 @@ plotAllTracks <- function(object,
     ggplot2::theme(
       panel.grid.major = ggplot2::element_blank(),
       panel.grid.minor = ggplot2::element_blank(), 
-      strip.background = ggplot2::element_blank(), 
-      axis.text = ggplot2::element_blank(), 
-      axis.ticks = ggplot2::element_blank()
+      strip.background = ggplot2::element_blank()
     ) + 
     ggplot2::facet_wrap(facets = ~ facet, scales = "fixed", ...) + 
-    ggplot2::labs(x = NULL, y = NULL, color = confuns::make_capital_letters(string = across),
+    ggplot2::labs(x = NULL, y = NULL, color = across,
                   subtitle = glue::glue("Time: {time_subset} {getIntervalUnit(object)}")) + 
     hlpr_caption_add_on(object = object, phase = phase) + 
     confuns::scale_color_add_on(variable = "discrete", clrp = clrp)
@@ -175,8 +172,12 @@ plotCellCount <- function(object, across, color_by = across, phase = NULL){
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
   stat_df <-
-    getStatsDf(object, verbose = FALSE, phase = phase) %>% 
-    dplyr::select(-phase, -cell_id)
+    getStatsDf(object,
+               with_cluster = TRUE, 
+               with_meta = TRUE,
+               with_well_plate = TRUE,
+               verbose = FALSE,
+               phase = phase)
   
   confuns::check_one_of(
     input = across, 
@@ -191,7 +192,7 @@ plotCellCount <- function(object, across, color_by = across, phase = NULL){
   ggplot2::ggplot(data = stat_df, mapping = ggplot2::aes(x = .data[[across]])) + 
     ggplot2::geom_bar(mapping = ggplot2::aes(fill = .data[[color_by]]), color = "black") + 
     ggplot2::theme_classic() + 
-    ggplot2::labs(y = "Cell Count", x = NULL) + 
+    ggplot2::labs(y = "Count", x = NULL) + 
     confuns::scale_color_add_on(aes = "fill", variable = "discrete", clrp = "milo")
   
 }
@@ -216,7 +217,7 @@ plotCellCount <- function(object, across, color_by = across, phase = NULL){
 #' @param corr_text_sep Character value. The string that separates correlation value and respective p-value.
 #' @param corr_text_size Numeric value. The size used to print the correlation results.
 #' 
-#' @details In this particular case argument \code{across} can be specified of a character vector of length 2. In this case argument 
+#' @details Argument \code{across} can be specified of a character vector of length 2. If so, argument 
 #' \code{across_subset} must be a list of character vectors whereby the names are equal to the input for \code{across}. 
 #'
 #' @inherit ggplot_family return
@@ -257,11 +258,15 @@ plotScatterplot <- function(object,
   
   phase <- check_phase(object, phase = phase, max_phases = 1)
   
-  
   stats_df <- 
-    getStatsDf(object = object, phase = phase, verbose = FALSE) %>% 
-    dplyr::select(-phase, -cell_id)
-  
+    getStatsDf(
+      object = object,
+      phase = phase,
+      with_meta = TRUE, 
+      with_cluster = TRUE,
+      with_well_plate = TRUE,
+      verbose = FALSE) %>% 
+    dplyr::select(-cell_id)
   
   confuns::plot_scatterplot(
     df = stats_df, 
@@ -310,9 +315,15 @@ plotScatterplot <- function(object,
 plotSingleTracks <- function(object,
                              cell_ids,
                              phase = "all",
+                             size = 1,
                              color_by = NULL,
                              scales = "free"){
+
+  check_object(object, module_req = "migration")
+  assign_default(object)
   
+  phase <- check_phase(object, phase = phase)
+    
   track_df <-
     getTracksDf(object = object, phase = phase) %>% 
     dplyr::filter(cell_id %in% {{cell_ids}}) 
@@ -334,7 +345,7 @@ plotSingleTracks <- function(object,
   ggplot2::ggplot(data = track_df, mapping = mapping) + 
     ggplot2::geom_point(size = 0.75) + 
     ggplot2::geom_path(mapping = ggplot2::aes(group = cell_id),
-                       size = 1, arrow = ggplot2::arrow(length = ggplot2::unit(0.1, "inches"))) +
+                       size = size, arrow = ggplot2::arrow(length = ggplot2::unit(0.1, "inches"))) +
     ggplot2::geom_point(data = start_df, size = 2) + 
     ggplot2::facet_wrap(facets = ~ cell_id, scales = scales) +
     ggplot2::theme_bw() + 
@@ -343,7 +354,8 @@ plotSingleTracks <- function(object,
       panel.grid.minor = ggplot2::element_blank(), 
       strip.background = ggplot2::element_rect(fill = ggplot2::alpha("steelblue", 0.75))
     ) + 
-    ggplot2::labs(x = "x-coordinates", y = "y-coordinates")
+    ggplot2::labs(x = "x-coordinates", y = "y-coordinates") + 
+    hlpr_caption_add_on(object, phase = phase)
   
   
 }
@@ -396,16 +408,21 @@ plotVelocityHeatmap <- function(object,
     
     confuns::check_one_of(
       input = across, 
-      against = getGroupingOptions(object, phase = phase) %>% purrr::flatten_chr()
+      against = getGroupingVariableNames(object, phase = phase)
     )
     
   }
   
   # the speed data shifted and sliced
   speed_df <- 
-    getTracksDf(object,
-                phase = phase,
-                verbose = FALSE) %>% 
+    getTracksDf(
+      object,
+      phase = phase,
+      with_cluster = TRUE, 
+      with_meta = TRUE, 
+      with_well_plate = TRUE,
+      verbose = FALSE
+      ) %>% 
     hlpr_merge_conditions(
       track_df = ., 
       phase = phase, 
@@ -542,7 +559,7 @@ plotVelocityHeatmap <- function(object,
 #' @export
 
 plotVelocityLineplot <- function(object, 
-                                 across = "cl_condition", 
+                                 across = "condition", 
                                  across_subset = NULL, 
                                  phase = NULL,
                                  threshold = NULL,
@@ -560,9 +577,14 @@ plotVelocityLineplot <- function(object,
   
   # speed data shifted 
   speed_df <- 
-    getTracksDf(object,
-              phase = phase,
-              verbose = verbose) %>% 
+    getTracksDf(
+      object,
+      with_cluster = TRUE, 
+      with_meta = TRUE, 
+      with_well_plate = TRUE,
+      phase = phase,
+      verbose = verbose
+      ) %>% 
     hlpr_merge_conditions(
       track_df = ., 
       phase = phase, 
@@ -673,8 +695,11 @@ plotVelocityLineplot <- function(object,
 plotWellPlate <- function(object, 
                           well_plate = NULL,
                           color_by = "condition", 
+                          size_well = 13.5, 
+                          display_labels = TRUE,
                           clrp_adjust = NULL,
-                          make_pretty = NULL){
+                          make_pretty = NULL, 
+                          ...){
   
   check_object(object)
   assign_default(object)
@@ -687,7 +712,7 @@ plotWellPlate <- function(object,
   
   wp_df <- object@well_plates[[well_plate]]$wp_df_eval
   
-  pt_size <- 13.5
+  pt_size <- size_well
   pt_stroke <- 2
   
   border <- 0.75
@@ -695,7 +720,7 @@ plotWellPlate <- function(object,
   limit_x <- base::max(wp_df$col_num) + border
   limit_y <- base::max(wp_df$row_num) + border
   
-  if(base::is.character(color_by) && color_by == "condition"){
+  if(multiplePhases(object) && base::is.character(color_by) && color_by == "condition"){
     
     getPhases(object)
     
@@ -714,7 +739,7 @@ plotWellPlate <- function(object,
         condition = dplyr::case_when(information_status == "Discarded" ~ "Discarded", TRUE ~ condition)
         )
     
-    facet_add_on <- ggplot2::facet_wrap(facets = . ~ phases)
+    facet_add_on <- ggplot2::facet_wrap(facets = . ~ phases, ...)
     
     border_add_on <- NULL
       
@@ -742,18 +767,29 @@ plotWellPlate <- function(object,
     
   }
   
+  if(base::isTRUE(display_labels)){
+    
+    text_add_on <- ggplot2::geom_text(mapping = ggplot2::aes(label = well))
+    
+  } else {
+    
+    text_add_on <- NULL
+    
+  }
+  
+  
   # plot output
   ggplot2::ggplot(data = wp_df, mapping = ggplot2::aes(x = col_num,y = row_num)) + 
     ggplot2::geom_point(data = wp_df, mapping = ggplot2::aes(fill = .data[[color_by]]),
       size = pt_size, shape = 21, alpha = 1, stroke = pt_stroke, 
     ) + 
-    ggplot2::geom_text(mapping = ggplot2::aes(label = well)) +
+    text_add_on +
     ggplot2::scale_x_continuous(limits = c(-border, limit_x)) +
     ggplot2::scale_y_reverse(limits = c(border + limit_y, -border)) +
     ggplot2::theme_void() +
     ggplot2::guides(
-      color = ggplot2::guide_legend(override.aes = list(size = 15, shape = 21)), 
-      fill = ggplot2::guide_legend(override.aes = list(size = 15, shape = 21))
+      color = ggplot2::guide_legend(override.aes = list(size = 10, shape = 21)), 
+      fill = ggplot2::guide_legend(override.aes = list(size = 10, shape = 21))
       ) + 
     confuns::scale_color_add_on(
       aes = "fill", variable = wp_df[[color_by]], clrp = "milo", 
@@ -762,7 +798,8 @@ plotWellPlate <- function(object,
     ggplot2::labs(
       fill = confuns::make_capital_letters(string = color_by, capital.letters = make_pretty)
     ) + 
-    facet_add_on 
+    facet_add_on + 
+    border_add_on
   
   
 }

@@ -18,7 +18,9 @@ plotPca(
   pt_clr = NULL,
   pt_fill = NULL,
   pt_size = NULL,
-  clrp_adjust = NULL
+  clrp_adjust = NULL,
+  add_ons = list(ggplot2::labs(fill = NULL, color = NULL)),
+  ...
 )
 
 plotTsne(
@@ -33,7 +35,9 @@ plotTsne(
   pt_clr = NULL,
   pt_fill = NULL,
   pt_size = NULL,
-  clrp_adjust = NULL
+  clrp_adjust = NULL,
+  add_ons = list(ggplot2::labs(fill = NULL, color = NULL)),
+  ...
 )
 
 plotUmap(
@@ -48,7 +52,9 @@ plotUmap(
   pt_clr = NULL,
   pt_fill = NULL,
   pt_size = NULL,
-  clrp_adjust = NULL
+  clrp_adjust = NULL,
+  add_ons = list(ggplot2::labs(fill = NULL, color = NULL)),
+  ...
 )
 }
 \arguments{
