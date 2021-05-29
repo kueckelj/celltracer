@@ -7,7 +7,7 @@
 getWellPlateNames(object)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
 A character vector.

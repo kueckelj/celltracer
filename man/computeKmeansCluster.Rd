@@ -2,7 +2,7 @@
 % Please edit documentation in R/clustering-kmeans.R
 \name{computeKmeansCluster}
 \alias{computeKmeansCluster}
-\title{Compute cluster according to Kmeans}
+\title{Compute cluster with kmeans}
 \usage{
 computeKmeansCluster(
   object,
@@ -14,7 +14,7 @@ computeKmeansCluster(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
@@ -38,11 +38,11 @@ the computational progress will be printed.
 (Warning messages will always be printed.)}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Performs kmeans clustering for every combination of \code{method_kmeans} and
-\code{k} and saves the results in the celltracer object.
+\code{k} and saves the results in the cypro object.
 }
 \details{
 As this function iterates over all valid combinations of \code{k} and \code{method_kmeans}

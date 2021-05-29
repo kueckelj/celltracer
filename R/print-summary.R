@@ -15,7 +15,7 @@ printSummary <- function(object){
   
   summary_list <- list()
   
-  summary_list$class <- "An object of class 'cto' - celltracer object.\n\n"
+  summary_list$class <- "An object of class 'cypro'.\n\n"
   
   summary_list$object_name <-stringr::str_c("Name: ", object@name)
   

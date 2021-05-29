@@ -3,7 +3,7 @@
 # Documentations dummies --------------------------------------------------
 
 #' dummy 
-#' @return An updated cell tracer object that contains the data added.
+#' @return An updated cypro object that contains the data added.
 add_family <- function(){}
 
 
@@ -21,7 +21,7 @@ add_family <- function(){}
 #' of the variable set. 
 #' @param set_name Character value. The name of the set of variable names. 
 #'
-#' @return An updated celltracer object.
+#' @inherit update_object return
 #' @export
 #'
 addVariableSet <- function(object, variable_names, set_name, overwrite = FALSE, phase = NULL){
@@ -250,7 +250,7 @@ addStatVariables <- function(object,
 #' 
 #' Use \code{getGroupingVariableNames()} afterwards to obtain all grouping variables.
 #'
-#' @return
+#' @inherit add_family return
 #' @export
 #'
 addHierarchicalClusterVariables <- function(object,
@@ -342,7 +342,7 @@ addHierarchicalClusterVariables <- function(object,
 #' 
 #' Use \code{getGroupingVariableNames()} afterwards to obtain all grouping variables.
 #' 
-#' @return An updated celltracer object.
+#' @inherit add_family return
 #' @export
 #'
 addKmeansClusterVariables <- function(object,
@@ -436,7 +436,7 @@ addKmeansClusterVariables <- function(object,
 #' 
 #' Use \code{getGroupingVariableNames()} afterwards to obtain all grouping variables.
 #'
-#' @return An updated celltracer object. 
+#' @inherit add_family return
 #' 
 #' @export
 #'

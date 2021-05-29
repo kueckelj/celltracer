@@ -10,7 +10,7 @@ getOutlierResults(object, method_outlier = NULL, check = TRUE)
 getOutlierIds(object, method_outlier = NULL, check = FALSE, flatten = TRUE)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{method_outlier}{Character vector. Specifies the method/algorithm of interest.
 

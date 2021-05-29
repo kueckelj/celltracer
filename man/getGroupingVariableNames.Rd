@@ -22,7 +22,7 @@ getMetaVariableNames(object, ..., phase = NULL)
 getWellPlateVariableNames(object, ...)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{...}{Additional selection helpers from the \code{tidyselect} package that match
 variable names according to a given pattern.}

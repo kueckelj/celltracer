@@ -15,7 +15,7 @@ subsetByNumber(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{new_name}{Character value. Denotes the name of the output object. If set to NULL the name of the
 input object is taken and suffixed with \emph{'_subset'}.}
@@ -57,7 +57,7 @@ via \code{dplyr::slice_sample()}. The exact number of remaining cells can be spe
 \code{n_by_group} or \code{n_total}:
 
 If specified with \code{n_by_group()}: The numeric value is given to argument \code{n} of \code{dplyr::slice_sample()}. E.g.
-\code{across} = \emph{'condition'} and \code{n_by_group} = 1000, if the celltracer object contains 6 different
+\code{across} = \emph{'condition'} and \code{n_by_group} = 1000, if the cypro object contains 6 different
 conditions the returned object contains 6000 randomly selectd cells - 1000 of each condition.
 
 If specified with \code{n_total}: The numeric value given to argument \code{n} of \code{dplyr::slice_sample()} is calculated
@@ -65,7 +65,7 @@ like this:
 
 n = \code{n_total} / number of groups
 
-E.g \code{across} = \emph{'condition'} and \code{n_total} = 10.000, if the celltracer object contains
+E.g \code{across} = \emph{'condition'} and \code{n_total} = 10.000, if the cypro object contains
 4 different conditions 2500 cells of each condition will be in the returned object.
 }
 \note{

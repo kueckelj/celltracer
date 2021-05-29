@@ -3,7 +3,7 @@
 #' @description Opens an interactive application in which the experiment can be set 
 #' up. This includes in particular the design of the well plates. 
 #'
-#' @return An empty celltracer object. 
+#' @return An empty cypro object. 
 #' @export
 #'
 designExperiment <- function(){
@@ -70,7 +70,7 @@ designExperiment <- function(){
           }
           
           shinyWidgets::actionBttn(inputId = "return_cto",
-                                   label = "Return Celltracer Object", 
+                                   label = "Return Cypro Object", 
                                    color = color, 
                                    style = "gradient")
           
@@ -115,7 +115,7 @@ designExperiment <- function(){
 #'
 #' @inherit argument_dummy params 
 #'
-#' @return An updated celltracer object.
+#' @return An updated cypro object.
 #' @export
 #'
 loadData <- function(object){
@@ -183,7 +183,7 @@ loadData <- function(object){
           }
           
           shinyWidgets::actionBttn(inputId = "return_cto",
-                                   label = "Return Celltracer Object", 
+                                   label = "Return Cypro Object", 
                                    color = color, 
                                    style = "gradient")
           
@@ -234,7 +234,7 @@ loadData <- function(object){
 #'
 #' @inherit argument_dummy params 
 #'
-#' @return An updated celltracer object.
+#' @inherit updated_object return
 #' @export
 #'
 checkDataQuality <- function(object){
@@ -308,7 +308,7 @@ checkDataQuality <- function(object){
           }
           
           shinyWidgets::actionBttn(inputId = "return_cto",
-                                   label = "Return Celltracer Object", 
+                                   label = "Return Cypro Object", 
                                    color = color, 
                                    style = "gradient")
           
@@ -353,11 +353,11 @@ checkDataQuality <- function(object){
 #' @title Object initiation: Step 4
 #' 
 #' @description Processes the data and constructs all needed slots. Afterwards the 
-#' celltracer object is set for all subsequent analysis and visualization steps. 
+#' cypro object is set for all subsequent analysis and visualization steps. 
 #'
 #' @inherit argument_dummy params
 #'
-#' @return An updated celltracer object.
+#' @inherit updated_object return
 #' @export
 #'
 processData <- function(object, verbose = TRUE){

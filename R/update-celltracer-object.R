@@ -1,21 +1,21 @@
 
 
 
-#' @title Keep celltracer object up to data
+#' @title Keep cypro object up to data
 #' 
-#' @description Ensures that the celltracer object is constructed according
+#' @description Ensures that the cypro object is constructed according
 #' to the latest version of the package. 
 #'
 #' @inherit argument_dummy
 #'
-#' @return An updated celltracer object.
+#' @return A cypro object whose architecture is up to date with the latest version.
 #' @export
 #'
-updateCelltracerObject <- function(object){
+updateCyproObject <- function(object){
   
   stopifnot(base::class(object) == "cto")
   
-  # include old celltracer objects
+  # include old Cypro objects
   all_slot_names <- methods::slotNames(object)
   
   content <- 
@@ -55,7 +55,7 @@ updateCelltracerObject <- function(object){
     
   } else if(version == "old"){
     
-    stop("Updating not possible. Please initiate the celltracer object again.")
+    stop("Updating not possible. Please initiate the cypro object again.")
     
   } else if(version == "alpha-development"){
     

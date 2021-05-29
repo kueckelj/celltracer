@@ -7,7 +7,7 @@
 \alias{getKmeansObject}
 \alias{getPamConv}
 \alias{getPamObject}
-\title{Obtain celltracers clustering objects}
+\title{Obtain cypros clustering objects}
 \usage{
 getHclustConv(object, variable_set, phase = NULL, with_data = TRUE)
 
@@ -22,7 +22,7 @@ getPamConv(object, variable_set, phase = NULL, with_data = TRUE)
 getPamObject(object, variable_set, phase = NULL, with_data = TRUE)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
@@ -36,5 +36,5 @@ Ignored if the experiment design contains only one phase.}
 An S4 object of \emph{'hclust_conv'}, \emph{'kmeans_conv'} or \emph{'pam_conv'}.
 }
 \description{
-Obtain celltracers clustering objects
+Obtain cypros clustering objects
 }

@@ -21,7 +21,7 @@ plotBarchart(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variables}{Character vector. The grouping variables whose group count or
 proportion you want to display. Must not contain the feature specified in

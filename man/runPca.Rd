@@ -13,7 +13,7 @@ runTsne(object, variable_set, phase = NULL, force = FALSE, verbose = NULL, ...)
 runUmap(object, variable_set, phase = NULL, force = FALSE, verbose = NULL, ...)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
@@ -41,7 +41,7 @@ than variables you are not interested in.)
 Use \code{getNumericVariableNames()} to obtain all valid input options.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Reduces the dimensions of all specified numeric variables using the respective

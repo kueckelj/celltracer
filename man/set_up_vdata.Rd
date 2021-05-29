@@ -7,7 +7,7 @@
 set_up_vdata(object, verbose = TRUE)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{verbose}{Logical. If set to TRUE informative messages regarding
 the computational progress will be printed.
@@ -15,7 +15,7 @@ the computational progress will be printed.
 (Warning messages will always be printed.)}
 }
 \value{
-An updated celltracer-object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Computes variable summaries

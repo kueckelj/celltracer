@@ -7,7 +7,7 @@
 adjustDefaultInstructions(object, ...)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{...}{The argument names with their new default value specified with the
 following syntax 'argument_name' = 'argument_default'.
@@ -17,7 +17,7 @@ whose default input you can manipulate this way.}
 }
 \description{
 The default input for many recurring arguments is carried with
-the celltracer object. Use this function to savely adjust the default
+the cypro object. Use this function to savely adjust the default
 according to your preference.
 }
 \examples{

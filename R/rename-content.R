@@ -1,7 +1,7 @@
 #' @title Rename groups
 #' 
 #' @description Allows to rename particular groups within a grouping variable
-#' of the celltracer object's cell data.
+#' of the cypro object's cell data.
 #'
 #' @inherit argument_dummy params
 #' @param grouping_variable Character value. The name of the grouping variable
@@ -14,7 +14,7 @@
 #' 
 #' Use \code{getGroupNames()} to check if renaming resulted in the desired output.
 #' 
-#' @return An updated celltracer object.
+#' @inherit updated_object return
 #' @export
 #'
 renameGroups <- function(object, grouping_variable = NULL, ..., phase = NULL){

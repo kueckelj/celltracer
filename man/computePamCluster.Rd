@@ -2,7 +2,7 @@
 % Please edit documentation in R/clustering-pam.R
 \name{computePamCluster}
 \alias{computePamCluster}
-\title{Compute cluster accordint to Partitioning Around Medoids (PAM)}
+\title{Compute cluster with Partitioning Around Medoids (PAM)}
 \usage{
 computePamCluster(
   object,
@@ -15,7 +15,7 @@ computePamCluster(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
@@ -39,11 +39,11 @@ the computational progress will be printed.
 \item{...}{Additional arguments given to \code{cluster::pam()}.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Performs partitioning around medoids for every combination of
-\code{method_pam} and \code{k} and saves the results in the celltracer object.
+\code{method_pam} and \code{k} and saves the results in the cypro object.
 }
 \details{
 As this function iterates over all valid combinations of \code{method_pam}

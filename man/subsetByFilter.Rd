@@ -7,7 +7,7 @@
 subsetByFilter(object, new_name, ..., phase = NULL, verbose = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{new_name}{Character value. Denotes the name of the output object. If set to NULL the name of the
 input object is taken and suffixed with \emph{'_subset'}.}
@@ -23,7 +23,7 @@ the computational progress will be printed.
 (Warning messages will always be printed.)}
 }
 \value{
-A celltracer object that contains the data for the subsetted cells.
+A cypro object that contains the data for the subsetted cells.
 }
 \description{
 Subset functions allow to conveniently split your data by certain characteristics such
@@ -42,7 +42,7 @@ The input for \code{...} must be supplied in the fashion of \code{dplyr::filter(
 The expressions are applied to the stat data.frame (obtained via \code{getStatDf()}) and
 must refer to the variables you obtain with \code{getStatVariableNames()}.
 
-Cells that match all requirements are those that are kept in the returned celltracer object.
+Cells that match all requirements are those that are kept in the returned cypro object.
 }
 \note{
 In case of experiment set ups with multiple phases:

@@ -287,7 +287,8 @@ hlpr_merge_conditions <- function(track_df, phase, across, verbose = TRUE){
       dplyr::group_by(track_df, cell_id) %>% 
       dplyr::mutate(
         condition = hlpr_merge_condition_by_id(condition)
-      )
+      ) %>% 
+      dplyr::ungroup()
     
   }
   
@@ -419,6 +420,9 @@ hlpr_order_input <- function(order_input){
  
 hlpr_process_tracks <- function(df, phase, object, verbose){
   
+  # ensure that phase is deault with as a character
+  phase <- check_phase(object, phase = phase)
+  
   itvl <- object@set_up$itvl
   itvl_u <- object@set_up$itvl_u
   exp_type <- object@set_up$experiment_type
@@ -445,7 +449,29 @@ hlpr_process_tracks <- function(df, phase, object, verbose){
   complete_df <- 
     dplyr::left_join(x = complete_num_df, y = group_df, by = "cell_id") %>% 
     dplyr::distinct() %>% # temporary solution to weird multiplying of observations
-    dplyr::arrange(cell_id)
+    dplyr::arrange(cell_id) %>% 
+    dplyr::select(cell_id, where(base::is.numeric)) # discard non numeric variables
+  
+  # allow computation of later phases to refer to the last position of the previous phase
+  # ignored if only one phase exist as phase in this case can only be "first"
+  if(phase != "first"){
+    
+    n_phase <- base::which(getPhases(object) == phase) - 1
+    
+    prev_track_df <- 
+      object@cdata$tracks[[n_phase]] %>% 
+      dplyr::group_by(cell_id) %>% 
+      dplyr::slice_max(frame) %>% # slice by frame as frame_num is not part of object data yet
+      dplyr::select(cell_id, where(base::is.numeric))
+    
+    complete_df <- 
+      dplyr::bind_rows(complete_df, prev_track_df) %>% 
+      dplyr::group_by(cell_id) %>% 
+      dplyr::arrange(frame, .by_group = TRUE)
+    
+    prev_last_frame <- base::max(prev_track_df$frame)
+    
+  }
   
   mutated_df <- 
     dplyr::mutate(.data = complete_df, 
@@ -476,6 +502,14 @@ hlpr_process_tracks <- function(df, phase, object, verbose){
         speed = dflp / object@set_up$itvl
       )
     
+    # delete the added frame row
+    if(phase != "first"){
+      
+      mutated_df <-
+        dplyr::filter(mutated_df, frame_num > prev_last_frame)
+      
+    }
+    
     track_df <-
       dplyr::select(.data = mutated_df,
         cell_id, x_coords, y_coords, speed, dfo, dflp,
@@ -491,7 +525,8 @@ hlpr_process_tracks <- function(df, phase, object, verbose){
   }
   
   track_df_numeric <- 
-    dplyr::select(track_df, cell_id, dplyr::starts_with("frame"), where(base::is.numeric))
+    dplyr::select(track_df, cell_id, dplyr::starts_with("frame"), where(base::is.numeric)) %>% 
+    dplyr::ungroup()
   
   base::return(track_df_numeric)
   
@@ -537,6 +572,45 @@ hlpr_select <- function(df, variables_subset){
   
 }
 
+
+#' @title Add vertical phase separating line to lineplot
+hlpr_phase_vertical_line <- function(object, phase, display_vline, vline_clr, vline_type){
+  
+  if(multiplePhases(object) & base::length(phase) >= 2){
+    
+    frames_df <-
+      purrr::imap_dfr(
+        .x = object@set_up$phases[phase], 
+        .f = function(phase_start, p){
+          
+          if(p != "first"){
+            
+            pos <- base::which(object@set_up$measurement_string == phase_start)
+            
+            data.frame(frame = pos, phase = p)
+            
+          } 
+          
+          
+        })
+    
+    add_on <-
+      ggplot2::geom_vline(
+        data = frames_df,
+        mapping = ggplot2::aes(xintercept = frame),
+        linetype = vline_type, 
+        color = vline_clr
+      )
+    
+  } else {
+    
+    add_on <- list()
+    
+  }
+  
+  base::return(add_on)
+  
+}
 
 #' @title Return directory of well plate
 #' 

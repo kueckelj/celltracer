@@ -7,7 +7,7 @@
 setStorageDirectory(object, directory_cto)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{directory_cto}{Character value. The directory under which
 the object is supposed to be stored via \code{saveCelltracerObject()}.}

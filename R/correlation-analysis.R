@@ -1,7 +1,7 @@
 
 
 
-#' @title Set up correlation with celltracer
+#' @title Set up correlation with cypro
 #' 
 #' @description Set up the necessary object to perform correlation analysis. 
 #'
@@ -20,7 +20,7 @@
 #' \code{addHierarchicalCluster(), addKmeansCluster() etc.} are added as options for \code{correlateAcross()}
 #' automatically. 
 #'
-#' @return An updated celltracer object. 
+#' @inherit update_object return
 #' @export
 #'
 initiateCorrelation <- function(object,

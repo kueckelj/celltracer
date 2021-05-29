@@ -1,7 +1,11 @@
 
 #' dummy
-#' @return An updated celltracer-object. 
+#' @return An updated version of the input \code{cypro}-object. 
 updated_object <- function(){}
+
+#' @rdname updated_object
+update_object <- function(){}
+
 
 
 # Data.frame documentation  -----------------------------------------------
@@ -196,7 +200,7 @@ variables_num <- function(){}
 
 #' variables_num
 #' @param variables Character vector. Denotes the numeric variables of interest.
-#' Run \code{getNumericVariableNames()} with you celltracer-object to obtain 
+#' Run \code{getNumericVariableNames()} with you cypro-object to obtain 
 #' all valid input options.
 
 

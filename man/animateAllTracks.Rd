@@ -20,7 +20,7 @@ animateAllTracks(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{across}{Character value or NULL. Specifies the grouping variable of interest.
 

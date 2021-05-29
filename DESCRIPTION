@@ -1,8 +1,8 @@
 Package: celltracer
-Title: An Analysis-Toolbox for High-Throughput Cell Imaging Data
+Title: A toolkit for analysis of automated fluorescency microscopy data
 Version: 0.0.0.9000
 Authors@R: as.person("Jan Kueckelhaus <jan.kueckelhaus@uniklinik-freiburg.de> [aut, cre]")
-Description: This package provides a framework of functions and shiny applications for handling, analyzing and visualizing huge amounts of cell tracking data. 
+Description: This package provides a framework of functions and shiny applications for handling, analyzing and visualizing multitudes of data files generated via high throughput microscopy. 
 Encoding: UTF-8
 LazyData: true
 License: GPL-3

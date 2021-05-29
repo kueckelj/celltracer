@@ -7,10 +7,10 @@
 loadData(object)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
-An updated celltracer object.
+An updated cypro object.
 }
 \description{
 Opens an interactive application in which the folders containing

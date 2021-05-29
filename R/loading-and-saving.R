@@ -1,4 +1,4 @@
-#' @title Save Celltracer Object
+#' @title Save cypro object
 #'
 #' @inherit check_object params
 #'
@@ -9,7 +9,7 @@ saveCelltracerObject <- function(object, verbose = TRUE){
   dir <- object@information$directory_cto
 
   confuns::give_feedback(
-    msg = glue::glue("Saving celltracer object under '{dir}'."), 
+    msg = glue::glue("Saving cypro object under '{dir}'."), 
     verbose = verbose
   )
     

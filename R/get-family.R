@@ -11,7 +11,7 @@ join_with_meta <- function(object, df, phase){
 
 # Analysis extraction ------------------------------------------------------
 
-#' @title Obtain celltracers clustering objects
+#' @title Obtain cypros clustering objects
 #'
 #' @inherit argument_dummy params 
 #'
@@ -128,7 +128,7 @@ getPamConv <- function(object, variable_set, phase = NULL, with_data = TRUE){
 getPamObject <- getPamConv
 
 
-#' @title Obtain celltracers correlation objects
+#' @title Obtain cypros correlation objects
 #'
 #' @inherit argument_dummy params
 #'
@@ -486,7 +486,7 @@ getTracksDf <- function(object,
         base::return(track_df)
         
       }
-    )
+    ) %>% dplyr::arrange(cell_id)
     
   } else {
     
@@ -785,7 +785,9 @@ getOutlierIds <- function(object, method_outlier = NULL, check = FALSE, flatten 
 # -----
 
 
-# Other Info extraction ----------------------------------------------------
+
+
+# Names -------------------------------------------------------------------
 
 # Exported ---
 
@@ -1120,6 +1122,58 @@ getStatVariableNames <- function(object, ..., phase = NULL){
 }
 
 
+#' @rdname getStatVariableNames
+#' @export
+getTrackVariableNames <- function(object, ..., phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  phase <- check_phase(object, phase = phase, max_phases = 1)
+  
+  track_df <-
+    getTracksDf(object, with_meta = FALSE, with_cluster = FALSE, with_well_plate = FALSE) %>% 
+    dplyr::select(-cell_id, -dplyr::all_of(x = non_data_track_variables))
+  
+  selected_df <- dplyr::select(track_df, ...)
+  
+  if(base::ncol(selected_df) == 0){
+    
+    # if TRUE then ncol == 0 because selection resulted in no vars
+    selection_helpers_provided <- 
+      base::tryCatch({
+        
+        # leads to error if tidyselection specified
+        list(...)
+        
+      }, error = function(error){
+        
+        TRUE
+        
+      })
+    
+    if(base::isTRUE(selection_helpers_provided)){
+      
+      base::stop("Tidyselect input resulted in no variables.")
+      
+      # if FALSE then ncol == 0 because no tidyselection specified: return all variable names
+    } else {
+      
+      selected_df <- track_df
+      
+    }
+    
+  }
+  
+  
+  stat_variable_names <- 
+    base::colnames(selected_df)
+  
+  base::return(stat_variable_names)
+  
+  
+}
+
 #' @title Obtain well plate names
 #'
 #' @inherit argument_dummy params
@@ -1259,10 +1313,24 @@ getFrameTimeSeq <- function(object, phase = NULL){
   check_object(object)
   assign_default(object)
   
-  phase <- check_phase(object, phase = phase, max_phases = 1)
+  phase <- check_phase(object, phase = phase)
   
-  getTracks(object, phase = phase) %>% 
+  getTracksDf(object, phase = phase) %>% 
+    dplyr::arrange(frame_num) %>% 
     dplyr::pull(var = "frame_time") %>% 
+    base::unique()
+  
+}
+
+#' @rdname getCategoricalVariablesNames
+getFrameLevels <- function(object, phase = NULL){
+  
+  check_object(object)
+  assign_default(object)
+  
+  getTracksDf(object, phase = phase) %>% 
+    dplyr::arrange(frame_num) %>% 
+    dplyr::pull(frame_itvl) %>% 
     base::unique()
   
 }

@@ -10,7 +10,7 @@ printSummary(object)
 printAnalysisSummary(object, slots = c("dim_red", "clustering"))
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
 A printed message via \code{writeLines()}.

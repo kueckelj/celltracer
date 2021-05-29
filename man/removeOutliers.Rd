@@ -7,7 +7,7 @@
 removeOutliers(object, method_outlier = NULL, verbose = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{method_outlier}{Character vector. Specifies the method/algorithm of interest.
 
@@ -19,7 +19,7 @@ the computational progress will be printed.
 (Warning messages will always be printed.)}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Removes the data from the cell ids detected by \code{detectOutliers()} from

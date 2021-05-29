@@ -2,13 +2,13 @@
 % Please edit documentation in R/loading-and-saving.R
 \name{saveCelltracerObject}
 \alias{saveCelltracerObject}
-\title{Save Celltracer Object}
+\title{Save cypro object}
 \usage{
 saveCelltracerObject(object, verbose = TRUE)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \description{
-Save Celltracer Object
+Save cypro object
 }

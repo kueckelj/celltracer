@@ -11,7 +11,7 @@
 #' @details This function only detects outliers. It does not remove them from the object. Use \code{removeOutliers()}
 #' for that matter.
 #'
-#' @return An updated celltracer object.
+#' @inherit updated_object return
 #' 
 #' @seealso removeOutliers()
 #' 
@@ -56,7 +56,7 @@ detectOutliers <- function(object,
 #'
 #' @inherit argument_dummy params 
 #'
-#' @return An updated celltracer object. 
+#' @inherit updated_object return
 #' 
 #' @seealso detectOutliers()
 #' @export

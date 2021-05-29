@@ -7,7 +7,7 @@
 renameGroups(object, grouping_variable = NULL, ..., phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{grouping_variable}{Character value. The name of the grouping variable
 whose groups you want to rename.}
@@ -21,11 +21,11 @@ referring to the phase of interest. If set to NULL takes the phase denoted as de
 Ignored if the experiment design contains only one phase.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Allows to rename particular groups within a grouping variable
-of the celltracer object's cell data.
+of the cypro object's cell data.
 }
 \details{
 Renaming groups of variables \emph{well_plate_name, well_plate_index, well}

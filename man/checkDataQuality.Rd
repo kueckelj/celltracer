@@ -7,10 +7,10 @@
 checkDataQuality(object)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Opens an interactive application in which the quality of the data can be assessed and

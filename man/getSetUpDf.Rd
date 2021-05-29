@@ -7,7 +7,7 @@
 getSetUpDf(object, well_plate_name = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
 A data.frame in which each observation represents the well of a well plate

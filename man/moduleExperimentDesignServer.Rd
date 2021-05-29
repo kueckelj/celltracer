@@ -9,16 +9,6 @@ moduleExperimentDesignServer(id, usage = "in_function")
 \arguments{
 \item{id}{Namespace ID}
 }
-\value{
-A reactive and named list:
-
-\describe{
-\item{\emph{set_up}}{Information about the experiments set up (well_plates,
-number of measurements, time interval, etc.)}
-\item{\emph{background_info}}{Information about the responsible researchers,
-the data, the idea etc.}
-}
-}
 \description{
 Server logic to be used as input for \code{module}-argument
 of function \code{shiny::moduleServer()}.

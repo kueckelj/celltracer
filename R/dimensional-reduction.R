@@ -219,7 +219,7 @@ plot_dim_red <- function(object,
 #' 
 #' Use \code{getNumericVariableNames()} to obtain all valid input options.
 #'
-#' @return An updated celltracer object.
+#' @inherit updated_object return
 #' @export
 #'
 runPca <- function(object,

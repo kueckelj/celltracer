@@ -19,7 +19,7 @@ printSubsetHistory <- function(object){
   
   if(base::is.null(subset_info)){
     
-    base::writeLines("Provided celltracer object has not been subsetted yet.")
+    base::writeLines("Provided cypro object has not been subsetted yet.")
     
   } else if(confuns::is_list(subset_info)){
     
@@ -33,7 +33,7 @@ printSubsetHistory <- function(object){
           text_out <- 
             confuns::call_flexibly(
               fn = fn_name, 
-              fn.ns = "celltracer", 
+              fn.ns = "cypro", 
               default = list(info = info, slot_name = slot_name)
             )
           

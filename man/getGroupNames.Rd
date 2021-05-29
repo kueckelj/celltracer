@@ -10,7 +10,7 @@ getGroups(object, option)
 getGroupNames(object, grouping_variable, ..., phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{grouping_variable}{Character value. Denotes the discrete variable - the grouping of cells -
 of interest. Use \code{getGroupingVariableNames()} to obtain all valid input options.}

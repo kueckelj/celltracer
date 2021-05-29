@@ -13,7 +13,7 @@ setDimRedConv(object, dim_red_object, method, variable_set, phase)
 setCorrConv(object, corr_object, variable_set, phase)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}

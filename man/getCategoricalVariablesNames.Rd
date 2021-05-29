@@ -5,6 +5,7 @@
 \alias{getNumericVariableNames}
 \alias{getFrameSeq}
 \alias{getFrameTimeSeq}
+\alias{getFrameLevels}
 \alias{getInterval}
 \alias{getIntervalUnit}
 \alias{getPhases}
@@ -18,6 +19,8 @@ getNumericVariableNames(object)
 getFrameSeq(object, phase = NULL)
 
 getFrameTimeSeq(object, phase = NULL)
+
+getFrameLevels(object, phase = NULL)
 
 getInterval(object)
 

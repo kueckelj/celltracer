@@ -7,6 +7,7 @@
 getStatsDf(
   object,
   phase = NULL,
+  with_grouping = NULL,
   with_cluster = NULL,
   with_meta = NULL,
   with_well_plate = NULL,
@@ -14,7 +15,7 @@ getStatsDf(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.

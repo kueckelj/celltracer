@@ -3,14 +3,14 @@
 \name{getCorrConv}
 \alias{getCorrConv}
 \alias{getCorrObject}
-\title{Obtain celltracers correlation objects}
+\title{Obtain cypros correlation objects}
 \usage{
 getCorrConv(object, variable_set, phase = NULL)
 
 getCorrObject(object, variable_set, phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
@@ -24,5 +24,5 @@ Ignored if the experiment design contains only one phase.}
 An S4 object of class \emph{'corr_conv'}
 }
 \description{
-Obtain celltracers correlation objects
+Obtain cypros correlation objects
 }

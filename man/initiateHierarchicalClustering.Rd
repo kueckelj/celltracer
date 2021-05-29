@@ -4,7 +4,7 @@
 \alias{initiateHierarchicalClustering}
 \alias{initiateKmeansClustering}
 \alias{initiatePamClustering}
-\title{Set up clustering objects with celltracer}
+\title{Set up clustering objects with cypro}
 \usage{
 initiateHierarchicalClustering(
   object,
@@ -34,7 +34,7 @@ initiatePamClustering(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
@@ -65,14 +65,14 @@ than variables you are not interested in.)
 Use \code{getNumericVariableNames()} to obtain all valid input options.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 These functions set up the necessary objects to perform clustering with the
 respective algorithm. See details for more.
 }
 \details{
-The clustering initiation functions set up the S4 object that is used by celltracer to do the clustering.
+The clustering initiation functions set up the S4 object that is used by cypro to do the clustering.
 Every downstream analysis function depends on the input you specify here. This means in particular the input for
 argument \code{scale} and the input for argument \code{variables_subset}. The latter denotes the variables on which
 the clustering will base on. Changing these might influence the clustering results. If you realize later on that

@@ -6,10 +6,10 @@
 
 
 
-#' @title Compute cluster according to Kmeans
+#' @title Compute cluster with kmeans
 #' 
 #' @description Performs kmeans clustering for every combination of \code{method_kmeans} and 
-#' \code{k} and saves the results in the celltracer object. 
+#' \code{k} and saves the results in the cypro object. 
 #'
 #' @inherit argument_dummy params
 #' @param k Numeric vector. For every value the kmeans cluster assignment is calculated via 
@@ -18,7 +18,7 @@
 #' @details As this function iterates over all valid combinations of \code{k} and \code{method_kmeans}
 #' both inputs can be specified as vectors. 
 #' 
-#' @return An updated celltracer object. 
+#' @inherit update_object return
 #' 
 #' @export
 #'

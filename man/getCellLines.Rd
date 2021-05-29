@@ -10,7 +10,7 @@ getCellLines(object)
 getConditions(object, phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
 Character vector.

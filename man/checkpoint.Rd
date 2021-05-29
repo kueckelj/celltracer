@@ -8,7 +8,7 @@ checkpoint(
   evaluate = TRUE,
   case_false = NULL,
   error_notifications = list(incomplete_cto =
-    "The celltracer object has not been initiated yet.", incomplete_cto2 =
+    "The cypro object has not been initiated yet.", incomplete_cto2 =
     "The results have not been saved yet. Click on 'Save & Proceed' first.",
     cell_line_condition_overlap =
     "Could not save well information. Cell line name and condition name must not overlap.",
@@ -29,7 +29,7 @@ checkpoint(
     no_software_input =
     "Please denote the software you used to generate the data files.",
     no_storage_directory =
-    "Please choose a folder in which to store the celltracer object and name the experiment.",
+    "Please choose a folder in which to store the cypro object and name the experiment.",
     no_well_plates_added = "No well plates have been added yet.", no_well_plate_chosen =
     "Please choose a well plate first.",      no_wells_chosen =
     "Could not save well information. Please select at least one well.", no_set_up_saved

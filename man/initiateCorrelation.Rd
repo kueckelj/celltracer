@@ -2,7 +2,7 @@
 % Please edit documentation in R/correlation-analysis.R
 \name{initiateCorrelation}
 \alias{initiateCorrelation}
-\title{Set up correlation with celltracer}
+\title{Set up correlation with cypro}
 \usage{
 initiateCorrelation(
   object,
@@ -14,7 +14,7 @@ initiateCorrelation(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. Denotes the variable set of interest. Use \code{getVariableSetNames()}
 to obtain all names of currently stored variable sets in your object.}
@@ -42,7 +42,7 @@ than variables you are not interested in.)
 Use \code{getNumericVariableNames()} to obtain all valid input options.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Set up the necessary object to perform correlation analysis.

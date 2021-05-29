@@ -2,19 +2,20 @@
 % Please edit documentation in R/check-family.R
 \name{check_object}
 \alias{check_object}
-\title{Check Celltracer Object Input}
+\title{Check object input}
 \usage{
 check_object(
   object,
   experiment = NULL,
   set_up_req = "process_data",
-  exp_type_req = NULL
+  exp_type_req = NULL,
+  module_req = NULL
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \description{
-Makes sure that object input is of class celltracer and
+Makes sure that object input is of class cypro and
 that it contains the relevant information needed for the function.
 }

@@ -20,7 +20,7 @@ labelsYremove()
 the labels are to be rotated.}
 }
 \value{
-
+gg object that can be added to ggplots via the \code{+}-operator
 }
 \description{
 Allows to rotate the labels of the x-/y-axis

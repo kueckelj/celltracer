@@ -5,7 +5,7 @@
 #'
 #' @inherit argument_dummy params
 #'
-#' @return
+#' @return TRUE or FALSE
 #' @export
 
 existOutlierResults <- function(object){

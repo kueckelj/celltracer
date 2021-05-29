@@ -9,7 +9,7 @@
 #' @inherit argument_dummy 
 #' @param cluster_variables,meta_variables Character vector. The variables you want to discard.
 #'
-#' @return An updated celltracer object.
+#' @inherit updated_object return
 #' @export
 #'
 discardClusterVariables <- function(object, cluster_variables, phase = NULL){
@@ -68,7 +68,7 @@ discardMetaVariables <- function(object, meta_variables, phase = NULL){
 #' @param cluster_variables Character vector. The cluster variables you want to discard.
 #' @param stat_variables Character vector. The variables from the cell statistics data you want to discard. 
 #'
-#' @return An updated celltracer object.
+#' @inherit updated_object return
 #' @export
 #'
 discardStatVariables <- function(object, stat_variables, phase = NULL){

@@ -14,7 +14,7 @@ addStatVariables(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{input_df}{A data.frame that contains the variables denoted in argument \code{variable_names}
 as well as a character variable named according to input of argument \code{by} that is used to match
@@ -36,7 +36,7 @@ the computational progress will be printed.
 as well as a character variable named \emph{cell_id} matching the cell ids of the input object.}
 }
 \value{
-An updated cell tracer object that contains the data added.
+An updated cypro object that contains the data added.
 }
 \description{
 Allows to join numeric variables that can be referred

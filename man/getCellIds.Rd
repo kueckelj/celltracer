@@ -4,14 +4,19 @@
 \alias{getCellIds}
 \title{Get cell ids}
 \usage{
-getCellIds(object, na_max = 0, ...)
+getCellIds(object, ..., na_max = Inf, phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{na_max}{Numeric value. Sets the threshold of the maximum number of missing values
 a cell can have across all variables. Ignored if set to NULL or if the experiment
 is not of type \emph{timelapse}.}
+
+\item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
+referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
+
+Ignored if the experiment design contains only one phase.}
 }
 \value{
 Character vector of cell ids.

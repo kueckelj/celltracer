@@ -16,10 +16,10 @@ isUsable(object, module)
 multiplePhases(object)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
-
+TRUE or FALSE
 }
 \description{
 Logical tests that return TRUE if the specified functions/algorithms

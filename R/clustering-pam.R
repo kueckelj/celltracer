@@ -4,10 +4,10 @@
 
 
 
-#' @title Compute cluster accordint to Partitioning Around Medoids (PAM)
+#' @title Compute cluster with Partitioning Around Medoids (PAM)
 #'
 #' @description Performs partitioning around medoids for every combination of 
-#' \code{method_pam} and \code{k} and saves the results in the celltracer object. 
+#' \code{method_pam} and \code{k} and saves the results in the cypro object. 
 #'
 #' @inherit argument_dummy params 
 #' @param k Numeric vector. Denotes the numbers of clusters the pam-algorithm 
@@ -17,7 +17,7 @@
 #' @details As this function iterates over all valid combinations of \code{method_pam}
 #' and \code{k} both inputs can be specified as vectors.
 #'
-#' @return An updated celltracer object. 
+#' @inherit update_object return
 #' @export
 #'
 computePamCluster <- function(object,

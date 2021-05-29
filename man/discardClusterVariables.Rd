@@ -10,7 +10,7 @@ discardClusterVariables(object, cluster_variables, phase = NULL)
 discardMetaVariables(object, meta_variables, phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{cluster_variables, meta_variables}{Character vector. The variables you want to discard.}
 
@@ -20,7 +20,7 @@ referring to the phase of interest. If set to NULL takes the phase denoted as de
 Ignored if the experiment design contains only one phase.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Discards variables from the provided object. They can not be restored apart

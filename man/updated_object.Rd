@@ -2,12 +2,15 @@
 % Please edit documentation in R/documentation-dummies.R
 \name{updated_object}
 \alias{updated_object}
+\alias{update_object}
 \title{dummy}
 \usage{
 updated_object()
+
+update_object()
 }
 \value{
-An updated celltracer-object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 dummy

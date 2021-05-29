@@ -10,7 +10,7 @@ renameMetaDf(object, ..., phase = NULL)
 renameMetaDfWith(object, ..., phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{phase}{Character value. The ordinal value referring to the phase of interest (e.g. \emph{'first'}, \emph{'second'} etc.).
 referring to the phase of interest. If set to NULL takes the phase denoted as default with \code{adjustDefault()}.
@@ -21,7 +21,7 @@ Ignored if the experiment design contains only one phase.}
 length as the input. Can be specified with formula syntax.}
 }
 \value{
-An updated celltracer-object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Implementations of the functions \code{dplyr::rename()} and

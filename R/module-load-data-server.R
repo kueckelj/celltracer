@@ -242,7 +242,7 @@ moduleLoadDataServer <- function(id, object){
         ld_output$proceed <- input$ld_save_and_proceed
         ld_output$object <- object
         
-        shiny_fdb(in_shiny = TRUE, ui = "Results have been saved. Click on 'Return Celltracer Object' and proceed with checkDataQuality().")
+        shiny_fdb(in_shiny = TRUE, ui = "Results have been saved. Click on 'Return Cypro Object' and proceed with checkDataQuality().")
         
         
       })

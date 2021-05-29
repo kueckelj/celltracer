@@ -8,7 +8,7 @@
 #' @param angle Numeric value. Denotes the angle with which 
 #' the labels are to be rotated. 
 #'
-#' @return
+#' @return gg object that can be added to ggplots via the \code{+}-operator
 #' @export
 #'
 

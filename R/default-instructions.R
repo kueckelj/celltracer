@@ -50,7 +50,7 @@ assign_default <- function(object){
 #' @title Adjust object based default
 #' 
 #' @description The default input for many recurring arguments is carried with 
-#' the celltracer object. Use this function to savely adjust the default 
+#' the cypro object. Use this function to savely adjust the default 
 #' according to your preference. 
 #'
 #' @inherit argument_dummy params 

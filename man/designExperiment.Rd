@@ -7,7 +7,7 @@
 designExperiment()
 }
 \value{
-An empty celltracer object.
+An empty cypro object.
 }
 \description{
 Opens an interactive application in which the experiment can be set

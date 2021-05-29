@@ -4,7 +4,7 @@
 
 # Initiation --------------------------------------------------------------
 
-#' @title Set up clustering objects with celltracer
+#' @title Set up clustering objects with cypro
 #' 
 #' @description These functions set up the necessary objects to perform clustering with the 
 #' respective algorithm. See details for more. 
@@ -21,7 +21,7 @@
 #' 
 #' Use \code{getNumericVariableNames()} to obtain all valid input options.
 #' 
-#' @details The clustering initiation functions set up the S4 object that is used by celltracer to do the clustering. 
+#' @details The clustering initiation functions set up the S4 object that is used by cypro to do the clustering. 
 #' Every downstream analysis function depends on the input you specify here. This means in particular the input for 
 #' argument \code{scale} and the input for argument \code{variables_subset}. The latter denotes the variables on which 
 #' the clustering will base on. Changing these might influence the clustering results. If you realize later on that 
@@ -30,7 +30,7 @@
 #' 
 #' @seealso getHclustConv(), getKmeansConv(), getPamConv()
 #'
-#' @return An updated celltracer object. 
+#' @inherit update_object return 
 #' @export
 #'
 initiateHierarchicalClustering <- function(object,

@@ -13,7 +13,7 @@ addVariableSet(
 )
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_names}{Character vector. Denotes the variable names that are part
 of the variable set.}
@@ -26,7 +26,7 @@ referring to the phase of interest. If set to NULL takes the phase denoted as de
 Ignored if the experiment design contains only one phase.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Allows to store predefined set of variable names in the object that

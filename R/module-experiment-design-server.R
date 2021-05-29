@@ -6,15 +6,6 @@
 #'
 #' @param id Namespace ID
 #'
-#' @return A reactive and named list: 
-#' 
-#'  \describe{
-#'   \item{\emph{set_up}}{Information about the experiments set up (well_plates,
-#'                        number of measurements, time interval, etc.)}
-#'   \item{\emph{background_info}}{Information about the responsible researchers,
-#'                                 the data, the idea etc.}
-#'   } 
-#' 
 #' @export
 
 moduleExperimentDesignServer <- function(id, usage = "in_function"){
@@ -1084,7 +1075,7 @@ moduleExperimentDesignServer <- function(id, usage = "in_function"){
       )
     
     
-    shiny_fdb(in_shiny = TRUE, ui = "Experiment design successfully saved. Click on 'Return Celltracer Object' and proceed with loadData().")
+    shiny_fdb(in_shiny = TRUE, ui = "Experiment design successfully saved. Click on 'Return Cypro Object' and proceed with loadData().")
     
   })
   

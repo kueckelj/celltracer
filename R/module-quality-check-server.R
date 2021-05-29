@@ -151,7 +151,7 @@ moduleQualityCheckServer <- function(id, object){
         
         qc_list$proceed <- input$qc_save_and_proceed
         
-        shiny_fdb(in_shiny = TRUE, ui = glue::glue("Results have been saved.  Click on 'Return Celltracer Object' and proceed with processData()."))
+        shiny_fdb(in_shiny = TRUE, ui = glue::glue("Results have been saved.  Click on 'Return Cypro Object' and proceed with processData()."))
         
         
       })

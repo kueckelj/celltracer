@@ -20,7 +20,7 @@ checkpoint <- function(evaluate = TRUE,
                        error_notifications = list(
                          
                          # miscellaneous
-                         "incomplete_cto" = "The celltracer object has not been initiated yet.",
+                         "incomplete_cto" = "The cypro object has not been initiated yet.",
                          "incomplete_cto2" = "The results have not been saved yet. Click on 'Save & Proceed' first.",
                          
                          # experiment set up
@@ -36,7 +36,7 @@ checkpoint <- function(evaluate = TRUE,
                          "missing_condition_input" = "Could not save well information. Please make sure to denote a condition for all phases before clicking on 'Add Info'.",
                          "missing_software" = "Please choose the software from which the files derived.", 
                          "no_software_input" = "Please denote the software you used to generate the data files.",
-                         "no_storage_directory" = "Please choose a folder in which to store the celltracer object and name the experiment.",
+                         "no_storage_directory" = "Please choose a folder in which to store the cypro object and name the experiment.",
                          "no_well_plates_added" = "No well plates have been added yet.",
                          "no_well_plate_chosen" = "Please choose a well plate first.",
                          "no_wells_chosen" = "Could not save well information. Please select at least one well.",

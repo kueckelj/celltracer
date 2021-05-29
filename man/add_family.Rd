@@ -7,7 +7,7 @@
 add_family()
 }
 \value{
-An updated cell tracer object that contains the data added.
+An updated cypro object that contains the data added.
 }
 \description{
 dummy

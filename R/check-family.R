@@ -25,19 +25,19 @@ check_availability <- function(evaluate, phase, ref_input, ref_fun){
   
 }
 
-#' @title Check Celltracer Object Input
+#' @title Check object input
 #' 
-#' @description Makes sure that object input is of class celltracer and 
+#' @description Makes sure that object input is of class cypro and 
 #' that it contains the relevant information needed for the function.
-#' @param object A valid celltracer object. 
+#' @param object A valid cypro object. 
 check_object <- function(object, experiment = NULL, set_up_req = "process_data", exp_type_req = NULL, module_req = NULL){
   
   input_class <- base::class(object)
   input_attribute <- base::attr(input_class, "package")
   
-  if(!input_class == object_class & input_attribute == "celltracer"){
+  if(!input_class == object_class & input_attribute == "cypro"){
     
-    msg <- "Input for argument 'object' must be of class 'cto' from package 'celltracer'."
+    msg <- "Input for argument 'object' must be of class 'cto' from package 'cypro'."
     
     confuns::give_feedback(msg = msg, fdb.fn = "stop", with.time = FALSE)
     

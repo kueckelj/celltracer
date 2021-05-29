@@ -7,7 +7,7 @@
 discardStatVariables(object, stat_variables, phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{stat_variables}{Character vector. The variables from the cell statistics data you want to discard.}
 
@@ -19,7 +19,7 @@ Ignored if the experiment design contains only one phase.}
 \item{cluster_variables}{Character vector. The cluster variables you want to discard.}
 }
 \value{
-An updated celltracer object.
+An updated version of the input \code{cypro}-object.
 }
 \description{
 Discard unwanted variables from your data

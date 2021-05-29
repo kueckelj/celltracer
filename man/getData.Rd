@@ -7,7 +7,7 @@
 getData(object, data_slot, phase)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{data_slot}{Character value. One of \emph{'stats', 'tracks', 'meta'} or \emph{'cluster'}.}
 

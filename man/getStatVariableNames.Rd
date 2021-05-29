@@ -2,12 +2,15 @@
 % Please edit documentation in R/get-family.R
 \name{getStatVariableNames}
 \alias{getStatVariableNames}
+\alias{getTrackVariableNames}
 \title{Obtain numeric variables of cell data}
 \usage{
 getStatVariableNames(object, ..., phase = NULL)
+
+getTrackVariableNames(object, ..., phase = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{...}{Additional selection helpers from the \code{tidyselect} package that match
 variable names according to a given pattern.}

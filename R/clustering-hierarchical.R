@@ -172,7 +172,7 @@ getHclustObj <- function(object,
 #' @details Distance matrices are discarded one by one. Input for argument \code{method_dist}
 #' must be a single character value.
 #' 
-#' @return An updated celltracer object. 
+#' @inherit update_object return
 #' @export
 #'
 discardDistanceMatrix <- function(object,

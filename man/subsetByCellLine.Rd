@@ -7,7 +7,7 @@
 subsetByCellLine(object, new_name, cell_lines, verbose = NULL)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{new_name}{Character value. Denotes the name of the output object. If set to NULL the name of the
 input object is taken and suffixed with \emph{'_subset'}.}
@@ -20,7 +20,7 @@ the computational progress will be printed.
 (Warning messages will always be printed.)}
 }
 \value{
-A celltracer object that contains the data for the subsetted cells.
+A cypro object that contains the data for the subsetted cells.
 }
 \description{
 Subset functions allow to conveniently split your data by certain characteristics such

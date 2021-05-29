@@ -13,7 +13,7 @@ getVariableSets(object)
 getVariableSetNames(object)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 
 \item{variable_set}{Character value. The name of the variable set of interest.}
 }

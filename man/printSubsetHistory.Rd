@@ -7,7 +7,7 @@
 printSubsetHistory(object)
 }
 \arguments{
-\item{object}{A valid celltracer object.}
+\item{object}{A valid cypro object.}
 }
 \value{
 A printed message via \code{writeLines()}.

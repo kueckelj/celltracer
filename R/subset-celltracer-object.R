@@ -22,7 +22,7 @@
 #' The mechanism with which you create the subset is stored in the output object. Use \code{printSubsetHistory()}
 #' to reconstruct the way from the original object to the current one. 
 #' 
-#' @return A celltracer object that contains the data for the subsetted cells. 
+#' @return A cypro object that contains the data for the subsetted cells. 
 #' @export
 #'
 subsetByCellId <- function(object, new_name, cell_ids, reasoning = NULL, verbose = NULL, ...){
@@ -45,7 +45,7 @@ subsetByCellId <- function(object, new_name, cell_ids, reasoning = NULL, verbose
   }
   
   confuns::give_feedback(
-    msg = "Subsetting celltracer object by cell ID.", 
+    msg = "Subsetting cypro object by cell ID.", 
     verbose = verbose
   )
 
@@ -252,7 +252,7 @@ subsetByCellId <- function(object, new_name, cell_ids, reasoning = NULL, verbose
 #' @inherit subsetByCellId params description details
 #' @param cell_lines Character vector. Denotes the cell lines to be kept.
 #' 
-#' @return A celltracer object that contains the data for the subsetted cells. 
+#' @return A cypro object that contains the data for the subsetted cells. 
 #' @export
 #'
 subsetByCellLine <- function(object, new_name, cell_lines, verbose = NULL){
@@ -268,7 +268,7 @@ subsetByCellLine <- function(object, new_name, cell_lines, verbose = NULL){
   
   # give feedback 
   confuns::give_feedback(
-    msg = glue::glue("Subsetting celltracer object by {ref_cell_line} '{cell_lines}'.", 
+    msg = glue::glue("Subsetting cypro object by {ref_cell_line} '{cell_lines}'.", 
                      ref_cell_line = confuns::adapt_reference(cell_lines, "cell line", "cell lines"),
                      cell_lines = glue::glue_collapse(cell_lines, sep = "', '", last = "' and '")), 
     verbose = verbose
@@ -316,7 +316,7 @@ subsetByCellLine <- function(object, new_name, cell_lines, verbose = NULL){
 #' the input for argument \code{cluster}/\code{groups} in the specified variable during 
 #' the specified phase.
 #' 
-#' @return A celltracer object that contains the data for the subsetted cells. 
+#' @return A cypro object that contains the data for the subsetted cells. 
 #' @export
 #'
 subsetByCluster <- function(object,
@@ -359,7 +359,7 @@ subsetByCluster <- function(object,
   }
   
   confuns::give_feedback(
-    msg = glue::glue("Subsetting celltracer object by cluster '{cluster}' of cluster variable '{cluster_variable}'{ref_phase}.",
+    msg = glue::glue("Subsetting cypro object by cluster '{cluster}' of cluster variable '{cluster_variable}'{ref_phase}.",
                      cluster = glue::glue_collapse(cluster, sep = "', '", last = "' and '")), 
     verbose = verbose
   )
@@ -428,7 +428,7 @@ subsetByGroup <- function(object,
   }
   
   confuns::give_feedback(
-    msg = glue::glue("Subsetting celltracer object by {ref_group} '{groups}' of grouping variable '{grouping_variable}'{ref_phase}.",
+    msg = glue::glue("Subsetting cypro object by {ref_group} '{groups}' of grouping variable '{grouping_variable}'{ref_phase}.",
                      ref_group = confuns::adapt_reference(groups, "group", "groups"),
                      groups = glue::glue_collapse(groups, sep = "', '", last = "' and '")), 
     verbose = verbose
@@ -471,7 +471,7 @@ subsetByGroup <- function(object,
 #' the input for argument \code{conditions} during the specified phase.
 #' 
 #' 
-#' @return A celltracer object that contains the data for the subsetted cells. 
+#' @return A cypro object that contains the data for the subsetted cells. 
 #' @export
 #'
 subsetByCondition <- function(object, new_name, conditions, phase = NULL, verbose = NULL){
@@ -490,7 +490,7 @@ subsetByCondition <- function(object, new_name, conditions, phase = NULL, verbos
   
   # give feedback
   confuns::give_feedback(
-    msg = glue::glue("Subsetting celltracer object by {ref_conditions} '{conditions}'.", 
+    msg = glue::glue("Subsetting cypro object by {ref_conditions} '{conditions}'.", 
                      ref_conditions = confuns::adapt_reference(conditions, "condition", "conditions"),
                      conditions = glue::glue_collapse(conditions, sep = "', '", last = "' and '")), 
     verbose = verbose
@@ -536,7 +536,7 @@ subsetByCondition <- function(object, new_name, conditions, phase = NULL, verbos
 #' The expressions are applied to the stat data.frame (obtained via \code{getStatDf()}) and
 #' must refer to the variables you obtain with \code{getStatVariableNames()}.
 #' 
-#' Cells that match all requirements are those that are kept in the returned celltracer object.
+#' Cells that match all requirements are those that are kept in the returned cypro object.
 #' 
 #' @note In case of experiment set ups with multiple phases: 
 #' 
@@ -548,7 +548,7 @@ subsetByCondition <- function(object, new_name, conditions, phase = NULL, verbos
 #' 
 #' @seealso \code{dplyr::filter()}
 #' 
-#' @return A celltracer object that contains the data for the subsetted cells. 
+#' @return A cypro object that contains the data for the subsetted cells. 
 #' @export
 #'
 subsetByFilter <- function(object, new_name, ..., phase = NULL, verbose = NULL){
@@ -565,7 +565,7 @@ subsetByFilter <- function(object, new_name, ..., phase = NULL, verbose = NULL){
   n_reqs <- base::length(requirements)
   
   confuns::give_feedback(
-    msg = glue::glue("Subsetting celltracer object by {n_reqs} filtering {ref_reqs}.", 
+    msg = glue::glue("Subsetting cypro object by {n_reqs} filtering {ref_reqs}.", 
                      ref_reqs = confuns::adapt_reference(requirements, "requirement", "requirements")
     ), 
     verbose = TRUE
@@ -634,7 +634,7 @@ subsetByFilter <- function(object, new_name, ..., phase = NULL, verbose = NULL){
 #' \code{n_by_group} or \code{n_total}:
 #' 
 #' If specified with \code{n_by_group()}: The numeric value is given to argument \code{n} of \code{dplyr::slice_sample()}. E.g. 
-#' \code{across} = \emph{'condition'} and \code{n_by_group} = 1000, if the celltracer object contains 6 different 
+#' \code{across} = \emph{'condition'} and \code{n_by_group} = 1000, if the cypro object contains 6 different 
 #' conditions the returned object contains 6000 randomly selectd cells - 1000 of each condition. 
 #' 
 #' If specified with \code{n_total}: The numeric value given to argument \code{n} of \code{dplyr::slice_sample()} is calculated 
@@ -642,7 +642,7 @@ subsetByFilter <- function(object, new_name, ..., phase = NULL, verbose = NULL){
 #' 
 #'  n = \code{n_total} / number of groups
 #'  
-#' E.g \code{across} = \emph{'condition'} and \code{n_total} = 10.000, if the celltracer object contains 
+#' E.g \code{across} = \emph{'condition'} and \code{n_total} = 10.000, if the cypro object contains 
 #' 4 different conditions 2500 cells of each condition will be in the returned object. 
 #' 
 #' @note In case of experiment set ups with multiple phases: 
@@ -714,7 +714,7 @@ subsetByNumber <- function(object, new_name, across = c("cell_line", "condition"
   
   # give feedback 
   confuns::give_feedback(
-    msg = glue::glue("Subsetting celltracer object across '{across}' with argument '{ref_arg}' = {n}.", 
+    msg = glue::glue("Subsetting cypro object across '{across}' with argument '{ref_arg}' = {n}.", 
                      across = glue::glue_collapse(across, sep = "', '", last = "' and '"), 
                      n = base::ifelse(ref_arg == "n_total", n_total, n_by_group)), 
     verbose = TRUE
